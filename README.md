@@ -37,7 +37,7 @@ To build VERICA directly from the sources and execute the binaries, please follo
 
 ## 4. Quick Start
 
-After VERICA was successfully build, it can be executed by `bin/release/verica -c config/verica.json`. The configuration file (i.e., `config/verica.json`) can be adapted according to [Section 4.1](#41-configure-verica). Executing VERICA with the configuration file `config/verica_example.json`, should result in the output given in [Section 4.2](#42-expected-output).
+After VERICA was successfully build, it can be executed by `bin/release/verica -c config/verica.json`. The configuration file (i.e., `config/verica.json`) can be adapted according to [Section 4.1](#41-configure-verica). Executing VERICA with the configuration file `config/verica-example.json`, should result in the output given in [Section 4.2](#42-expected-output).
 
 ### 4.1 Configure VERICA
 
@@ -270,7 +270,11 @@ In case you get an error message similar to:
 ./bin/release/verica: error while loading shared libraries: libcudd-3.0.0.so.0: cannot open shared object file: No such file or directory
 ```
 
-please export the `/lib` directory to your linker library path, e.g., using `export LD_LIBRARY_PATH=``pwd``/lib` before executing the binary.
+please export the `/lib` directory to your linker library path, e.g., using 
+```
+export LD_LIBRARY_PATH=`pwd`/lib
+```
+before executing the binary.
 
 ## Licensing
 
