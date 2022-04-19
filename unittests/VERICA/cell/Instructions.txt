@@ -1,0 +1,136 @@
+%%%%%%  library file %%%%%%%
+% usage:
+%
+% Library
+% library_name
+%
+% Type of the cell: Gate/Reg
+%
+% # of its variants
+% variant names
+%
+% name of the cell in VERICA
+%
+% # of inputs
+% input names
+%
+% # of outputs
+% output names
+%
+% # of Boolean expressions
+% Boolean expressions
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Library
+NL
+
+Gate
+1
+buf
+buf
+1
+A
+1
+Z
+1
+A
+
+Gate
+1
+not
+not
+1
+A
+1
+ZN
+1
+!A
+
+Reg
+1
+reg
+reg
+1
+A
+1
+Z
+1
+A
+
+Reg
+1
+regn
+regn
+1
+A
+1
+ZN
+1
+!A
+
+Gate
+1
+and
+and
+2
+A1 A2
+1
+Z
+1
+(A1 & A2)
+
+Gate
+1
+nand
+nand
+2
+A1 A2
+1
+ZN
+1
+!(A1 & A2)
+
+Gate
+1
+or
+or
+2
+A1 A2
+1
+Z
+1
+(A1 | A2)
+
+Gate
+1
+nor
+nor
+2
+A1 A2
+1
+ZN
+1
+!(A1 | A2)
+
+Gate
+1
+xor
+xor
+2
+A1 A2
+1
+Z
+1
+(A1 ^ A2)
+
+Gate
+1
+xnor
+xnor
+2
+A1 A2
+1
+ZN
+1
+!(A1 ^ A2)

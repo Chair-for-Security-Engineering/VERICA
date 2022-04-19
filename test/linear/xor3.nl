@@ -1,0 +1,12 @@
+in 0 0:0
+in 1 0:1
+in 2 0:2
+in 3 1:0
+in 4 1:1
+in 5 1:2
+xor 3 0
+xor 4 1
+xor 5 2
+out 6 0:0
+out 7 0:1
+out 8 0:2

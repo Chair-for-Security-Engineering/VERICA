@@ -1,0 +1,13 @@
+Library
+NANG45
+
+Gate
+2
+BUF_X1
+buf
+1
+A
+1
+Z
+1
+A

@@ -1,0 +1,94 @@
+{
+    "general":
+    {
+        "verbose": 0,
+        "cores": 1,
+        "memory": 4,
+        "netlist":
+        {
+            "file": "unittests/VERICA/Designs/Netlist/fia_reduced_fault_locations_example_paper.nl",
+            "name": "",
+            "module": ""
+        },
+        "library":
+        {
+            "file": "cell/Instructions.txt",
+            "name": "NL"
+        },
+        "filtering":
+        {
+            "type": "none",
+            "whitelist": "model/whitelist",
+            "blacklist": "model/blacklist"
+        },
+        "annotation":
+        {
+            "file": "model/annotations.json",
+            "apply": true
+        },
+        "cudd":
+        {
+            "reordering": false
+        }
+    },
+
+    "side-channel":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "order": 0,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": true
+        },
+        "model":
+        {
+            "glitches": true,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis": 
+        {
+            "uniformity": false,
+            "probing": true,
+            "ni": false,
+            "sni": false,
+            "pini": false
+        }
+    },
+
+    "fault-injection":
+    {
+        "enable": true,
+        "configuration":
+        {
+            "number": 2,
+            "variate": 1,
+            "interrupt": false
+        },
+        "model": 
+        {
+            "mapping": "model/setreset.txt",
+            "location": "cs"
+        },
+        "analysis":
+        {
+            "reduced_complexity": true,
+            "strategy": "detection",
+            "na": true,
+            "sna": true
+        }
+    },
+
+    "combined": 
+    {
+        "enable": false,
+        "analysis":
+        {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false
+        }
+    }
+}

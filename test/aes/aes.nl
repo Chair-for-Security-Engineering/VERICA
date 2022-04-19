@@ -1,0 +1,135 @@
+in 0 0:0
+in 1 1:0
+in 2 2:0
+in 3 3:0
+in 4 4:0
+in 5 5:0
+in 6 6:0
+in 7 7:0
+xor 3 5
+xor 0 6
+xor 9 8
+xor 0 3
+xor 0 5
+xor 1 2
+xor 13 7
+xor 14 3
+xor 14 0
+xor 14 6
+xor 4 10
+xor 17 12
+xor 18 5
+xor 18 1
+xor 20 7
+xor 20 13
+xor 21 11
+xor 7 24
+xor 23 24
+xor 23 12
+xor 13 24
+xor 9 28
+xor 0 28
+and 10 20
+and 19 22
+and 15 7
+and 9 28
+and 17 14
+and 16 25
+and 11 24
+and 8 26
+xor 32 31
+xor 33 31
+xor 35 34
+xor 36 34
+xor 38 37
+xor 39 43
+xor 41 43
+xor 44 21
+xor 45 29
+and 12 23
+and 46 47
+xor 48 37
+xor 40 50
+xor 42 50
+xor 52 30
+xor 47 53
+xor 51 27
+xor 46 55
+xor 53 49
+xor 55 49
+and 56 57
+and 58 54
+xor 59 55
+xor 60 53
+xor 47 62
+xor 57 62
+xor 61 62
+and 61 16
+and 53 64
+xor 67 63
+xor 57 67
+and 61 69
+and 61 25
+xor 62 68
+xor 56 70
+xor 73 68
+xor 61 73
+xor 65 74
+and 72 20
+and 68 22
+and 72 10
+and 68 19
+and 73 14
+and 65 24
+and 73 17
+and 65 11
+and 76 26
+and 74 23
+and 76 8
+and 74 12
+and 62 15
+and 75 9
+and 62 7
+and 75 28
+xor 84 87
+xor 80 89
+xor 71 83
+xor 79 80
+xor 91 90
+xor 91 71
+xor 85 86
+xor 77 92
+xor 82 85
+xor 87 88
+xor 90 95
+xor 97 100
+xor 81 93
+xor 92 101
+xor 93 104
+xor 66 104
+xor 99 105
+xor 96 105
+xor 81 106
+xor 108 109
+xor 78 110
+xor 106 110
+xor 103 109
+xor 95 107
+xor 111 112
+xor 100 113
+xor 98 113
+xor 94 112
+xor 111 118
+xor 102 117
+not 115
+not 116
+not 121
+not 122
+out 124
+out 123
+out 120
+out 119
+out 118
+out 126
+out 125
+out 114

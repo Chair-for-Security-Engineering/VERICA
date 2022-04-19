@@ -1,0 +1,3 @@
+# This file is used to determine entities that should whitelisted.
+# All gates with matching annotations will be included.
+Red_AddKey

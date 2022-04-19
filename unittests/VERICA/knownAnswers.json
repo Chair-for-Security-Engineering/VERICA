@@ -1,0 +1,393 @@
+{
+    "Injector":
+    {
+        "Injector_Get_Next_Fault_Locations_Test":
+        {
+            "expectedPermutedFaultLocations":
+            [
+                [ "and (line3)", "xor (line4)" ],
+                [ "and (line3)", "and (line5)" ],
+                [ "and (line3)", "nor (line6)" ],
+                [ "and (line3)", "in (line0)" ],
+                [ "and (line3)", "in (line1)" ],
+                [ "and (line3)", "in (line2)" ],
+                [ "xor (line4)", "and (line5)" ],
+                [ "xor (line4)", "nor (line6)" ],
+                [ "xor (line4)", "in (line0)" ],
+                [ "xor (line4)", "in (line1)" ],
+                [ "xor (line4)", "in (line2)" ],
+                [ "and (line5)", "nor (line6)" ],
+                [ "and (line5)", "in (line0)" ],
+                [ "and (line5)", "in (line1)" ],
+                [ "and (line5)", "in (line2)" ],
+                [ "nor (line6)", "in (line0)" ],
+                [ "nor (line6)", "in (line1)" ],
+                [ "nor (line6)", "in (line2)" ],
+                [ "in (line0)", "in (line1)" ],
+                [ "in (line0)", "in (line2)" ],
+                [ "in (line1)", "in (line2)" ]
+            ],
+            "expectedFaultLocations":
+            [
+                [ 
+                    "and (line3)",
+                    "xor (line4)",
+                    "and (line5)",
+                    "nor (line6)",
+                    "in (line0)",
+                    "in (line1)",
+                    "in (line2)"
+                ]
+            ]
+        },
+
+        "Injector_Get_Next_Fault_Locations_RC_Test":
+        {
+            "expectedPermutedFaultLocations1":
+            [
+                ["reg (line15)"], ["reg (line16)"], ["reg (line17)"], ["reg (line18)"], 
+                ["g0"], ["g1"], ["g2"], ["g3"], ["g4"], ["g5"], ["g6"], ["g7"], 
+                ["in (line0)"], ["in (line1)"], ["in (line2)"], ["in (line3)"],
+                ["in (line4)"], ["in (line5)"], ["in (line6)"]
+            ],
+            "expectedPermutedFaultLocations2":
+            [
+                ["reg (line15)", "reg (line16)"], ["reg (line15)", "reg (line17)"], ["reg (line15)", "reg (line18)"], ["reg (line15)", "g5"], ["reg (line15)", "g1"], ["reg (line15)", "g6"], ["reg (line15)", "g4"], ["reg (line15)", "g7"], 
+                ["reg (line16)", "reg (line17)"], ["reg (line16)", "reg (line18)"], ["reg (line16)", "g5"], ["reg (line16)", "g1"], ["reg (line16)", "g6"], ["reg (line16)", "g4"], ["reg (line16)", "g7"], 
+                ["reg (line17)", "reg (line18)"], ["reg (line17)", "g5"], ["reg (line17)", "g1"], ["reg (line17)", "g6"], ["reg (line17)", "g4"], ["reg (line17)", "g7"],
+                ["reg (line18)", "g5"], ["reg (line18)", "g1"], ["reg (line18)", "g6"], ["reg (line18)", "g4"], ["reg (line18)", "g7"],
+                ["g5", "g1"], ["g5", "g6"], ["g5", "g4"], ["g5", "g7"],
+                ["g1", "g6"], ["g1", "g4"], ["g1", "g7"],
+                ["g6", "g4"], ["g6", "g7"],
+                ["g4", "g7"]
+            ]
+        },
+
+        "Injector_Generate_Specific_Fault_Combinations_Test":
+        {
+            "specificFaultCombinations":
+            [
+                "and (line3)",
+                "and (line5)",
+                "nor (line6)"
+            ]
+        },
+
+        "Injector_Generate_Fault_Combinations_Partly_Test":
+        {
+            "expectedPermutedFaultLocations":
+            [
+                [
+                    "and (line3)",
+                    "and (line5)",
+                    "in (line0)",
+                    "in (line2)",
+                    "xor (line4)",
+                    "nor (line6)",
+                    "in (line1)",
+                    "and (line3)",
+                    "xor (line4)",
+                    "and (line5)",
+                    "nor (line6)",
+                    "in (line0)",
+                    "in (line1)",
+                    "in (line2)",
+                    "in (line0)",
+                    "in (line1)",
+                    "in (line2)"
+                ],
+                [
+                    "and (line3)",
+                    "and (line5)",
+                    "in (line1)",
+                    "in (line2)",
+                    "xor (line4)",
+                    "nor (line6)",
+                    "in (line2)",
+                    "and (line3)",
+                    "xor (line4)",
+                    "and (line5)",
+                    "nor (line6)",
+                    "in (line0)",
+                    "in (line1)",
+                    "in (line2)",
+                    "and (line3)",
+                    "xor (line4)",
+                    "and (line5)"
+                ]
+            ]
+        },
+
+        "Injector_Prepeare_Fault_Mappings_For_Injection_Test":
+        {
+            "expectedTargetFaultCollection":
+            [
+                [
+                    [ [ ["and (line3)", "reset"] ], [ ["and (line3)", "set"] ] ],
+                    [ [ ["xor (line4)", "reset"] ], [ ["xor (line4)", "set"] ] ],
+                    [ [ ["and (line5)", "reset"] ], [ ["and (line5)", "set"] ] ],
+                    [ [ ["nor (line6)", "reset"] ], [ ["nor (line6)", "set"] ] ],
+                    [ [ ["in (line0)", "reset"] ], [ ["in (line0)", "set"] ] ],
+                    [ [ ["in (line1)", "reset"] ], [ ["in (line1)", "set"] ] ],
+                    [ [ ["in (line2)", "reset"] ], [ ["in (line2)", "set"] ] ]
+                ],
+                [
+                    [ [ ["and (line3)", "reset"], ["xor (line4)", "reset"] ],
+                    [ ["and (line3)", "set"] ],
+                    [ ["and (line3)", "reset"], ["xor (line4)", "set"] ],
+                    [ ["and (line3)", "set"] ] ],
+                    [ [ ["and (line3)", "reset"], ["and (line5)", "reset"] ],
+                    [ ["and (line3)", "set"] ],
+                    [ ["and (line3)", "reset"], ["and (line5)", "set"] ],
+                    [ ["and (line3)", "set"] ] ],
+                    [ [ ["and (line3)", "reset"], ["nor (line6)", "reset"] ],
+                    [ ["and (line3)", "set"] ],
+                    [ ["and (line3)", "reset"], ["nor (line6)", "set"] ],
+                    [ ["and (line3)", "set"] ] ],
+                    [ [ ["and (line3)", "reset"], ["in (line0)", "reset"] ],
+                    [ ["and (line3)", "set"] ],
+                    [ ["and (line3)", "reset"], ["in (line0)", "set"] ],
+                    [ ["and (line3)", "set"] ] ],
+                    [ [ ["and (line3)", "reset"], ["in (line1)", "reset"] ],
+                    [ ["and (line3)", "set"] ],
+                    [ ["and (line3)", "reset"], ["in (line1)", "set"] ],
+                    [ ["and (line3)", "set"] ] ],
+                    [ [ ["and (line3)", "reset"], ["in (line2)", "reset"] ],
+                    [ ["and (line3)", "set"] ],
+                    [ ["and (line3)", "reset"], ["in (line2)", "set"] ],
+                    [ ["and (line3)", "set"] ] ],
+                    
+                    [ [ ["xor (line4)", "reset"], ["and (line5)", "reset"] ],
+                    [ ["xor (line4)", "set"] ],
+                    [ ["xor (line4)", "reset"], ["and (line5)", "set"] ],
+                    [ ["xor (line4)", "set"] ] ],
+                    [ [ ["xor (line4)", "reset"], ["nor (line6)", "reset"] ],
+                    [ ["xor (line4)", "set"] ],
+                    [ ["xor (line4)", "reset"], ["nor (line6)", "set"] ],
+                    [ ["xor (line4)", "set"] ] ],
+                    [ [ ["xor (line4)", "reset"], ["in (line0)", "reset"] ],
+                    [ ["xor (line4)", "set"] ],
+                    [ ["xor (line4)", "reset"], ["in (line0)", "set"] ],
+                    [ ["xor (line4)", "set"] ] ],
+                    [ [ ["xor (line4)", "reset"], ["in (line1)", "reset"] ],
+                    [ ["xor (line4)", "set"] ],
+                    [ ["xor (line4)", "reset"], ["in (line1)", "set"] ],
+                    [ ["xor (line4)", "set"] ] ],
+                    [ [ ["xor (line4)", "reset"], ["in (line2)", "reset"] ],
+                    [ ["xor (line4)", "set"] ],
+                    [ ["xor (line4)", "reset"], ["in (line2)", "set"] ],
+                    [ ["xor (line4)", "set"] ] ],
+                    
+                    [ [ ["and (line5)", "reset"], ["nor (line6)", "reset"] ],
+                    [ ["and (line5)", "set"] ],
+                    [ ["and (line5)", "reset"], ["nor (line6)", "set"] ],
+                    [ ["and (line5)", "set"] ] ],
+                    [ [ ["and (line5)", "reset"], ["in (line0)", "reset"] ],
+                    [ ["and (line5)", "set"] ],
+                    [ ["and (line5)", "reset"], ["in (line0)", "set"] ],
+                    [ ["and (line5)", "set"] ] ],
+                    [ [ ["and (line5)", "reset"], ["in (line1)", "reset"] ],
+                    [ ["and (line5)", "set"] ],
+                    [ ["and (line5)", "reset"], ["in (line1)", "set"] ],
+                    [ ["and (line5)", "set"] ] ],
+                    [ [ ["and (line5)", "reset"], ["in (line2)", "reset"] ],
+                    [ ["and (line5)", "set"] ],
+                    [ ["and (line5)", "reset"], ["in (line2)", "set"] ],
+                    [ ["and (line5)", "set"] ] ],
+                    
+                    [ [ ["nor (line6)", "reset"], ["in (line0)", "reset"] ],
+                    [ ["nor (line6)", "set"] ],
+                    [ ["nor (line6)", "reset"], ["in (line0)", "set"] ],
+                    [ ["nor (line6)", "set"] ] ],
+                    [ [ ["nor (line6)", "reset"], ["in (line1)", "reset"] ],
+                    [ ["nor (line6)", "set"] ],
+                    [ ["nor (line6)", "reset"], ["in (line1)", "set"] ],
+                    [ ["nor (line6)", "set"] ] ],
+                    [ [ ["nor (line6)", "reset"], ["in (line2)", "reset"] ],
+                    [ ["nor (line6)", "set"] ],
+                    [ ["nor (line6)", "reset"], ["in (line2)", "set"] ],
+                    [ ["nor (line6)", "set"] ] ],
+                    
+                    [ [ ["in (line0)", "reset"], ["in (line1)", "reset"] ],
+                    [ ["in (line0)", "set"] ],
+                    [ ["in (line0)", "reset"], ["in (line1)", "set"] ],
+                    [ ["in (line0)", "set"] ] ],
+                    [ [ ["in (line0)", "reset"], ["in (line2)", "reset"] ],
+                    [ ["in (line0)", "set"] ],
+                    [ ["in (line0)", "reset"], ["in (line2)", "set"] ],
+                    [ ["in (line0)", "set"] ] ],
+                    
+                    [ [ ["in (line1)", "reset"], ["in (line2)", "reset"] ],
+                    [ ["in (line1)", "set"] ],
+                    [ ["in (line1)", "reset"], ["in (line2)", "set"] ],
+                    [ ["in (line1)", "set"] ] ]
+                ]
+            ]
+        },
+
+        "Injector_Inject_Test":
+        {
+            "expectedCurrentFaultInjection":
+            [
+                [ ["and (line3)", "set"], ["xor (line4)", "set"], ["and (line5)", "set"], ["nor (line6)", "set"], ["in (line0)", "set"], ["in (line1)", "reset"], ["in (line2)", "reset"] ],
+                [ ["and (line3)", "set"], ["xor (line4)", "set"], ["and (line5)", "set"], ["nor (line6)", "set"], ["in (line0)", "set"], ["in (line1)", "set"], ["in (line2)", "reset"] ],
+                [ ["and (line3)", "set"], ["xor (line4)", "set"], ["and (line5)", "set"], ["nor (line6)", "set"], ["in (line0)", "set"], ["in (line1)", "reset"], ["in (line2)", "set"] ],
+                [ ["and (line3)", "set"], ["xor (line4)", "set"], ["and (line5)", "set"], ["nor (line6)", "set"], ["in (line0)", "set"], ["in (line1)", "set"], ["in (line2)", "set"] ]
+            ]
+        }
+    },
+
+    "FIA":
+    {
+        "FIA_Fault_Locations_Test":
+        {
+            "expectedFaultLocations":
+            {
+                "comb":
+                [
+                    "and (line4)",
+                    "or (line6)",
+                    "nand (line5)",
+                    "nor (line7)",
+                    "xor (line8)",
+                    "xnor (line9)",
+                    "buf (line10)",
+                    "not (line11)"
+                ],
+
+                "seq":
+                [
+                    "reg (line12)",
+                    "regn (line13)"
+                ],
+
+                "combseq":
+                {
+                    "nofilter":
+                    [
+                        "reg (line12)",
+                        "regn (line13)",
+                        "and (line4)",
+                        "or (line6)",
+                        "nand (line5)",
+                        "nor (line7)",
+                        "xor (line8)",
+                        "xnor (line9)",
+                        "buf (line10)",
+                        "not (line11)"
+                    ],
+
+                    "whitelist":
+                    [
+                        "and (line4)",
+                        "or (line6)",
+                        "nand (line5)",
+                        "nor (line7)",
+                        "xor (line8)",
+                        "xnor (line9)" 
+                    ],
+
+                    "blacklist":
+                    [
+                        "reg (line12)",
+                        "regn (line13)",
+                        "buf (line10)",
+                        "not (line11)"
+                    ]
+                }
+            }
+        },
+
+        "FIA_Propagation_Paths_Test":
+        {
+            "expectedPropPath":
+            [
+                [
+                    "buf (line10)",
+                    "not (line11)",
+                    "xor (line8)",
+                    "and (line4)",
+                    "reg (line12)",
+                    "regn (line13)",
+                    "xnor (line9)",
+                    "or (line6)"
+                ],
+                [
+                    "buf (line10)",
+                    "not (line11)",
+                    "xor (line8)",
+                    "and (line4)",
+                    "reg (line12)",
+                    "regn (line13)",
+                    "xnor (line9)",
+                    "nor (line7)"
+                ],
+                [
+                    "buf (line10)",
+                    "not (line11)",
+                    "xor (line8)",
+                    "nand (line5)",
+                    "reg (line12)",
+                    "regn (line13)",
+                    "xnor (line9)",
+                    "or (line6)"
+                ],
+                [
+                    "buf (line10)",
+                    "not (line11)",
+                    "xor (line8)",
+                    "nand (line5)",
+                    "reg (line12)",
+                    "regn (line13)",
+                    "xnor (line9)",
+                    "nor (line7)"
+                ],
+                [
+                    "buf (line10)",
+                    "not (line11)",
+                    "xor (line8)"
+                ],
+                [
+                    "buf (line10)",
+                    "not (line11)",
+                    "xor (line8)"
+                ],
+                [
+                    "reg (line12)",
+                    "regn (line13)",
+                    "xnor (line9)"
+                ],
+                [
+                    "reg (line12)",
+                    "regn (line13)",
+                    "xnor (line9)"
+                ],
+                [
+                    "buf (line10)",
+                    "not (line11)"
+                ],
+                [
+                    "reg (line12)",
+                    "regn (line13)"
+                ],
+                [], [], [], []
+            ]
+        },
+
+        "FIA_Reduced_Fault_Locations_Test":
+        {
+            "expectedFaultLocationsReduced":
+            [
+                "reg (line15)",
+                "reg (line16)",
+                "reg (line17)",
+                "reg (line18)",
+                "g5",
+                "g1",
+                "g6",
+                "g4",
+                "g7"
+            ]
+        }
+    }
+}

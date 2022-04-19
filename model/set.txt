@@ -1,0 +1,10 @@
+#source target0 target1 target2...
+and set
+nand set
+or set
+nor set
+not set
+xor set
+xnor set
+reg set
+in set

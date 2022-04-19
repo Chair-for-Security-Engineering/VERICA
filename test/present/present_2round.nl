@@ -1,0 +1,1326 @@
+in 0
+in 1
+in 2
+in 3
+in 4
+in 5
+in 6
+in 7
+in 8
+in 9
+in 10
+in 11
+in 12
+in 13
+in 14
+in 15
+in 16
+in 17
+in 18
+in 19
+in 20
+in 21
+in 22
+in 23
+in 24
+in 25
+in 26
+in 27
+in 28
+in 29
+in 30
+in 31
+in 32
+in 33
+in 34
+in 35
+in 36
+in 37
+in 38
+in 39
+in 40
+in 41
+in 42
+in 43
+in 44
+in 45
+in 46
+in 47
+in 48
+in 49
+in 50
+in 51
+in 52
+in 53
+in 54
+in 55
+in 56
+in 57
+in 58
+in 59
+in 60
+in 61
+in 62
+in 63
+in 64
+in 65
+in 66
+in 67
+in 68
+in 69
+in 70
+in 71
+in 72
+in 73
+in 74
+in 75
+in 76
+in 77
+in 78
+in 79
+in 80
+in 81
+in 82
+in 83
+in 84
+in 85
+in 86
+in 87
+in 88
+in 89
+in 90
+in 91
+in 92
+in 93
+in 94
+in 95
+in 96
+in 97
+in 98
+in 99
+in 100
+in 101
+in 102
+in 103
+in 104
+in 105
+in 106
+in 107
+in 108
+in 109
+in 110
+in 111
+in 112
+in 113
+in 114
+in 115
+in 116
+in 117
+in 118
+in 119
+in 120
+in 121
+in 122
+in 123
+in 124
+in 125
+in 126
+in 127
+in 128
+in 129
+in 130
+in 131
+in 132
+in 133
+in 134
+in 135
+in 136
+in 137
+in 138
+in 139
+in 140
+in 141
+in 142
+in 143
+xor 89 25
+xor 88 24
+xor 87 23
+xor 86 22
+xor 143 79
+xor 142 78
+xor 141 77
+xor 140 76
+xor 85 21
+xor 139 75
+xor 138 74
+xor 137 73
+xor 136 72
+xor 135 71
+xor 134 70
+xor 133 69
+xor 132 68
+xor 131 67
+xor 130 66
+xor 84 20
+xor 129 65
+xor 128 64
+xor 127 63
+xor 126 62
+xor 125 61
+xor 124 60
+xor 123 59
+xor 122 58
+xor 121 57
+xor 120 56
+xor 83 19
+xor 119 55
+xor 118 54
+xor 117 53
+xor 116 52
+xor 115 51
+xor 114 50
+xor 113 49
+xor 112 48
+xor 111 47
+xor 110 46
+xor 82 18
+xor 109 45
+xor 108 44
+xor 107 43
+xor 106 42
+xor 105 41
+xor 104 40
+xor 103 39
+xor 102 38
+xor 101 37
+xor 100 36
+xor 81 17
+xor 99 35
+xor 98 34
+xor 97 33
+xor 96 32
+xor 95 31
+xor 94 30
+xor 93 29
+xor 92 28
+xor 91 27
+xor 90 26
+xor 80 16
+nor 15 18
+nand 15 16
+nor 16 18
+not 17
+not 15
+nor 207 174
+nand 207 196
+nor 196 174
+not 185
+not 207
+nor 163 146
+nand 163 152
+nor 152 146
+not 147
+not 163
+nor 145 205
+nand 145 144
+nor 144 205
+not 206
+not 145
+nor 204 201
+nand 204 203
+nor 203 201
+not 202
+not 204
+nor 200 197
+nand 200 199
+nor 199 197
+not 198
+not 200
+nor 195 192
+nand 195 194
+nor 194 192
+not 193
+not 195
+nor 191 188
+nand 191 190
+nor 190 188
+not 189
+not 191
+nor 187 183
+nand 187 186
+nor 186 183
+not 184
+not 187
+nor 182 179
+nand 182 181
+nor 181 179
+not 180
+not 182
+nor 178 175
+nand 178 177
+nor 177 175
+not 176
+not 178
+nor 173 170
+nand 173 172
+nor 172 170
+not 171
+not 173
+nor 169 166
+nand 169 168
+nor 168 166
+not 167
+not 169
+nor 165 161
+nand 165 164
+nor 164 161
+not 162
+not 165
+nor 160 157
+nand 160 159
+nor 159 157
+not 158
+not 160
+nor 156 153
+nand 156 155
+nor 155 153
+not 154
+not 156
+nor 151 148
+nand 151 150
+nor 150 148
+not 149
+not 151
+nor 211 18
+nor 208 210
+xor 212 16
+or 209 17
+nand 212 17
+nor 18 209
+nor 16 211
+xor 212 18
+nor 216 174
+nor 213 215
+xor 217 196
+or 214 185
+nand 217 185
+nor 174 214
+nor 196 216
+xor 217 174
+nor 221 146
+nor 218 220
+xor 222 152
+or 219 147
+nand 222 147
+nor 146 219
+nor 152 221
+xor 222 146
+nor 226 205
+nor 223 225
+xor 227 144
+or 224 206
+nand 227 206
+nor 205 224
+nor 144 226
+xor 227 205
+nor 231 201
+nor 228 230
+xor 232 203
+or 229 202
+nand 232 202
+nor 201 229
+nor 203 231
+xor 232 201
+nor 236 197
+nor 233 235
+xor 237 199
+or 234 198
+nand 237 198
+nor 197 234
+nor 199 236
+xor 237 197
+nor 241 192
+nor 238 240
+xor 242 194
+or 239 193
+nand 242 193
+nor 192 239
+nor 194 241
+xor 242 192
+nor 246 188
+nor 243 245
+xor 247 190
+or 244 189
+nand 247 189
+nor 188 244
+nor 190 246
+xor 247 188
+nor 251 183
+nor 248 250
+xor 252 186
+or 249 184
+nand 252 184
+nor 183 249
+nor 186 251
+xor 252 183
+nor 256 179
+nor 253 255
+xor 257 181
+or 254 180
+nand 257 180
+nor 179 254
+nor 181 256
+xor 257 179
+nor 261 175
+nor 258 260
+xor 262 177
+or 259 176
+nand 262 176
+nor 175 259
+nor 177 261
+xor 262 175
+nor 266 170
+nor 263 265
+xor 267 172
+or 264 171
+nand 267 171
+nor 170 264
+nor 172 266
+xor 267 170
+nor 271 166
+nor 268 270
+xor 272 168
+or 269 167
+nand 272 167
+nor 166 269
+nor 168 271
+xor 272 166
+nor 276 161
+nor 273 275
+xor 277 164
+or 274 162
+nand 277 162
+nor 161 274
+nor 164 276
+xor 277 161
+nor 281 157
+nor 278 280
+xor 282 159
+or 279 158
+nand 282 158
+nor 157 279
+nor 159 281
+xor 282 157
+nor 286 153
+nor 283 285
+xor 287 155
+or 284 154
+nand 287 154
+nor 153 284
+nor 155 286
+xor 287 153
+nor 291 148
+nor 288 290
+xor 292 150
+or 289 149
+nand 292 149
+nor 148 289
+nor 150 291
+xor 292 148
+nor 210 293
+nand 18 299
+nor 17 294
+nor 17 295
+nand 297 296
+nand 17 298
+xnor 300 299
+nor 215 301
+nand 174 307
+nor 185 302
+nor 185 303
+nand 305 304
+nand 185 306
+xnor 308 307
+nor 220 309
+nand 146 315
+nor 147 310
+nor 147 311
+nand 313 312
+nand 147 314
+xnor 316 315
+nor 225 317
+nand 205 323
+nor 206 318
+nor 206 319
+nand 321 320
+nand 206 322
+xnor 324 323
+nor 230 325
+nand 201 331
+nor 202 326
+nor 202 327
+nand 329 328
+nand 202 330
+xnor 332 331
+nor 235 333
+nand 197 339
+nor 198 334
+nor 198 335
+nand 337 336
+nand 198 338
+xnor 340 339
+nor 240 341
+nand 192 347
+nor 193 342
+nor 193 343
+nand 345 344
+nand 193 346
+xnor 348 347
+nor 245 349
+nand 188 355
+nor 189 350
+nor 189 351
+nand 353 352
+nand 189 354
+xnor 356 355
+nor 250 357
+nand 183 363
+nor 184 358
+nor 184 359
+nand 361 360
+nand 184 362
+xnor 364 363
+nor 255 365
+nand 179 371
+nor 180 366
+nor 180 367
+nand 369 368
+nand 180 370
+xnor 372 371
+nor 260 373
+nand 175 379
+nor 176 374
+nor 176 375
+nand 377 376
+nand 176 378
+xnor 380 379
+nor 265 381
+nand 170 387
+nor 171 382
+nor 171 383
+nand 385 384
+nand 171 386
+xnor 388 387
+nor 270 389
+nand 166 395
+nor 167 390
+nor 167 391
+nand 393 392
+nand 167 394
+xnor 396 395
+nor 275 397
+nand 161 403
+nor 162 398
+nor 162 399
+nand 401 400
+nand 162 402
+xnor 404 403
+nor 280 405
+nand 157 411
+nor 158 406
+nor 158 407
+nand 409 408
+nand 158 410
+xnor 412 411
+nor 285 413
+nand 153 419
+nor 154 414
+nor 154 415
+nand 417 416
+nand 154 418
+xnor 420 419
+nor 290 421
+nand 148 427
+nor 149 422
+nor 149 423
+nand 425 424
+nand 149 426
+xnor 428 427
+nor 15 429
+nand 18 432
+nand 433 18
+nor 207 436
+nand 174 439
+nand 440 174
+nor 163 443
+nand 146 446
+nand 447 146
+nor 145 450
+nand 205 453
+nand 454 205
+nor 204 457
+nand 201 460
+nand 461 201
+nor 200 464
+nand 197 467
+nand 468 197
+nor 195 471
+nand 192 474
+nand 475 192
+nor 191 478
+nand 188 481
+nand 482 188
+nor 187 485
+nand 183 488
+nand 489 183
+nor 182 492
+nand 179 495
+nand 496 179
+nor 178 499
+nand 175 502
+nand 503 175
+nor 173 506
+nand 170 509
+nand 510 170
+nor 169 513
+nand 166 516
+nand 517 166
+nor 165 520
+nand 161 523
+nand 524 161
+nor 160 527
+nand 157 530
+nand 531 157
+nor 156 534
+nand 153 537
+nand 538 153
+nor 151 541
+nand 148 544
+nand 545 148
+nand 434 549
+nand 434 550
+xor 505 44
+xor 498 43
+xor 491 42
+xor 484 41
+xor 477 40
+xor 470 39
+xor 463 38
+xor 456 37
+xor 449 36
+xor 547 50
+xor 540 49
+xor 533 48
+xor 526 47
+xor 519 46
+xor 512 45
+xor 442 35
+nand 441 552
+nand 441 553
+nand 448 555
+nand 448 556
+nand 455 558
+nand 455 559
+nand 462 561
+nand 462 562
+nand 469 564
+nand 469 565
+nand 476 567
+nand 476 568
+nand 483 570
+nand 483 571
+nand 490 573
+nand 490 574
+nand 497 576
+nand 497 577
+nand 504 579
+nand 504 580
+nand 511 582
+nand 511 583
+nand 518 585
+nand 518 586
+nand 525 588
+nand 525 589
+nand 532 591
+nand 532 592
+nand 539 594
+nand 539 595
+nand 546 597
+nand 546 598
+nor 599 548
+nor 599 431
+nor 210 600
+nor 616 607
+nand 616 609
+nor 609 607
+not 608
+not 616
+nor 606 603
+nand 606 605
+nor 605 603
+not 604
+not 606
+nor 602 614
+nand 602 601
+nor 601 614
+not 615
+not 602
+nor 613 610
+nand 613 612
+nor 612 610
+not 611
+not 613
+nor 617 551
+nor 617 438
+nor 215 618
+nor 619 554
+nor 619 445
+nor 220 620
+nor 621 557
+nor 621 452
+nor 225 622
+nor 623 560
+nor 623 459
+nor 230 624
+nor 625 563
+nor 625 466
+nor 235 626
+nor 627 566
+nor 627 473
+nor 240 628
+nor 629 569
+nor 629 480
+nor 245 630
+nor 631 572
+nor 631 487
+nor 250 632
+nor 633 575
+nor 633 494
+nor 255 634
+nor 635 578
+nor 635 501
+nor 260 636
+nor 637 581
+nor 637 508
+nor 265 638
+nor 639 584
+nor 639 515
+nor 270 640
+nor 641 587
+nor 641 522
+nor 275 642
+nor 643 590
+nor 643 529
+nor 280 644
+nor 645 593
+nor 645 536
+nor 285 646
+nor 647 596
+nor 647 543
+nor 290 648
+nand 649 296
+nand 650 430
+nor 655 607
+nor 652 654
+xor 656 609
+or 653 608
+nand 656 608
+nor 607 653
+nor 609 655
+xor 656 607
+nor 660 603
+nor 657 659
+xor 661 605
+or 658 604
+nand 661 604
+nor 603 658
+nor 605 660
+xor 661 603
+nor 665 614
+nor 662 664
+xor 666 601
+or 663 615
+nand 666 615
+nor 614 663
+nor 601 665
+xor 666 614
+nor 670 610
+nor 667 669
+xor 671 612
+or 668 611
+nand 671 611
+nor 610 668
+nor 612 670
+xor 671 610
+nand 672 304
+nand 673 437
+nand 675 312
+nand 676 444
+nand 678 320
+nand 679 451
+nand 681 328
+nand 682 458
+nand 684 336
+nand 685 465
+nand 687 344
+nand 688 472
+nand 690 352
+nand 691 479
+nand 693 360
+nand 694 486
+nand 696 368
+nand 697 493
+nand 699 376
+nand 700 500
+nand 702 384
+nand 703 507
+nand 705 392
+nand 706 514
+nand 708 400
+nand 709 521
+nand 711 408
+nand 712 528
+nand 714 416
+nand 715 535
+nand 717 424
+nand 718 542
+xor 719 66
+xor 716 65
+xor 713 64
+xor 710 63
+xor 707 62
+xor 704 61
+xor 701 60
+xor 698 59
+xor 695 58
+xor 692 57
+xor 689 56
+xor 686 55
+xor 683 54
+xor 680 53
+xor 677 52
+xor 674 51
+nor 654 722
+nand 607 728
+nor 608 723
+nor 608 724
+nand 726 725
+nand 608 727
+xnor 729 728
+nor 659 730
+nand 603 736
+nor 604 731
+nor 604 732
+nand 734 733
+nand 604 735
+xnor 737 736
+nor 664 738
+nand 614 744
+nor 615 739
+nor 615 740
+nand 742 741
+nand 615 743
+xnor 745 744
+nor 669 746
+nand 610 752
+nor 611 747
+nor 611 748
+nand 750 749
+nand 611 751
+xnor 753 752
+xor 784 720
+xor 782 721
+xor 780 651
+xor 778 435
+xor 776 14
+xor 774 13
+xor 772 12
+xor 770 11
+xor 768 10
+xor 766 9
+xor 764 8
+xor 762 7
+xor 760 6
+xor 758 5
+xor 756 4
+xor 754 3
+xor 785 2
+xor 783 1
+xor 781 0
+xor 779 79
+xor 777 78
+xor 775 77
+xor 773 76
+xor 771 75
+xor 769 74
+xor 767 73
+xor 765 72
+xor 763 71
+xor 761 70
+xor 759 69
+xor 757 68
+xor 755 67
+nor 616 802
+nand 607 805
+nand 806 607
+nor 606 809
+nand 603 812
+nand 813 603
+nor 602 816
+nand 614 819
+nand 820 614
+nor 613 823
+nand 610 826
+nand 827 610
+nor 801 798
+nand 801 800
+nor 800 798
+not 799
+not 801
+nor 797 794
+nand 797 796
+nor 796 794
+not 795
+not 797
+nor 793 790
+nand 793 792
+nor 792 790
+not 791
+not 793
+nor 789 786
+nand 789 788
+nor 788 786
+not 787
+not 789
+nand 807 863
+nand 807 864
+nand 814 866
+nand 814 867
+nand 821 869
+nand 821 870
+nand 828 872
+nand 828 873
+nor 877 798
+nor 874 876
+xor 878 800
+or 875 799
+nand 878 799
+nor 798 875
+nor 800 877
+xor 878 798
+nor 882 794
+nor 879 881
+xor 883 796
+or 880 795
+nand 883 795
+nor 794 880
+nor 796 882
+xor 883 794
+nor 887 790
+nor 884 886
+xor 888 792
+or 885 791
+nand 888 791
+nor 790 885
+nor 792 887
+xor 888 790
+nor 892 786
+nor 889 891
+xor 893 788
+or 890 787
+nand 893 787
+nor 786 890
+nor 788 892
+xor 893 786
+nor 861 858
+nand 861 860
+nor 860 858
+not 859
+not 861
+nor 857 854
+nand 857 856
+nor 856 854
+not 855
+not 857
+nor 853 850
+nand 853 852
+nor 852 850
+not 851
+not 853
+nor 849 846
+nand 849 848
+nor 848 846
+not 847
+not 849
+nor 845 842
+nand 845 844
+nor 844 842
+not 843
+not 845
+nor 841 838
+nand 841 840
+nor 840 838
+not 839
+not 841
+nor 837 834
+nand 837 836
+nor 836 834
+not 835
+not 837
+nor 833 830
+nand 833 832
+nor 832 830
+not 831
+not 833
+nor 894 862
+nor 894 804
+nor 654 895
+nor 896 865
+nor 896 811
+nor 659 897
+nor 898 868
+nor 898 818
+nor 664 899
+nor 900 871
+nor 900 825
+nor 669 901
+nor 876 902
+nand 798 908
+nor 799 903
+nor 799 904
+nand 906 905
+nand 799 907
+xnor 909 908
+nor 881 910
+nand 794 916
+nor 795 911
+nor 795 912
+nand 914 913
+nand 795 915
+xnor 917 916
+nor 886 918
+nand 790 924
+nor 791 919
+nor 791 920
+nand 922 921
+nand 791 923
+xnor 925 924
+nor 891 926
+nand 786 932
+nor 787 927
+nor 787 928
+nand 930 929
+nand 787 931
+xnor 933 932
+nor 937 858
+nor 934 936
+xor 938 860
+or 935 859
+nand 938 859
+nor 858 935
+nor 860 937
+xor 938 858
+nor 942 854
+nor 939 941
+xor 943 856
+or 940 855
+nand 943 855
+nor 854 940
+nor 856 942
+xor 943 854
+nor 947 850
+nor 944 946
+xor 948 852
+or 945 851
+nand 948 851
+nor 850 945
+nor 852 947
+xor 948 850
+nor 952 846
+nor 949 951
+xor 953 848
+or 950 847
+nand 953 847
+nor 846 950
+nor 848 952
+xor 953 846
+nor 957 842
+nor 954 956
+xor 958 844
+or 955 843
+nand 958 843
+nor 842 955
+nor 844 957
+xor 958 842
+nor 962 838
+nor 959 961
+xor 963 840
+or 960 839
+nand 963 839
+nor 838 960
+nor 840 962
+xor 963 838
+nor 967 834
+nor 964 966
+xor 968 836
+or 965 835
+nand 968 835
+nor 834 965
+nor 836 967
+xor 968 834
+nor 972 830
+nor 969 971
+xor 973 832
+or 970 831
+nand 973 831
+nor 830 970
+nor 832 972
+xor 973 830
+nand 974 725
+nand 975 803
+nand 977 733
+nand 978 810
+nand 980 741
+nand 981 817
+nand 983 749
+nand 984 824
+nor 801 986
+nand 798 989
+nand 990 798
+nor 797 993
+nand 794 996
+nand 997 794
+nor 793 1000
+nand 790 1003
+nand 1004 790
+nor 789 1007
+nand 786 1010
+nand 1011 786
+nor 936 1014
+nand 858 1020
+nor 859 1015
+nor 859 1016
+nand 1018 1017
+nand 859 1019
+xnor 1021 1020
+nor 941 1022
+nand 854 1028
+nor 855 1023
+nor 855 1024
+nand 1026 1025
+nand 855 1027
+xnor 1029 1028
+nor 946 1030
+nand 850 1036
+nor 851 1031
+nor 851 1032
+nand 1034 1033
+nand 851 1035
+xnor 1037 1036
+nor 951 1038
+nand 846 1044
+nor 847 1039
+nor 847 1040
+nand 1042 1041
+nand 847 1043
+xnor 1045 1044
+nor 956 1046
+nand 842 1052
+nor 843 1047
+nor 843 1048
+nand 1050 1049
+nand 843 1051
+xnor 1053 1052
+nor 961 1054
+nand 838 1060
+nor 839 1055
+nor 839 1056
+nand 1058 1057
+nand 839 1059
+xnor 1061 1060
+nor 966 1062
+nand 834 1068
+nor 835 1063
+nor 835 1064
+nand 1066 1065
+nand 835 1067
+xnor 1069 1068
+nor 971 1070
+nand 830 1076
+nor 831 1071
+nor 831 1072
+nand 1074 1073
+nand 831 1075
+xnor 1077 1076
+nand 991 1087
+nand 991 1088
+nand 998 1090
+nand 998 1091
+nand 1005 1093
+nand 1005 1094
+nand 1012 1096
+nand 1012 1097
+nor 861 1098
+nand 858 1101
+nand 1102 858
+nor 857 1105
+nand 854 1108
+nand 1109 854
+nor 853 1112
+nand 850 1115
+nand 1116 850
+nor 849 1119
+nand 846 1122
+nand 1123 846
+nor 845 1126
+nand 842 1129
+nand 1130 842
+nor 841 1133
+nand 838 1136
+nand 1137 838
+nor 837 1140
+nand 834 1143
+nand 1144 834
+nor 833 1147
+nand 830 1150
+nand 1151 830
+nor 1154 1086
+nor 1154 988
+nor 876 1155
+nor 1156 1089
+nor 1156 995
+nor 881 1157
+nor 1158 1092
+nor 1158 1002
+nor 886 1159
+nor 1160 1095
+nor 1160 1009
+nor 891 1161
+nand 1103 1163
+nand 1103 1164
+nand 1110 1166
+nand 1110 1167
+nand 1117 1169
+nand 1117 1170
+nand 1124 1172
+nand 1124 1173
+nand 1131 1175
+nand 1131 1176
+nand 1138 1178
+nand 1138 1179
+nand 1145 1181
+nand 1145 1182
+nand 1152 1184
+nand 1152 1185
+nand 1186 905
+nand 1187 987
+nand 1189 913
+nand 1190 994
+nand 1192 921
+nand 1193 1001
+nand 1195 929
+nand 1196 1008
+nor 1198 1162
+nor 1198 1100
+nor 936 1199
+nor 1200 1165
+nor 1200 1107
+nor 941 1201
+nor 1202 1168
+nor 1202 1114
+nor 946 1203
+nor 1204 1171
+nor 1204 1121
+nor 951 1205
+nor 1206 1174
+nor 1206 1128
+nor 956 1207
+nor 1208 1177
+nor 1208 1135
+nor 961 1209
+nor 1210 1180
+nor 1210 1142
+nor 966 1211
+nor 1212 1183
+nor 1212 1149
+nor 971 1213
+nand 1222 1017
+nand 1223 1099
+nand 1225 1025
+nand 1226 1106
+nand 1228 1033
+nand 1229 1113
+nand 1231 1041
+nand 1232 1120
+nand 1234 1049
+nand 1235 1127
+nand 1237 1057
+nand 1238 1134
+nand 1240 1065
+nand 1241 1141
+nand 1243 1073
+nand 1244 1148
+out 808
+out 815
+out 822
+out 829
+out 992
+out 999
+out 1006
+out 1013
+out 1104
+out 1111
+out 1118
+out 1125
+out 1132
+out 1139
+out 1146
+out 1153
+out 976
+out 979
+out 982
+out 985
+out 1188
+out 1191
+out 1194
+out 1197
+out 1224
+out 1227
+out 1230
+out 1233
+out 1236
+out 1239
+out 1242
+out 1245
+out 1079
+out 1081
+out 1083
+out 1085
+out 1215
+out 1217
+out 1219
+out 1221
+out 1247
+out 1249
+out 1251
+out 1253
+out 1255
+out 1257
+out 1259
+out 1261
+out 1078
+out 1080
+out 1082
+out 1084
+out 1214
+out 1216
+out 1218
+out 1220
+out 1246
+out 1248
+out 1250
+out 1252
+out 1254
+out 1256
+out 1258
+out 1260

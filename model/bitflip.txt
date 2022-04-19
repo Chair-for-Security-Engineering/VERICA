@@ -1,0 +1,9 @@
+#source target0 target1 target2...
+and nand
+nand and
+or nor
+nor or
+not buf
+xor xnor
+xnor xor
+reg not

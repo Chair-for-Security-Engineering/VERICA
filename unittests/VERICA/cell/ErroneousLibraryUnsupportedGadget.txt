@@ -1,0 +1,13 @@
+Library
+NANG45
+
+Gate
+1
+ERR_X1
+error
+1
+A
+1
+Z
+1
+A

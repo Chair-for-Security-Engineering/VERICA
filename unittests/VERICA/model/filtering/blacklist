@@ -1,0 +1,7 @@
+# This file is used to determine entities that should blacklisted.
+# All gates with matching annotations will be excluded.
+# Check1_CheckInst Red_ToCheckInst test_gate
+comp_
+cor_
+creg_
+ref_1_regData_

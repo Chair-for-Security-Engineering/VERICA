@@ -1,0 +1,140 @@
+in 0 0:0
+in 1 1:0
+in 2 2:0
+in 3 3:0
+in 4 0:1
+in 5 1:1
+in 6 2:1
+in 7 3:1
+xnor 2 0
+not 7
+nand 7 4
+not 7
+xor 4 6
+nor 0 3
+and 3 2
+xnor 0 6
+nand 7 2
+not 7
+xor 4 6
+nand 0 2
+not 6
+xor 1 7
+not 2
+nand 4 6
+reg 1
+reg 5
+nand 8 3
+nand 6 9
+or 9 0
+nand 2 11
+and 3 12
+nor 14 13
+and 15 7
+nand 4 17
+and 3 18
+nand 0 20
+nand 4 22
+xnor 23 3
+reg 19
+reg 24
+reg 25
+xnor 26 1
+nand 28 27
+nand 29 10
+xor 1 31
+nand 33 16
+xnor 21 35
+xnor 5 36
+reg 30
+reg 32
+reg 34
+reg 37
+xor 5 43
+xor 5 45
+reg 41
+reg 42
+reg 44
+reg 46
+reg 47
+reg 52
+reg 53
+xor 38 57
+xor 58 51
+xor 56 49
+xor 54 55
+xor 60 50
+xor 59 48
+reg 64
+reg 63
+reg 61
+reg 62
+reg 66
+reg 65
+not 69
+nand 68 70
+not 69
+xnor 67 69
+not 69
+not 68
+not 69
+nand 68 69
+xor 68 40
+not 69
+reg 70
+nor 68 73
+xnor 74 40
+nand 72 70
+nor 72 75
+nor 68 77
+nand 70 78
+nand 72 70
+and 72 69
+nand 39 79
+or 70 81
+xnor 72 39
+nand 40 82
+or 82 72
+reg 76
+reg 71
+xnor 86 39
+xnor 40 89
+xnor 90 39
+nand 80 92
+nor 70 94
+nand 96 95
+reg 84
+reg 85
+reg 87
+reg 88
+reg 91
+reg 93
+xor 97 83
+reg 98
+reg 99
+reg 100
+reg 101
+reg 102
+reg 103
+reg 104
+xor 105 106
+reg 111
+xor 116 110
+xor 117 118
+xor 108 114
+xor 115 109
+xor 113 107
+reg 119
+reg 123
+reg 121
+reg 125
+reg 124
+reg 122
+out 126 0:0
+out 120 1:0
+out 127 2:0
+out 128 3:0
+out 129 0:1
+out 112 1:1
+out 130 2:1
+out 131 3:1

@@ -1,0 +1,94 @@
+{
+    "general":
+    {
+        "verbose": 2,
+        "cores": 2,
+        "memory": 4,
+        "netlist":
+        {
+            "file": "test/dom/dom1.v",
+            "name": "",
+            "module": ""
+        },
+        "library":
+        {
+            "file": "cell/nang45.txt",
+            "name": "NANG45"
+        },
+        "filtering":
+        {
+            "type": "none",
+            "whitelist": "model/whitelist",
+            "blacklist": "model/blacklist"
+        },
+        "annotation":
+        {
+            "file": "model/annotations.json",
+            "apply": true
+        },
+        "cudd":
+        {
+            "reordering": false
+        }
+    },
+
+    "side-channel":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "order": 2,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": false
+        },
+        "model":
+        {
+            "glitches": true,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis": 
+        {
+            "uniformity": false,
+            "probing": false,
+            "ni": false,
+            "sni": true,
+            "pini": false
+        }
+    },
+
+    "fault-injection":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "number": 2,
+            "variate": 1,
+            "interrupt": false
+        },
+        "model": 
+        {
+            "mapping": "model/setreset.txt",
+            "location": "c"
+        },
+        "analysis":
+        {
+            "reduced_complexity": false,
+            "strategy": "correction",
+            "na": false,
+            "sna": true
+        }
+    },
+
+    "combined": 
+    {
+        "enable": true,
+        "analysis":
+        {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": true
+        }
+    }
+}

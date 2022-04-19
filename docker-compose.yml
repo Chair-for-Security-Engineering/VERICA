@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  verica:
+    container_name: verica
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: verica:latest

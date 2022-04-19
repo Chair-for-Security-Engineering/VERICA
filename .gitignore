@@ -1,0 +1,45 @@
+# Temporary files
+.vscode/**
+db/**
+viv/**
+
+# Documentation (generated)
+docs/html
+
+# Compiled object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Code coverage measurement and report files
+coverage/**
+*.gcda
+*.gcno
+
+# Executables
+bin/**
+
+# Latex temporary files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+
+# Simulation / Vivado files
+**/*.sim/**
+**/*.hw/**
+**/*.ip_user_files/**
+**/*.cache/**
+**/*.xpr
+
+# Visualization
+dot/*.dot
+
+out/**
+
+# Try to keep the repo clean...
+test/temp/**
+config/verica_*.json

@@ -1,0 +1,17 @@
+# Gitlab templates und VSCode property files
+.gitlab/**
+.vscode/**
+
+# Compiled object files and binaries
+bin/**
+build/**
+
+# Code covergae informations, documentations and logs
+coverage/**
+docs/**
+log/**
+
+# Other files
+.gitignore
+.gitlab-ci.yml
+testCoverage.sh
