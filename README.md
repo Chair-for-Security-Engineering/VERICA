@@ -295,7 +295,7 @@ J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA -
 
 The repository contains a Dockerfile, which gives developers and users the possibility to build Docker images for VERICA. Using Docker images, the application can be executed in containers, which provide a minimalist environment containing all necessary dependencies for VERICA.
 
-This Wiki entry gives an overview on how to use Docker to deploy and run the application.
+This instruction gives an overview on how to use Docker to deploy and run the application.
 
 Note that you need a current Docker installation and appropriate rights on the host machine to run the following commands. Tutorials on how to set up Docker can be found here:
 
@@ -332,7 +332,7 @@ The following commands show how to use volumes and mount binds as data exchange 
 Volumes allow the user to store files in a persistent memory. Additionally, volumes can be shared between multiple containers.\
 One possible use case for VERICA is to store output files, such as logs, in a volume. Using a volume, these output files will not be deleted after the execution of the application is finished.
 
-To create of new volume, run the following command:
+To create a new volume, run the following command:
 
 `docker volume create VericaOut`
 
@@ -355,7 +355,7 @@ To use mount binds, use the following command to run the container:
 
 This command mounts the subfolder _/config_ of the current working directory of the host machine into the directory _/user/src/verica/config_ of the container. In this example, the configuration files for the application are obtained from the directory of the host machine instead of the directory which is built from the image. This makes it possible to change the configuration of VERICA without the need to built a whole new image.
 
-Note that this command is very similar to the previous command. However, no previously created volumes are used here. The configuration file can be adapted according to [Section 3](#3-configure-verica). 
+Note that this command is very similar to the previous command. However, no previously created volumes are used here. The configuration file can be adapted according to [Section 4.1](#41-configure-verica). 
 
 ### Additional notes
 

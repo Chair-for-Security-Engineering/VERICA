@@ -2,11 +2,11 @@
     "general":
     {
         "verbose": 2,
-        "cores": 2,
-        "memory": 4,
+        "cores": 16,
+        "memory": 8,
         "netlist":
         {
-            "file": "test/dom/dom1.v",
+            "file": "test/case-study-nina/and_snina_d2_k1.v",
             "name": "",
             "module": ""
         },
@@ -23,12 +23,18 @@
         },
         "annotation":
         {
-            "file": "model/annotations.json",
+            "file": "test/case-study-nina/annotations.json",
             "apply": true
         },
         "cudd":
         {
             "reordering": false
+        },
+        "visualization":
+        {
+            "enable": true,
+            "full": true,
+            "partial": true
         }
     },
 
@@ -37,7 +43,7 @@
         "enable": false,
         "configuration":
         {
-            "order": 2,
+            "order": 1,
             "variate": 0,
             "masking": 0,
             "interrupt": false
@@ -52,8 +58,8 @@
         {
             "uniformity": false,
             "probing": false,
-            "ni": false,
-            "sni": true,
+            "p-ni": false,
+            "p-sni": false,
             "pini": false
         }
     },
@@ -63,21 +69,21 @@
         "enable": false,
         "configuration":
         {
-            "number": 2,
+            "number": 1,
             "variate": 1,
             "interrupt": false
         },
         "model": 
         {
             "mapping": "model/setreset.txt",
-            "location": "c"
+            "location": "cs"
         },
         "analysis":
         {
             "reduced_complexity": false,
-            "strategy": "correction",
-            "na": false,
-            "sna": true
+            "strategy": "detection",
+            "f-ni": false,
+            "f-sni": false
         }
     },
 
@@ -87,8 +93,8 @@
         "analysis":
         {
             "c-ni": false,
-            "c-sni": false,
-            "ic-sni": true
+            "c-sni": true,
+            "ic-sni": false
         }
     }
 }
