@@ -68,7 +68,7 @@ Settings::Settings(int argc, char * argv[])
     validateSettings();
 
     // Determine current number of cores
-    if (this->cores == 0) 
+    if (getCores() == 0) 
         this->cores = omp_get_max_threads();    
 }
 

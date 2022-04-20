@@ -126,7 +126,8 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
 
         if(!this->m_independent) {
             this->m_combined_leaking_probes.push_back(this->m_current_probes);
-            this->m_combined_leaking_fault_injections.push_back(state->m_current_fault_injections[threadNum]);
+            if(settings->getFaultInjection())
+                this->m_combined_leaking_fault_injections.push_back(state->m_current_fault_injections[threadNum]);
         }
     }
 }
