@@ -104,9 +104,11 @@ namespace verica
             const int& stage_index() const { return m_stage_index; }
 
             /* Accessor function(s) */
-            const bool& ignore() const { return m_ignore; }
+            const bool& sca_ignore() const { return m_sca_ignore; }
+            const bool& fia_ignore() const { return m_fia_ignore; }
             const Pin* source_pin() const { return m_source_pin; }
-            const std::vector<const Pin*> target_pins() const { return m_target_pins; }
+            //const std::vector<const Pin*> target_pins() const { return m_target_pins; }
+            const std::vector<Pin*> target_pins() const { return m_target_pins; }
             const std::vector<const Wire*> propagation_path() const { return m_propagation_path; }
             const int& faulty_gate_identifier(int core) const { return m_faulty_gate_identifier[core]; }
 
@@ -196,11 +198,12 @@ namespace verica
 
             /* Connectivity */
             Pin* m_source_pin;
-            std::vector<const Pin*> m_target_pins;
+            std::vector<Pin*> m_target_pins; 
             std::vector<const Wire*> m_propagation_path;
 
             /* Gate information */
-            bool m_ignore = false;
+            bool m_sca_ignore = false;
+            bool m_fia_ignore = false;
             std::vector<int> m_faulty_gate_identifier;
 
             /* BDDs */

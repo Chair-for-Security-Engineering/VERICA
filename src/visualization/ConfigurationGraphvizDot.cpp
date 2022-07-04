@@ -26,16 +26,21 @@
 #include "visualization/ConfigurationGraphvizDot.hpp"
 #include "util.hpp"
 
+void
+ConfigurationGraphvizDot::initialize(const Settings *settings, State *state){
+    (void)settings; // We do not need a settings object in this function. However, it must be given as paramter due to an overwriting.
+    (void)state; // We do not need a state object in this function. However, it must be given as paramter due to an overwriting.
+}  
 
 void
 ConfigurationGraphvizDot::execute(const Settings *settings, State *state) {
     /* Export full graph */
     if(settings->getVisualizationFull())
-        m_done_full = export_full(state);
+        m_done_full = export_full(state, settings);
 
     /* Export flaws */
     if(settings->getVisualizationPartial())
-        m_done_flaw = export_flaws(state);
+        m_done_flaw = export_flaws(state, settings);
 }
 
 
@@ -58,9 +63,9 @@ ConfigurationGraphvizDot::report(std::string service, const Logger *logger, cons
 
 }
 
-bool ConfigurationGraphvizDot::export_full(State *state){
+bool ConfigurationGraphvizDot::export_full(State *state, const Settings *settings){
     /* Open dot file */
-    std::ofstream dot_file("dot/circuit.dot", std::ios_base::out);
+    std::ofstream dot_file(settings->getVisualizationPath() + "circuit.dot", std::ios_base::out);
 
     /* Graph */
     std::string graph;
@@ -154,9 +159,9 @@ bool ConfigurationGraphvizDot::export_full(State *state){
     return true;
 }
 
-bool ConfigurationGraphvizDot::export_flaws(State *state){
+bool ConfigurationGraphvizDot::export_flaws(State *state, const Settings *settings){
     /* Open dot file */
-    std::ofstream dot_file("dot/circuit_flaw.dot", std::ios_base::out);
+    std::ofstream dot_file(settings->getVisualizationPath() + "circuit_flaw.dot", std::ios_base::out);
 
     /* Graph */
     std::string graph;
@@ -168,7 +173,6 @@ bool ConfigurationGraphvizDot::export_flaws(State *state){
     graph += "  label=\"" + mut->name() +"\" \n";
 
     /* Get all gates */
-    // std::vector<const verica::Module*> gates = state->m_netlist_model->get_gates(mut->uid());
     std::set<const verica::Module*> sub_gates;
 
     // Start from fault locations

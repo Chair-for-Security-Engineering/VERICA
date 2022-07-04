@@ -43,7 +43,7 @@ ConfigurationLibrary::execute(const Settings *settings, State *state)
     std::vector<std::string> variants, in_pins, out_pins, out_expr;
     std::string line, cellName;
     std::map<std::string, CellTemplate*> gate_types;
-    std::map<std::string, CellTemplate*>::iterator gt_it;
+    std::map<std::string, CellTemplate*>::iterator gt_it; //FIXME: not used!
     CellTemplate temp_ct;
     // Dummy values
     temp_ct.m_identifier = {0};

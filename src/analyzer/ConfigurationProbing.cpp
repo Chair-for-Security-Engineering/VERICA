@@ -126,8 +126,11 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
 
         if(!this->m_independent) {
             this->m_combined_leaking_probes.push_back(this->m_current_probes);
-            if(settings->getFaultInjection())
+
+            // add leaking fault injections
+            if(settings->getFaultInjection() || settings->getCombined()){
                 this->m_combined_leaking_fault_injections.push_back(state->m_current_fault_injections[threadNum]);
+            }
         }
     }
 }
@@ -141,12 +144,6 @@ ConfigurationProbing::finalize(const Settings *settings, State *state)
 
     /* Sort failing probe combinations by size (small to large) */
     std::sort(this->m_failing_probes.begin(), this->m_failing_probes.end(), [](const std::vector<const verica::Wire*> & a, const std::vector<const verica::Wire*> & b){ return a.size() < b.size(); });
-}
-
-void 
-ConfigurationProbing::add_leaking_fault_injections(std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>> fault_injection){
-    /* Add leaking fault injection to container */
-    this->m_combined_leaking_fault_injections.push_back(fault_injection);
 }
 
 void
@@ -219,6 +216,8 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
     }
 
     /* Add results to state for visualization */
+    if(!m_combined_leaking_fault_injections.empty())
+        state->m_visualization_faults = m_combined_leaking_fault_injections[0].first;
     if(!m_failing_probes.empty())
         state->m_visualization_probes = m_failing_probes[0];
 
@@ -230,4 +229,10 @@ ConfigurationProbing::insert(const ConfigurationProbing* configuration)
     for (auto combination : configuration->failing_probes())
         if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
             this->m_failing_probes.push_back(combination);
+
+    for (auto combination : configuration->combined_failing_probes())
+        this->m_combined_leaking_probes.push_back(combination);
+
+    for (auto combination : configuration->combined_leaking_faults())
+        this->m_combined_leaking_fault_injections.push_back(combination);   
 }

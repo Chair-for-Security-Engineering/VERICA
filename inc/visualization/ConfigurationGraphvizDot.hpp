@@ -33,6 +33,9 @@ class ConfigurationGraphvizDot : public Configuration
     public:
 
         ConfigurationGraphvizDot(std::string name) : Configuration(name) { };
+
+        /* Initialize strategy */
+        void initialize(const Settings *settings, State *state);
     
         /* Perform analysis for given context & configuration */
         void execute(const Settings *settings, State *state) override;
@@ -47,14 +50,14 @@ class ConfigurationGraphvizDot : public Configuration
          *
          * @param state Pointer to the state.
          */
-        bool export_full(State *state);
+        bool export_full(State *state, const Settings *settings);
 
         /**
          * @brief Exports subgraph that only contains parts that are influenced by faults or probes.
          *
          * @param state Pointer to the state.
          */
-        bool export_flaws(State *state);     
+        bool export_flaws(State *state, const Settings *settings);     
 
         /**
          * @brief Starts from a given wire and searches upwards to find the output of a gates or an input.

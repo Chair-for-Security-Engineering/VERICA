@@ -184,4 +184,39 @@ template<typename T> bool is_in(const std::vector<T> vec, T elem){
     return false;
 }
 
+template<typename T> void cartesian_product(std::vector<std::vector<T>> &buckets, std::vector<std::vector<T>> &combinations){
+    // make sure no bucket is empty
+    bool check = true;
+    for(auto& b : buckets)
+        if(b.empty()) check &= false;
+
+    if(check){    
+        uint num_buckets = buckets.size();
+        std::vector<uint> indices(num_buckets, 0);
+
+        int next;
+        while (true){
+            std::vector<T> tmp;                                     // set of n elements from the n buckets
+            for(uint ind=0; ind<indices.size(); ++ind){
+                T elem = buckets[ind][indices[ind]];
+                tmp.push_back(elem);
+            }
+            if(tmp.size() == num_buckets){                          // only add complete sets of elements (i.e., of size n)
+                combinations.push_back(tmp);                        // push back combination
+            }
+
+            next = num_buckets-1;
+            while(next >= 0 && (indices[next]+1 >= buckets[next].size()))
+                next--;
+
+            if(next < 0) break;
+
+            indices[next]++;
+
+            for(uint i=next+1; i<num_buckets; ++i) indices[i] = 0;
+        }
+    }
+
+}
+
 #endif // ___UTIL_HPP_

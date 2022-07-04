@@ -206,7 +206,7 @@ std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::faul
     // final vector of pairs
     std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> collection;
 
-    // required varibales
+    // required variables
     std::vector<unsigned int> cnt(permutation.size(), 0);
     std::vector<verica::fault::Fault> new_set_of_mappings;
     std::vector<const verica::Wire*> new_set_of_wires;
@@ -220,7 +220,7 @@ std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::faul
     }
     collection.push_back(std::make_pair(permutation, new_set_of_mappings));
 
-    // check if mappings alread complete (e.g., for bitflip model)
+    // check if mappings already complete (e.g., for bit-flip model)
     for(unsigned int idx=0; idx<permutation.size(); ++idx)
         done = (cnt[idx] == this->m_state->m_faultMap[permutation[idx]->source_pin()->gate_identifier()].size()-1) ? done & true : done & false;
 

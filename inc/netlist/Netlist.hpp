@@ -58,6 +58,8 @@ namespace verica
             /* Constructor(s) */
             Netlist(std::string name);
 
+            ~Netlist();
+
 
             /* Statistics */
             int num_modules();
@@ -83,8 +85,8 @@ namespace verica
             Module* add_module(std::string name, Module* parent, CellTemplate gate_template);
             Module* replicate_module(std::string name, Module* parent, const Module* origin, bool submodule);
 
-            const std::map<int, Module*>& modules() const { return m_modules; }
-            const Module* get_module(const int uid) const { return m_modules.at(uid); }
+            const std::map<int, std::unique_ptr<Module>>& modules() const { return m_modules; }
+            const Module* get_module(const int uid) const { return m_modules.at(uid).get(); }
 
             void set_topmodule(Module *new_top);
             const Module* topmodule() const { return m_topmodule; }
@@ -92,7 +94,8 @@ namespace verica
             void set_module_under_test(Module *new_module);
             const Module* module_under_test() const { return m_module_under_test; }
 
-            void ignore_module(int uid, bool ignore);    // TODO: Split into include_module(Module *module) and exclude_module(Module *module)?
+            void ignore_sca_module(int uid, bool ignore);           // TODO: Split into include_module(Module *module) and exclude_module(Module *module)?
+            void ignore_fia_module(int uid, bool ignore);
 
             std::vector<const verica::Module*> get_gates(uint uid);
 
@@ -104,11 +107,14 @@ namespace verica
             Wire* add_wire(std::string name, Module *parent);
             Wire* add_wire(std::string name, Module *parent, int primary_input_identifier);
 
-            const std::map<int, Wire*>& wires() const { return m_wires; }
-            const Wire* get_wire(const int uid) const { return m_wires.at(uid); }
+            const std::map<int, std::unique_ptr<Wire>>& wires() const { return m_wires; }
+            const Wire* get_wire(const int uid) const { return m_wires.at(uid).get(); }
 
             void rename_wire(int uid, std::string new_name);
             void sort_wires();
+
+            void ignore_sca_wire(int uid, bool ignore);
+            void ignore_fia_wire(int uid, bool ignore);
 
             void remove_wire(int uid);
 
@@ -139,8 +145,8 @@ namespace verica
             Pin* add_pin(std::string name, Module *parent, bool is_input, int gate_identifier);
             void set_constant_input(int pin_uid, int const_value);
 
-            const std::map<int, Pin*>& pins() const { return m_pins; }
-            const Pin* get_pin(const int uid) const { return m_pins.at(uid); }
+            const std::map<int, std::unique_ptr<Pin>>& pins() const { return m_pins; }
+            const Pin* get_pin(const int uid) const { return m_pins.at(uid).get(); }
 
             void set_pin_share_domain(int uid, int share_domain);
             void set_pin_share_index(int uid, int share_index);
@@ -186,12 +192,12 @@ namespace verica
 
             /* Hierarchy (entry point) */
             Module* m_topmodule;
-            Module* m_module_under_test;    
+            Module* m_module_under_test;
 
             /* Container */
-            std::map<int,  Module*> m_modules;
-            std::map<int,  Wire*> m_wires;
-            std::map<int,  Pin*> m_pins;
+            std::map<int,  std::unique_ptr<Module>> m_modules;
+            std::map<int,  std::unique_ptr<Wire>> m_wires;
+            std::map<int,  std::unique_ptr<Pin>> m_pins;
             int m_next_module_id = 0;
             int m_next_wire_id = 0;
             int m_next_pin_id = 0;

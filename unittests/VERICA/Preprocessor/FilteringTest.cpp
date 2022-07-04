@@ -82,69 +82,69 @@ BOOST_FIXTURE_TEST_CASE(Filtering_No_Filter_Test, TestConfigurationFiltering) {
     std::string conf_str(CONFIG_ARG_PARAM + noFilterConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    TestEnvironment* testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::PARSER);
-    
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::PARSER};
+
     // Check the clear_filter function.
-    BOOST_REQUIRE_NO_THROW(clear_filter(testEnv->getState()));
-    BOOST_CHECK((testEnv->getState()->m_netlist_model->get_module(testEnv->getState()->m_netlist_model->topmodule()->uid()))->ignore() == false);
+    BOOST_REQUIRE_NO_THROW(clear_filter(testEnv.getState()));
+    BOOST_CHECK((testEnv.getState()->m_netlist_model->get_module(testEnv.getState()->m_netlist_model->topmodule()->uid()))->sca_ignore() == false);
 }
 
-// Check the correct functionality of the blacklist filter.
+// Check the correct functionality of the blacklist filter for SCA.
 BOOST_FIXTURE_TEST_CASE(Filtering_Blacklist_Filter_Test, TestConfigurationFiltering) {
     // Prepare check of the apply_filter function.
     std::string conf_str(CONFIG_ARG_PARAM + blacklistFilterConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    TestEnvironment* testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::PARSER);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::PARSER};
 
     // Check the apply_filter function using a blacklist filter.
-    BOOST_REQUIRE_NO_THROW(apply_filter(testEnv->getSettings(), testEnv->getState(), true));
+    BOOST_REQUIRE_NO_THROW(apply_filter(testEnv.getSettings(), testEnv.getState(), true, false));
     std::vector<std::string> filter = blacklistFilter;
-    for (auto module : testEnv->getState()->m_netlist_model->modules()) {
+    for (auto& module : testEnv.getState()->m_netlist_model->modules()) {
         if (checkModule(filter, module.second->name())) {
-            BOOST_CHECK(module.second->ignore() == true);
+            BOOST_CHECK(module.second->sca_ignore() == true);
             if (module.second->gate()) {
                 for(auto p:module.second->output_pins()) {
-                    BOOST_CHECK(p->fan_out()->ignore() == true);
+                    BOOST_CHECK(p->fan_out()->sca_ignore() == true);
                 }
             }
         }
         else {
-            BOOST_CHECK(module.second->ignore() == false);
+            BOOST_CHECK(module.second->sca_ignore() == false);
             if (module.second->gate()) {
                 for(auto p:module.second->output_pins()) {
-                    BOOST_CHECK(p->fan_out()->ignore() == false);
+                    BOOST_CHECK(p->fan_out()->sca_ignore() == false);
                 }
             }
         }
     }
 }
 
-// Check the correct functionality of the whitelist filter.
+// Check the correct functionality of the whitelist filter for SCA.
 BOOST_FIXTURE_TEST_CASE(Filtering_Whitelist_Filter_Test, TestConfigurationFiltering) {
     // Prepare check of the apply_filter function.
     std::string conf_str(CONFIG_ARG_PARAM + whitelistFilterConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    TestEnvironment* testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::PARSER);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::PARSER};
 
     // Check the clear_filter function using a whitelist filter.
-    BOOST_REQUIRE_NO_THROW(apply_filter(testEnv->getSettings(), testEnv->getState(), false));
+    BOOST_REQUIRE_NO_THROW(apply_filter(testEnv.getSettings(), testEnv.getState(), false, false));
     std::vector<std::string> filter = whitelistFilter;
-    for (auto module : testEnv->getState()->m_netlist_model->modules()) {
+    for (auto& module : testEnv.getState()->m_netlist_model->modules()) {
         if (checkModule(filter, module.second->name())) {
-            BOOST_CHECK(module.second->ignore() == false);
+            BOOST_CHECK(module.second->sca_ignore() == false);
             if (module.second->gate()) {
                 for(auto p:module.second->output_pins()) {
-                    BOOST_CHECK(p->fan_out()->ignore() == false);
+                    BOOST_CHECK(p->fan_out()->sca_ignore() == false);
                 }
             }
         }
         else {
-            BOOST_CHECK(module.second->ignore() == true);
+            BOOST_CHECK(module.second->sca_ignore() == true);
             if (module.second->gate()) {
                 for(auto p:module.second->output_pins()) {
-                    BOOST_CHECK(p->fan_out()->ignore() == true);
+                    BOOST_CHECK(p->fan_out()->sca_ignore() == true);
                 }
             }
         }

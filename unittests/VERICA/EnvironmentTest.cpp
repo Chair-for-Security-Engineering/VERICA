@@ -43,32 +43,33 @@ char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
 // Check the constructor and destructor of the Environment class.
 void environmentConstructionTest() {
     /** Suppress console output **/
-    std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
-    std::ofstream   fout("/dev/null");
-    std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'
+    // std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
+    // std::ofstream   fout("/dev/null");
+    // std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'
     /*****************************/
 
     Environment* environment = new Environment(argc, argv);
 
+    delete environment;
     /**** Free console output ****/
-    std::cout.rdbuf(cout_sbuf); // restore the original stream buffer
+    // std::cout.rdbuf(cout_sbuf); // restore the original stream buffer
     /*****************************/
 }
 
 // Check the constructor and destructor of the TestEnvironment class.
 void testEnvironmentConstructionTest() {
     /** Suppress console output **/
-    std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
-    std::ofstream   fout("/dev/null");
-    std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'
+    // std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
+    // std::ofstream   fout("/dev/null");
+    // std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'
     /*****************************/
 
     TestEnvironment* testEnvironment = new TestEnvironment(argc, argv);
 
-    //delete testEnvironment;
+    delete testEnvironment;
     
     /**** Free console output ****/
-    std::cout.rdbuf(cout_sbuf); // restore the original stream buffer
+    // std::cout.rdbuf(cout_sbuf); // restore the original stream buffer
     /*****************************/
 }
 

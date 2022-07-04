@@ -146,15 +146,22 @@ ConfigurationSCA::determine_probe_positions(State *state, const Settings *settin
             for (auto target : current->target_pins()) 
                 is_output_pin |= (target->parent_module() == state->m_netlist_model->module_under_test());
 
-            if (is_sequential || is_input_pin || is_output_pin)
-                m_positions.push_back(current);
+            if (is_sequential || is_input_pin || is_output_pin) {
+                // Only add wire if not blacklisted
+                if(!current->sca_ignore()) m_positions.push_back(current);
+            }
         }
     } 
     else {
-        m_positions = state->m_netlist_model->module_under_test()->wires();
+        for(auto w : state->m_netlist_model->module_under_test()->wires()){
+            // Only add wire if not blacklisted
+            if(!w->sca_ignore()) m_positions.push_back(w);
+        }
     }
 
     if (m_positions.size() == 0) throw std::logic_error(this->m_name + ": Detected empty set of probe positions!");
+
+
 }
 
 void

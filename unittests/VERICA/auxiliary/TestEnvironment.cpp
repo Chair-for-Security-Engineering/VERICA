@@ -49,19 +49,23 @@
  * =========================================================================================
  */
 
-TestEnvironment::TestEnvironment(int argc, char * argv[])
+TestEnvironment::TestEnvironment(int argc, char * argv[]) :
+    execPhase{execPhases::COMPLETE},
+    m_logger{new Logger(100)},
+    m_state{new State()},
+    m_settings{new Settings(argc, argv)}
 {
-    /* Enable full evalutaion */
-    this->execPhase = execPhases::COMPLETE;
+    /* Enable full evaluation */
+    //this->execPhase = execPhases::COMPLETE;
 
     /* Registering new logger */
-    this->m_logger = new Logger(100);
+    //this->m_logger = new Logger(100);
 
     /* Registering new evaluation settings */
-    this->m_settings = new Settings(argc, argv);
+    //this->m_settings = new Settings(argc, argv);
 
     /* Registering new evaluation context */
-    this->m_state = new State();
+    //this->m_state = new State();
 
     /* Initialize execution environment */
     this->initialize();
@@ -70,19 +74,23 @@ TestEnvironment::TestEnvironment(int argc, char * argv[])
     this->execute();
 }
 
-TestEnvironment::TestEnvironment(int argc, char * argv[], TestEnvironment::execPhases execPhase)
+TestEnvironment::TestEnvironment(int argc, char * argv[], TestEnvironment::execPhases execPhase) :
+    execPhase{execPhase},
+    m_logger{new Logger(100)},
+    m_state{new State()},
+    m_settings{new Settings(argc, argv)}
 {
-    /* Registering phase after which evalution stops */
-    this->execPhase = execPhase;
+    /* Registering phase after which evaluation stops */
+    //this->execPhase = execPhase;
 
     /* Registering new logger */
-    this->m_logger = new Logger(100);
+    //this->m_logger = new Logger(100);
 
     /* Registering new evaluation settings */
-    this->m_settings = new Settings(argc, argv);
+    //this->m_settings = new Settings(argc, argv);
 
     /* Registering new evaluation context */
-    this->m_state = new State();
+    //this->m_state = new State();
 
     /* Initialize execution environment */
     this->initialize();
@@ -99,7 +107,13 @@ TestEnvironment::TestEnvironment(int argc, char * argv[], TestEnvironment::execP
 
 TestEnvironment::~TestEnvironment()
 {
-
+    delete this->m_analyzer;
+    delete this->m_injector;
+    delete this->m_preprocessor;
+    delete this->m_parser;
+    delete this->m_settings;
+    delete this->m_state;
+    delete this->m_logger;
 }
 
 /* 
@@ -130,17 +144,23 @@ TestEnvironment::execute()
     if (this->execPhase == execPhases::NONE) { return; }
 
     /* Design cell library parser configuration & execution */
-    this->m_parser->configure(new ConfigurationLibrary("CELLLIB"));
+    ConfigurationLibrary configLibrary{"CELLLIB"};
+    this->m_parser->configure(&configLibrary);
     this->m_parser->execute();
 
     if (this->execPhase == execPhases::CELLLIB) { return; }
 
     /* Design parser configuration & execution */
-    if (boost::algorithm::ends_with(this->m_settings->getDesignFilePath(), ".v"))
-        this->m_parser->configure(new ConfigurationVerilog("VERILOG"));
-    else if (boost::algorithm::ends_with(this->m_settings->getDesignFilePath(), ".nl"))
-        this->m_parser->configure(new ConfigurationNetlist("NETLIST"));
-    this->m_parser->execute();
+    if (boost::algorithm::ends_with(this->m_settings->getDesignFilePath(), ".v")){
+        ConfigurationVerilog configVerilog{"VERILOG"};
+        this->m_parser->configure(&configVerilog);
+        this->m_parser->execute();
+    }
+    else if (boost::algorithm::ends_with(this->m_settings->getDesignFilePath(), ".nl")){
+        ConfigurationNetlist configNetlist{"NETLIST"};
+        this->m_parser->configure(&configNetlist);
+        this->m_parser->execute();
+    }
     
     // NetlistComposer* nc = new NetlistComposer("COMPOSER");
     // nc->execute(this->m_settings, this->m_state);
@@ -148,37 +168,44 @@ TestEnvironment::execute()
     if (this->execPhase == execPhases::PARSER) { return; }
 
     /* Preprocessor configuration & execution */
-    this->m_preprocessor->configure(new ConfigurationAnnotation("ANNOTATION"));
+    ConfigurationAnnotation configAnnotation{"ANNOTATION"};
+    this->m_preprocessor->configure(&configAnnotation);
     this->m_preprocessor->execute();
     
     if (this->execPhase == execPhases::ANNOTATION) { return; }
 
-    this->m_preprocessor->configure(new ConfigurationFiltering("FILTERING"));
+    ConfigurationFiltering configFiltering{"FILTERING"};
+    this->m_preprocessor->configure(&configFiltering);
     this->m_preprocessor->execute();
 
     if (this->execPhase == execPhases::FILTERING) { return; }
 
-    this->m_preprocessor->configure(new ConfigurationMultithreading("MULTI-THREADING"));
+    ConfigurationMultithreading configMultithreading{"MULTI-THREADING"};
+    this->m_preprocessor->configure(&configMultithreading);
     this->m_preprocessor->execute();
 
     if (this->execPhase == execPhases::MULTI_THREADING) { return; }
 
-    this->m_preprocessor->configure(new ConfigurationModelPostprocessing("MODEL POSTPROCESSING"));
+ConfigurationModelPostprocessing configModelPostprocessing{"MODEL POSTPROCESSING"};
+    this->m_preprocessor->configure(&configModelPostprocessing);
     this->m_preprocessor->execute();
 
     if (this->execPhase == execPhases::MODEL_POSTPROCESSING) { return; }
 
-    this->m_preprocessor->configure(new ConfigurationElaborate("ELABORATE"));
+    ConfigurationElaborate configElaborate{"ELABORATE"};
+    this->m_preprocessor->configure(&configElaborate);
     this->m_preprocessor->execute();
 
     if (this->execPhase == execPhases::ELABORATE) { return; }
 
-    this->m_preprocessor->configure(new ConfigurationFIA("FIA"));
+    ConfigurationFIA configFIA{"FIA"};
+    this->m_preprocessor->configure(&configFIA);
     this->m_preprocessor->execute();
 
     if (this->execPhase == execPhases::FIA) { return; }
 
-    this->m_preprocessor->configure(new ConfigurationSCA("SCA"));
+    ConfigurationSCA sca_preprocessor{"SCA"};
+    this->m_preprocessor->configure(&sca_preprocessor);
     this->m_preprocessor->execute();
 
     if (this->execPhase == execPhases::SCA || this->execPhase == execPhases::COMPLETE) { return; }

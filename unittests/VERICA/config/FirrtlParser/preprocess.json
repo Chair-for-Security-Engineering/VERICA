@@ -1,94 +1,88 @@
 {
-    "general":
-    {
+    "general": {
         "verbose": 0,
         "cores": 1,
         "memory": 4,
-        "netlist":
-        {
+        "netlist": {
             "file": "unittests/VERICA/Designs/Firrtl/trivialAddNot.fir",
             "name": "",
             "module": ""
         },
-        "library":
-        {
+        "library": {
             "file": "cell/Instructions.txt",
             "name": "NL"
         },
-        "filtering":
-        {
-            "type": "black",
-            "whitelist": "model/whitelist",
-            "blacklist": "model/blacklist"
+        "filtering": {
+            "sca": {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia": {
+                "type": "none",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "model/fia-blacklist"
+            }
         },
-        "annotation":
-        {
+        "annotation": {
             "file": "model/annotations.json",
             "apply": true
         },
-        "cudd":
-        {
+        "cudd": {
             "reordering": false
+        },
+        "visualization": {
+            "enable": false,
+            "path": "dot/",
+            "full": true,
+            "partial": true
         }
     },
-
-    "side-channel":
-    {
+    "side-channel": {
         "enable": false,
-        "configuration":
-        {
+        "configuration": {
             "order": 0,
             "variate": 0,
             "masking": 0,
             "interrupt": true
         },
-        "model":
-        {
+        "model": {
             "glitches": true,
             "transitions": false,
             "couplings": false
         },
-        "analysis": 
-        {
+        "analysis": {
             "uniformity": false,
             "probing": true,
-            "ni": false,
-            "sni": false,
+            "p-ni": false,
+            "p-sni": false,
             "pini": false
         }
     },
-
-    "fault-injection":
-    {
+    "fault-injection": {
         "enable": false,
-        "configuration":
-        {
+        "configuration": {
             "number": 2,
             "variate": 1,
             "interrupt": false
         },
-        "model": 
-        {
+        "model": {
             "mapping": "model/setreset.txt",
             "location": "cs"
         },
-        "analysis":
-        {
+        "analysis": {
             "reduced_complexity": false,
             "strategy": "detection",
-            "na": true,
-            "sna": true
+            "f-ni": false,
+            "f-sni": false
         }
     },
-
-    "combined": 
-    {
+    "combined": {
         "enable": false,
-        "analysis":
-        {
-            "nina": false,
-            "snina": false,
-            "sinina": false
+        "analysis": {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false
         }
     }
 }

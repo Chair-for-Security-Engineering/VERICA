@@ -17,9 +17,18 @@
         },
         "filtering":
         {
-            "type": "none",
-            "whitelist": "model/whitelist",
-            "blacklist": "model/blacklist"
+            "sca":
+            {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia":
+            {
+                "type": "none",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "model/fia-blacklist"
+            }
         },
         "annotation":
         {
@@ -33,6 +42,7 @@
         "visualization":
         {
             "enable": true,
+            "path": "dot/",
             "full": true,
             "partial": true
         }

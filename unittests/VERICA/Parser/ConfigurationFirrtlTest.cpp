@@ -42,8 +42,7 @@ std::string emptyFirrtlConfig = "unittests/VERICA/config/FirrtlParser/emptyFirrt
 /****************************************************************/
 
 /*************************** GLOBALS ***************************/
-TestEnvironment* testEnv;
-ConfigurationFirrtl* confFirrtl = new ConfigurationFirrtl("TEST_FIRRTL");
+ConfigurationFirrtl confFirrtl{"TEST_FIRRTL"};
 /***************************************************************/
 
 /***************** AUXILIARY CLASS DEFINITIONS *****************/
@@ -70,13 +69,12 @@ BOOST_FIXTURE_TEST_CASE(FirrtlParserPreprocessTest, TestConfigurationFirrtl) {
     std::string conf_str(CONFIG_ARG_PARAM + preprocessConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    TestEnvironment* testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::NONE);
-
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::NONE};
     std::string compareFilePath = "unittests/VERICA/Designs/Firrtl/trivialAddNotPreprocessed.fir";
 
     // Check the preprocess function.
-    BOOST_REQUIRE_NO_THROW(preprocess(testEnv->getSettings()));
-    const std::istringstream result = preprocess(testEnv->getSettings());
+    BOOST_REQUIRE_NO_THROW(preprocess(testEnv.getSettings()));
+    const std::istringstream result = preprocess(testEnv.getSettings());
 
     // Check the generated design file against the excpeted file.
     BOOST_CHECK(checkPreprocessor(compareFilePath, result));
@@ -92,13 +90,13 @@ void emptyFirrtlParserTest() {                 // Empty FIRRTL file MUST throw a
     std::string conf_str(CONFIG_ARG_PARAM + emptyFirrtlConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confFirrtl));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_modules() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_gates() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_wires() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_pins() == 0);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confFirrtl));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_modules() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_gates() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_wires() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_pins() == 0);
 }
 
 // TODO: Add exceptional test cases.

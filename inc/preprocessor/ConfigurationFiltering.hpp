@@ -52,8 +52,9 @@ class ConfigurationFiltering : public Configuration
          * @param settings Pointer to the settings.
          * @param state Pointer to the state.
          * @param blacklist_filter Set to true to apply blacklist filtering.
+         * @param strategy Indicates the strategy for which the filter is applied. (0) SCA, (1) FIA
         */
-        void apply_filter(const Settings *settings, State *state, bool blacklist_filter);
+        void apply_filter(const Settings *settings, State *state, const bool blacklist_filter, const bool strategy);
 };
 
 #endif // __VERICA_PREPROCESSOR_CONFIGURATION_FILTERING_HPP_

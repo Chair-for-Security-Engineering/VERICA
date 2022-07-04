@@ -25,7 +25,7 @@ C_DEBUG_FLAGS		:= -Wall -Wextra -pedantic -m64 -fopenmp -march=native -g3 -Og -f
 C_TEST_FLAGS		:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c11 -D UNITTEST
 
 CXX					:= g++
-CXX_RELEASE_FLAGS	:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -std=c++11 -g
+CXX_RELEASE_FLAGS	:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -std=c++17 -g
 CXX_DEBUG_FLAGS		:= -Wall -Wextra -pedantic -m64 -fopenmp -march=native -g3 -Og -fsanitize=address -std=c++17
 CXX_TEST_FLAGS		:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c++17 -D UNITTEST
 
@@ -116,7 +116,7 @@ endif
 ## USER TARGETS																								##
 ##############################################################################################################
 
-all: debug release
+all: test debug release
 
 clean:
 	@echo  Removing build artifacts...

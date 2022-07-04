@@ -47,21 +47,20 @@ std::string erroneousGateVerilogConfig = "unittests/VERICA/config/VerilogParser/
 /****************************************************************/
 
 /*************************** GLOBALS ***************************/
-TestEnvironment* testEnv;
-ConfigurationVerilog* confVlog = new ConfigurationVerilog("TEST_VERILOG");
+ConfigurationVerilog confVlog{"TEST_VERILOG"};
 /***************************************************************/
 
 void simpleVerilogParserTest() {                // Simple Verilog file MUST NOT throw an exception.
     std::string conf_str(CONFIG_ARG_PARAM + simpleVerilogConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confVlog));
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->execute());
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_modules() == 4);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_gates() == 12);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_wires() == 42);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_pins() == 74);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confVlog));
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->execute());
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_modules() == 4);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_gates() == 12);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_wires() == 42);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_pins() == 74);
 }
 
 BOOST_AUTO_TEST_CASE(VerliogParserTests) {
@@ -72,40 +71,40 @@ void emptyVerilogParserTest() {                 // Empty Verilog file MUST throw
     std::string conf_str(CONFIG_ARG_PARAM + emptyVerilogConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confVlog));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_modules() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_gates() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_wires() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_pins() == 0);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confVlog));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_modules() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_gates() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_wires() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_pins() == 0);
 }
 
 void erroneousPinVerilogParserTest() {          // Erroneous pins MUST throw an exception.
     std::string conf_str(CONFIG_ARG_PARAM + erroneousPinVerilogConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confVlog));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confVlog));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
 }
 
 void erroneousWireVerilogParserTest() {         // Erroneous wires MUST throw an exception.
     std::string conf_str(CONFIG_ARG_PARAM + erroneousWireVerilogConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confVlog));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confVlog));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
 }
 
 void erroneousGateVerilogParserTest() {         // Erroneous gates MUST throw an exception.
     std::string conf_str(CONFIG_ARG_PARAM + erroneousGateVerilogConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confVlog));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confVlog));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(VerilogParserExceptionTests) {

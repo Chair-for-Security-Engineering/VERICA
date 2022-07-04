@@ -38,6 +38,15 @@
 verica::Netlist::Netlist(std::string name) {
     this->m_name = name;
 }
+/* 
+ * =========================================================================================
+ * Destructor
+ * =========================================================================================
+ */
+
+verica::Netlist::~Netlist(){
+
+}
 
 /* 
  * =========================================================================================
@@ -48,26 +57,26 @@ int
 verica::Netlist::num_modules()
 {
     int count = 0;
-    for (auto m : this->m_modules) count += !m.second->m_is_gate;
+    for (auto const & m : this->m_modules) count += !m.second->m_is_gate;
     return count;
 }
 
 int 
 verica::Netlist::num_gates()
 {
-    return std::count_if(this->m_modules.begin(), this->m_modules.end(),[](std::pair<int, verica::Module*> m){ return m.second->m_is_gate; });
+    return std::count_if(this->m_modules.begin(), this->m_modules.end(),[](std::pair<const int, std::unique_ptr<verica::Module>>& m){ return m.second->m_is_gate; });
 }
 
 int 
 verica::Netlist::num_combinational_gates()
 {
-    return std::count_if(this->m_modules.begin(), this->m_modules.end(),[](std::pair<int, verica::Module*> m){ return (m.second->m_is_gate && !m.second->is_sequential()); });
+    return std::count_if(this->m_modules.begin(), this->m_modules.end(),[](std::pair<const int, std::unique_ptr<verica::Module>>& m){ return (m.second->m_is_gate && !m.second->is_sequential()); });
 }
 
 int 
 verica::Netlist::num_sequential_gates()
 {
-    return std::count_if(this->m_modules.begin(), this->m_modules.end(),[](std::pair<int, verica::Module*> m){ return (m.second->m_is_gate && m.second->is_sequential()); });
+    return std::count_if(this->m_modules.begin(), this->m_modules.end(),[](std::pair<const int, std::unique_ptr<verica::Module>>& m){ return (m.second->m_is_gate && m.second->is_sequential()); });
 }
 
 int 
@@ -283,17 +292,38 @@ void verica::Netlist::set_module_under_test(verica::Module* new_module) {
     this->m_module_under_test = new_module;
 }
 
-void verica::Netlist::ignore_module(int uid, bool ignore) {
-    // Ignore module and all children
-    m_modules[uid]->m_ignore = ignore;
-    // Ignore output wire of each gate
+void verica::Netlist::ignore_sca_module(int uid, bool ignore) {
+    // Ignore module
+    m_modules[uid]->m_sca_ignore = ignore;
+
+    // Ignore all wires belonging to module
+    for(auto w : m_modules[uid]->wires()) this->ignore_sca_wire(w->uid(), ignore);
+
+    // Ignore output wire of each gate or all submodules
+    if (m_modules[uid]->m_is_gate) {
+        for(auto p:m_modules[uid]->m_output_pins){
+            if (p->m_fan_out) p->m_fan_out->m_sca_ignore = ignore;
+        }
+    } else {
+        for(auto m:m_modules[uid]->m_children) this->ignore_sca_module(m->uid(), ignore);
+    }
+}
+
+void verica::Netlist::ignore_fia_module(int uid, bool ignore) {
+    // Ignore module
+    m_modules[uid]->m_fia_ignore = ignore;
+
+    // Ignore all wires belonging to module
+    for(auto w : m_modules[uid]->wires()) this->ignore_fia_wire(w->uid(), ignore);
+
+    // Ignore output wire of each gate or all submodules
     if (m_modules[uid]->m_is_gate) {
         for(auto p:m_modules[uid]->m_output_pins){
             if (p->m_fan_out)
-                p->m_fan_out->m_ignore = ignore;
+                p->m_fan_out->m_fia_ignore = ignore;
         }
     } else {
-        for(auto m:m_modules[uid]->m_children) this->ignore_module(m->uid(), ignore);
+        for(auto m:m_modules[uid]->m_children) this->ignore_fia_module(m->uid(), ignore);
     }
 }
 
@@ -313,7 +343,7 @@ std::vector<const verica::Module*> verica::Netlist::get_gates(uint uid){
 
 void verica::Netlist::remove_module(int uid) {
     /* Get module */
-    verica::Module* m = this->m_modules.at(uid);
+    verica::Module* m = this->m_modules.at(uid).get();
 
     if (!m->m_is_gate) {
         /* Remove input pins */
@@ -384,17 +414,25 @@ void verica::Netlist::rename_wire(int uid, std::string new_name){
 }
 
 void verica::Netlist::sort_wires(){
-    for (auto m : this->m_modules){
+    for (auto & m : this->m_modules){
         if (!m.second->gate()){
             m.second->sort_wires();
         }
     }
 }
 
+void verica::Netlist::ignore_sca_wire(int uid, bool ignore){
+    m_wires.at(uid)->m_sca_ignore = ignore;
+}
+
+void verica::Netlist::ignore_fia_wire(int uid, bool ignore){
+    m_wires.at(uid)->m_fia_ignore = ignore;
+}
+
 void verica::Netlist::remove_wire(int uid){
     /* Get wire */
-    verica::Wire* w = this->m_wires.at(uid);
-
+    verica::Wire* w = this->m_wires.at(uid).get();
+    
     /* List of modules that point to the wire */ 
     std::vector<verica::Module*> modules;
     modules.push_back(m_topmodule);
@@ -406,8 +444,16 @@ void verica::Netlist::remove_wire(int uid){
 
         current_module->remove_wire(uid);
         if(current_module != w->parent()){
-            for(auto m : current_module->children()) modules.push_back(m_modules.at(m->uid()));
+            for(auto const & m : current_module->children()) modules.push_back(m_modules.at(m->uid()).get());
         }
+    }
+
+    /* Remove wire pointer from pin */
+    if(w->m_source_pin){
+        w->m_source_pin->m_fan_out = nullptr;
+    }
+    for(auto pin : w->target_pins()){
+        pin->m_fan_in = nullptr;  
     }
 
     /* Remove wire pointer from netlist */
@@ -547,15 +593,18 @@ void verica::Netlist::set_pin_gate_identifier(int uid, int gate_identifier){
 }
 
 void verica::Netlist::remove_pin(int uid){
-    verica::Pin* p = this->m_pins.at(uid);
-    if (p->fan_out()){
-        p->fan_out()->m_parent->remove_wire(p->fan_out()->uid());
-        this->m_wires.erase(p->fan_out()->uid());
-        p->m_fan_out = nullptr;
+
+    verica::Pin* p = this->m_pins.at(uid).get();
+
+    /* Remove pin pointer from wire */
+    if(p->fan_out()){
+        p->m_fan_out->m_source_pin = nullptr;
     }
-    if (p->fan_in()){
+    if(p->fan_in()){
         p->m_fan_in->remove_target_pin(p->uid());
     }
+    
+    /* Remove pin from current parent_module */
     p->m_parent_module->remove_pin(uid);
     this->m_pins.erase(uid);
 }
@@ -567,14 +616,14 @@ void verica::Netlist::remove_pin(int uid){
  * =========================================================================================
  */
 void verica::Netlist::set_wire_source(int uid, int pin_uid) {
-    m_wires[uid]->m_source_pin = m_pins[pin_uid];
-    m_pins[pin_uid]->m_fan_out = m_wires[uid];
+    m_wires[uid]->m_source_pin = m_pins[pin_uid].get();
+    m_pins[pin_uid]->m_fan_out = m_wires[uid].get();
 }
 
 void verica::Netlist::set_wire_target(int uid, int pin_uid) {
-    if(std::find(m_wires[uid]->m_target_pins.begin(), m_wires[uid]->m_target_pins.end(), m_pins[pin_uid]) == m_wires[uid]->m_target_pins.end()){
-        m_wires[uid]->m_target_pins.push_back(m_pins[pin_uid]);
-        m_pins[pin_uid]->m_fan_in = m_wires[uid];
+    if(std::find(m_wires[uid]->m_target_pins.begin(), m_wires[uid]->m_target_pins.end(), m_pins[pin_uid].get()) == m_wires[uid]->m_target_pins.end()){
+        m_wires[uid]->m_target_pins.push_back(m_pins[pin_uid].get());
+        m_pins[pin_uid]->m_fan_in = m_wires[uid].get();
     }
 }
 
@@ -604,21 +653,23 @@ void verica::Netlist::add_wire_to_parents(Module *parent, const Wire *wire){
 }
 
 void verica::Netlist::remove_type_from_netlist(Flag type){
-    std::vector<const verica::Pin*> pins_to_remove;
-    for (auto pin_id_pair : m_pins){
-        const verica::Pin* p = pin_id_pair.second;
+    /* Collect pins with Flag type */
+    std::set<const verica::Pin*> pins_to_remove; 
+    for (auto const& pin_id_pair : m_pins){
+        const verica::Pin* p = pin_id_pair.second.get();
         if (p->port_type() == type){
-            pins_to_remove.push_back(p);
+            pins_to_remove.insert(p);
         }
     }
+    
     while (!pins_to_remove.empty()){
-        const verica::Pin* current_pin = pins_to_remove[0];
+        const verica::Pin* current_pin = *pins_to_remove.begin();
         pins_to_remove.erase(pins_to_remove.begin());
-        if (current_pin->fan_out()){
+        if (current_pin->fan_out()){ 
             for (auto p : current_pin->fan_out()->target_pins()){
-                pins_to_remove.push_back(p);
+                pins_to_remove.insert(p);
             }
-            remove_wire(current_pin->fan_out()->uid());
+            remove_wire(current_pin->fan_out()->uid());             
         }
         remove_pin(current_pin->uid());
     }
@@ -628,9 +679,9 @@ int
 verica::Netlist::remove_unconnected_pins(){
     int cnt_pins = 0;
     std::vector<verica::Pin*> pins_to_remove;
-    for (auto p : m_pins){
+    for (auto const & p : m_pins){
         if(p.second->fan_in() == nullptr && p.second->fan_out() == nullptr) {
-                pins_to_remove.push_back(p.second);
+                pins_to_remove.push_back(p.second.get());
         }
     }
     for (auto p : pins_to_remove){
@@ -644,9 +695,9 @@ verica::Netlist::remove_unconnected_pins(){
 int
 verica::Netlist::remove_unconnected_wires(){
     std::vector<verica::Wire*> wires_to_remove;
-    for(auto w : m_wires){
+    for(auto const & w : this->m_wires){
         if(w.second->source_pin() == nullptr && w.second->target_pins().empty()){
-            wires_to_remove.push_back(w.second);
+            wires_to_remove.push_back(w.second.get());
         }
     }
     for(auto w : wires_to_remove){
@@ -676,12 +727,12 @@ void verica::Netlist::print_hierarchy(const verica::Module* top, int level)
 void verica::Netlist::info() {
     std::cout << "In the parsed Netlist object" << std::endl;
     std::cout << "There are " << this->m_modules.size() << " modules in the Netlist" << std::endl;
-    for (auto m : m_modules){
-        std::cout << "Module name: " << m.second->m_name << std::endl;
+    for (auto const & m : m_modules){
+        std::cout << "Module name: " << m.second.get()->m_name << std::endl;
     }
     int number_of_target_pins = 0;
-    for (auto module_pair : m_modules){
-        verica::Module* m = module_pair.second;
+    for (auto const & module_pair : m_modules){
+        verica::Module* m = module_pair.second.get();
         //verica::Module* test_top = m_modules.at(0);
         std::cout << "Module : " << m->m_name << std::endl;
         std::cout << "\tUID: " << m->m_uid << std::endl;
@@ -743,14 +794,14 @@ void verica::Netlist::info() {
         }
     }
 
-    for (auto w_pair : this->m_wires){
+    for (auto const & w_pair : this->m_wires){
         std::cout << "Wire " << w_pair.second->name() << " (UID: " << w_pair.second->uid() << ")"<< " of module " << w_pair.second->parent()->name() << "\ngoes from " << w_pair.second->source_pin()->name() << " to " << std::endl;
         for (auto p_pair : w_pair.second->target_pins())
             std::cout << "\t " << p_pair->name() << " of gate " << p_pair->parent_module()->name() <<  std::endl;
     }
 
-    for (auto elem_pair : this->m_modules){
-        verica::Module* elem = elem_pair.second;
+    for (auto const & elem_pair : this->m_modules){
+        verica::Module* elem = elem_pair.second.get();
         if (elem->gate()){
             std::cout << "Gate name: " << elem->name() << " ";
             for(auto ident : elem->cell_template().m_identifier) std::cout << ident << " ";
@@ -771,7 +822,7 @@ void verica::Netlist::info() {
         */
     }
     std::cout << "Module hierarchy:" << std::endl; 
-    for (auto elem : this->m_modules) if (elem.second->m_parent == nullptr) print_hierarchy(elem.second, 0);
+    for (auto const& elem : this->m_modules) if (elem.second->m_parent == nullptr) print_hierarchy(elem.second.get(), 0);
 
      std::cout << "Targets: " << number_of_target_pins << std::endl;
 }

@@ -32,7 +32,7 @@ class ConfigurationProbing : public Configuration
 {
     public:
     
-        ConfigurationProbing(std::string name) : Configuration(name) { };
+        ConfigurationProbing(std::string name, const Composability type) : Configuration(name) { };
 
         /* Initialize analysis for given context & configuration */
         void initialize(const Settings *settings, State *state);
@@ -57,9 +57,6 @@ class ConfigurationProbing : public Configuration
 
         /* Mutator function(s) */
         void current_probes(const std::vector<const verica::Wire*> current_probes) { this->m_current_probes = current_probes; };
-
-        /* Add fault events that lead to failing probe combinations */
-        void add_leaking_fault_injections(std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>> fault_injection);
 
     private:
         

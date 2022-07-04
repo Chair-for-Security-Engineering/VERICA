@@ -74,7 +74,8 @@ namespace verica
             const CellTemplate& cell_template() const { return m_cell_template; }
             const std::map<int, std::unordered_set<int>>& shares() const {return m_shares;}
             const bool& gate() const { return m_is_gate; }
-            const bool& ignore() const { return m_ignore; }
+            const bool& sca_ignore() const { return m_sca_ignore; }
+            const bool& fia_ignore() const { return m_fia_ignore; }
             const bool& is_sequential() const { return m_is_sequential; }
             void sort_wires();
             void remove_pin(int uid);            
@@ -107,7 +108,8 @@ namespace verica
             /* Gate information */
             std::vector<std::string> m_out_expression;
             bool m_is_gate = false;
-            bool m_ignore = false;
+            bool m_sca_ignore = false;
+            bool m_fia_ignore = false;
             bool m_is_sequential = false;
 
             /* Cell template */

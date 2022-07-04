@@ -34,18 +34,20 @@ ConfigurationModelPostprocessing::execute(const Settings *settings, State *state
     /* Remove clock tree */
     m_num_of_removed_clock_wires = state->m_netlist_model->wires().size();
     state->m_netlist_model->remove_type_from_netlist(verica::Clock);
+
     m_num_of_removed_clock_wires = m_num_of_removed_clock_wires - state->m_netlist_model->wires().size();
 
     /* Remove control signal from netlist */
     m_num_of_removed_control_wires = state->m_netlist_model->wires().size();
     state->m_netlist_model->remove_type_from_netlist(verica::Control);
+
     m_num_of_removed_control_wires = m_num_of_removed_control_wires - state->m_netlist_model->wires().size();
 
     /* Remove unconnected pins */
     m_num_of_removed_pins = state->m_netlist_model->remove_unconnected_pins();
 
     /* Remove unconnected wires */
-    m_num_of_removed_wires = state->m_netlist_model->remove_unconnected_wires();
+    m_num_of_removed_wires = state->m_netlist_model->remove_unconnected_wires(); 
 
     /* Set primary input identifier */
     set_primary_input_identifier(state->m_netlist_model);

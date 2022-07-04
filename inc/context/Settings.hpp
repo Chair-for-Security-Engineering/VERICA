@@ -56,9 +56,12 @@ class Settings
         std::string getLibraryFilePath() const;
         std::string getLibraryName() const;
 
-        std::string getFilteringType() const;
-        std::string getWhiteList() const;
-        std::string getBlackList() const;
+        std::string getSideChannelFilteringType() const;
+        std::string getSideChannelWhiteList() const;
+        std::string getSideChannelBlackList() const;
+        std::string getFaultFilteringType() const;
+        std::string getFaultWhiteList() const;
+        std::string getFaultBlackList() const;
 
         std::string getAnnotationFilePath() const;
         bool getAnnotation() const;
@@ -66,6 +69,7 @@ class Settings
         bool getReordering() const;
 
         bool getVisualization() const;
+        std::string getVisualizationPath() const;
         bool getVisualizationFull() const;
         bool getVisualizationPartial() const;
 
@@ -125,6 +129,7 @@ class Settings
         void validateSettings(); 
         template<typename T> void checkSettingRange(const std::string &setting, const std::vector<T> &validSettings);
         void checkSettingFileExists(const std::string& setting);
+        void checkSettingPathExists(const std::string& setting);
         void checkSettingGreaterEqual(const std::string &setting, const int &threshold);
 
         /* Boost property tree (parsed from .ini configuration) */

@@ -33,6 +33,9 @@
 #include "context/CellLibrary.hpp"
 #include "context/FaultLibrary.hpp"
 
+// Used for SCA analysis
+enum Composability {NONE, NI, SNI, PINI, CNI, CSNI, ICSNI };
+
 class State
 {
     public:
@@ -43,11 +46,11 @@ class State
         /* Destructor */
         ~State();
 
-        /* Cell Libraray */
+        /* Cell Library */
         CellLibrary* m_cell_library = new CellLibrary();
 
         /* Netlist */
-        verica::Netlist *m_netlist_model;
+        verica::Netlist *m_netlist_model = nullptr;
 
         /* SCA: Sharing details */
         std::map<int, std::vector<const verica::Wire*>> m_shared_inputs;
@@ -62,7 +65,7 @@ class State
         std::vector<Cudd_Manager> m_managers;
 
         /* Fault Library */
-        FaultLibrary* m_fault_libraray = new FaultLibrary();
+        FaultLibrary* m_fault_library = new FaultLibrary();
 
         /* Fault related members */
         std::map<int, std::vector<verica::fault::Fault>> m_faultMap;

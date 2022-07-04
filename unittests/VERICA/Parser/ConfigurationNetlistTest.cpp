@@ -46,21 +46,21 @@ std::string erronoeusInputPinOrderNetlistConfig = "unittests/VERICA/config/Netli
 /****************************************************************/
 
 /*************************** GLOBALS ***************************/
-TestEnvironment* testEnv;
-ConfigurationNetlist* confNL = new ConfigurationNetlist("TEST_NETLIST");
+ConfigurationNetlist confNL{"TEST_NETLIST"};
 /***************************************************************/
 
 void trivialNetlistParserTest() {                  // Trivial netlist MUST NOT throw an exception.
     std::string conf_str(CONFIG_ARG_PARAM + trivialNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confNL));
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->execute());
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_modules() == 1);    // Netlist always contains a top module.
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_gates() == 4);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_wires() == 7);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_pins() == 16);
+    //testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confNL));
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->execute());
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_modules() == 1);    // Netlist always contains a top module.
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_gates() == 4);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_wires() == 7);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_pins() == 16);
 }
 
 BOOST_AUTO_TEST_CASE(NetlistParserTests) {
@@ -71,31 +71,31 @@ void emptyNetlistParserTest() {                    // Empty netlist MUST throw a
     std::string conf_str(CONFIG_ARG_PARAM + emptyNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confNL));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_modules() == 1);    // Netlist always contains a top module.
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_gates() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_wires() == 0);
-    BOOST_CHECK(testEnv->getState()->m_netlist_model->num_pins() == 0);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confNL));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_modules() == 1);    // Netlist always contains a top module.
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_gates() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_wires() == 0);
+    BOOST_CHECK(testEnv.getState()->m_netlist_model->num_pins() == 0);
 }
 
 void erroneousGateNetlistParserTest() {            // Erroneous gates MUST throw an exception.
     std::string conf_str(CONFIG_ARG_PARAM + erroneousGateNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confNL));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confNL));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
 }
 
 void erroneousInputNetlistParserTest() {           // Erroneous inputs MUST throw an exception.
     std::string conf_str(CONFIG_ARG_PARAM + erroneousInputNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confNL));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confNL));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
 }
 
 void erronoeusInputPinOrderNetlistParserTest() {   /* 
@@ -105,9 +105,9 @@ void erronoeusInputPinOrderNetlistParserTest() {   /*
     std::string conf_str(CONFIG_ARG_PARAM + erronoeusInputPinOrderNetlistConfig);
     char* CONFIG_ARG = &conf_str[0];
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
-    BOOST_REQUIRE_NO_THROW(testEnv->getParser()->configure(confNL));
-    BOOST_REQUIRE_THROW(testEnv->getParser()->execute(), std::logic_error);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
+    BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confNL));
+    BOOST_REQUIRE_THROW(testEnv.getParser()->execute(), std::logic_error);
 }
 
 BOOST_AUTO_TEST_CASE(NetlistParserExceptionTests) {

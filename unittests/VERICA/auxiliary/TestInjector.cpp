@@ -33,10 +33,21 @@
  * =========================================================================================
  */
 
-TestInjector::TestInjector(Logger *logger, Settings *settings, State *state) {
-    this->injector = new Injector("TEST_INJECTOR", logger, settings, state);
+TestInjector::TestInjector(Logger *logger, Settings *settings, State *state) :
+    injector{new Injector("TEST_INJECTOR", logger, settings, state)}
+{
+
 }
 
+/* 
+ * =========================================================================================
+ * Destructor
+ * =========================================================================================
+ */
+TestInjector::~TestInjector(){
+    delete this->injector;
+    this->injector = nullptr;
+}
 /* 
  * =========================================================================================
  * Member functions

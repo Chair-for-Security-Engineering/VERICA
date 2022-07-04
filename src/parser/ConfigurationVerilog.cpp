@@ -58,10 +58,10 @@ ConfigurationVerilog::execute(const Settings *settings, State *state)
     /* Parse verilog netlist into netlist model */
     if (!boost::spirit::qi::phrase_parse(iter, end, *grammar, skipper))
     {
-        throw std::logic_error("Parsing Failure!");
+        throw std::logic_error("[VERILOG PARSER] Parsing Failure!");
     }
 
-    if (iter != end) throw std::logic_error("Unparsed content.");
+    if (iter != end) throw std::logic_error("[VERILOG PARSER] Unparsed content. Stopped at " + *iter);
 
     /* Post-processing: Create topological sorting of wires */
     //state->m_netlist_model->info();
@@ -83,6 +83,9 @@ ConfigurationVerilog::execute(const Settings *settings, State *state)
     if (state->m_netlist_model->num_pins() == 0) {
         throw std::logic_error("[PARSER] No pin was parsed.");
     }
+    
+    delete grammar;
+    grammar = nullptr;
 }   
 
 void
@@ -92,7 +95,7 @@ ConfigurationVerilog::report(std::string service, const Logger *logger, const Se
 
     /* Count unconnected wires */
     uint32_t cnt_wires = 0;
-    for(auto w : state->m_netlist_model->wires()){
+    for(auto& w : state->m_netlist_model->wires()){
         if(w.second->source_pin() == nullptr || w.second->target_pins().empty()) {
             cnt_wires++;
         }
@@ -100,7 +103,7 @@ ConfigurationVerilog::report(std::string service, const Logger *logger, const Se
 
     /* Count unconnected pins*/
     uint32_t cnt_pins = 0;
-    for(auto p : state->m_netlist_model->pins()){        
+    for(auto& p : state->m_netlist_model->pins()){        
         if(p.second->fan_in() == nullptr && p.second->fan_out() == nullptr) cnt_pins++;
     }
 

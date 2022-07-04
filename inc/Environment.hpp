@@ -59,6 +59,59 @@ class Environment
 
     private:
 
+        /* Member Functions */
+        /** 
+         * This function performs a multithreaded side-channel analysis of type T. It supports probing analysis (type=NONE)
+         * and all implemented composability notions. 
+         * 
+         * @brief Performs a multithreaded side-channel analysis of type T.
+         *
+         * @param strategy The side-channel strategy that should be applied to the DUT.
+         * @param name Name of the strategy (e.g., PROBING, NI, SNI, ...).
+         * @param type Type of the composability strategy that should be applied.
+         * 
+         */   
+        template<typename T> void 
+        analyze_sca(T &strategy, std::string name, Composability type=NONE);
+
+        /** 
+         * This function performs a multithreaded side-channel analysis in the combined settings (i.e., with injected faults) of type T. 
+         * It supports probing analysis (type=NONE) and all implemented composability notions. 
+         * 
+         * @brief Performs a multithreaded side-channel analysis of type T in a combined setting.
+         *
+         * @param strategy The side-channel strategy that should be applied to the DUT.
+         * @param thread_num Number of the working thread.
+         * 
+         */   
+        template<typename T> void 
+        analyze_combined(T &strategy, int thread_num);
+
+        /** 
+         * Reports the side-channel analysis results in a combined setting, i.e., with injected faults. 
+         * 
+         * @brief Reports SCA analysis results in a combined setting.
+         *
+         * @param strategy The side-channel strategy that should bne applied to the DUT.
+         * @param strategies Vector to the applied SCA strategies (used for multithreading).
+         * 
+         */   
+        template<typename T> void 
+        report_combined(T &strategy, std::vector<T> strategies);
+
+        /** 
+         * Reports a detailed analysis report of an combined analysis of FIA and SCA without 
+         * considering reciprocal effects. 
+         * 
+         * @brief Detailed analysis report of combined analysis without considering reciprocal effects.
+         *
+         * @param strategies Vector to the applied SCA strategies (used for multithreading).
+         * @param name Is used for reporting (e.g., PROB, NI, SNI, ...).
+         * 
+         */   
+        template<typename T> void 
+        report_independent_combined(std::vector<T> strategies, std::string name);
+
         /* Logger */
         Logger *m_logger;
 

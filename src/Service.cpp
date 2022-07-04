@@ -35,9 +35,9 @@
 Service::Service(std::string name, Logger *logger, Settings *settings, State *state) : m_name(name)
 {
     /* Register context with service */
-    if (!this->m_logger) delete this->m_logger;
-    if (!this->m_settings) delete this->m_settings;
-    if (!this->m_state) delete this->m_state;
+    if (this->m_logger) delete this->m_logger;
+    if (this->m_settings) delete this->m_settings;
+    if (this->m_state) delete this->m_state;
 
     this->m_logger = logger;
     this->m_settings = settings;
@@ -65,7 +65,6 @@ void
 Service::configure(Configuration *config)
 {
     /* Register configuration with service */
-    if (!this->m_config) delete this->m_config;
     this->m_config = config;
 }
 

@@ -36,6 +36,9 @@ class TestInjector
 
         /* Constructor(s) */
         TestInjector(Logger *logger, Settings *settings, State *state);
+                
+        /* Destructor */
+        ~TestInjector();
 
         /* Injector to test */
         Injector* injector;

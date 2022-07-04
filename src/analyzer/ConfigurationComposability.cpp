@@ -245,7 +245,9 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                 if (!this->m_independent){
                     this->m_failing_probes.push_back(this->m_current_probes);
                     this->m_combined_leaking_probes.push_back(this->m_current_probes);
-                    if(settings->getFaultInjection())
+
+                    // add leaking fault injections
+                    if(settings->getFaultInjection() || settings->getCombined())
                         this->m_combined_leaking_fault_injections.push_back(state->m_current_fault_injections[threadNum]);
                 }
             } else {

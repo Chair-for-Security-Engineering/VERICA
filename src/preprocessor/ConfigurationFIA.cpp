@@ -253,7 +253,7 @@ int ConfigurationFIA::fault_get_locations(const std::string location, verica::Ne
     if(location == "s" || location == "cs"){
         for(auto w : model->module_under_test()->wires()){
             if(w->source_pin()->parent_module()->is_sequential()){
-                if(!w->ignore()) faultLocations.push_back(w);
+                if(!w->fia_ignore()) faultLocations.push_back(w);
             }
         }
     }
@@ -263,7 +263,7 @@ int ConfigurationFIA::fault_get_locations(const std::string location, verica::Ne
         for(auto w : model->module_under_test()->wires()){
             if(!w->source_pin()->parent_module()->is_sequential()){
                 if(std::find(model->module_under_test()->input_pins().begin(), model->module_under_test()->input_pins().end(), w->source_pin()) == model->module_under_test()->input_pins().end()){
-                    if(!w->ignore()) faultLocations.push_back(w);
+                    if(!w->fia_ignore()) faultLocations.push_back(w);
                 }
             }
         }

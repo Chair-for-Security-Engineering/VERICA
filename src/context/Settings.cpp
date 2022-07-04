@@ -27,6 +27,7 @@
 #include "context/Settings.hpp"
 
 #include <iostream>
+#include <filesystem>
 
 /* 
  * =========================================================================================
@@ -109,6 +110,10 @@ bool Settings::getVisualization() const {
     return this->config.get<bool>("general.visualization.enable");
 }
 
+std::string Settings::getVisualizationPath() const{
+    return this->config.get<std::string>("general.visualization.path");
+}
+
 bool Settings::getVisualizationFull() const {
     return this->config.get<bool>("general.visualization.full");
 }
@@ -153,21 +158,39 @@ Settings::getLibraryName() const
 }
 
 std::string
-Settings::getFilteringType() const
+Settings::getSideChannelFilteringType() const
 {
-    return this->config.get<std::string>("general.filtering.type");
+    return this->config.get<std::string>("general.filtering.sca.type");
 }
 
 std::string
-Settings::getWhiteList() const
+Settings::getSideChannelWhiteList() const
 {
-    return this->config.get<std::string>("general.filtering.whitelist");
+    return this->config.get<std::string>("general.filtering.sca.whitelist");
 }
 
 std::string
-Settings::getBlackList() const
+Settings::getSideChannelBlackList() const
 {
-    return this->config.get<std::string>("general.filtering.blacklist");
+    return this->config.get<std::string>("general.filtering.sca.blacklist");
+}
+
+std::string
+Settings::getFaultFilteringType() const
+{
+    return this->config.get<std::string>("general.filtering.fia.type");
+}
+
+std::string
+Settings::getFaultWhiteList() const
+{
+    return this->config.get<std::string>("general.filtering.fia.whitelist");
+}
+
+std::string
+Settings::getFaultBlackList() const
+{
+    return this->config.get<std::string>("general.filtering.fia.blacklist");
 }
 
 std::string
@@ -307,9 +330,12 @@ void Settings::validateSettings(){
     checkSettingRange("general.library.name", lib);
 
     // validate filtering settings
-    checkSettingRange("general.filtering.type", filter);
-    checkSettingFileExists("general.filtering.whitelist");
-    checkSettingFileExists("general.filtering.blacklist");
+    checkSettingRange("general.filtering.sca.type", filter);
+    checkSettingFileExists("general.filtering.sca.whitelist");
+    checkSettingFileExists("general.filtering.sca.blacklist");
+    checkSettingRange("general.filtering.fia.type", filter);
+    checkSettingFileExists("general.filtering.fia.whitelist");
+    checkSettingFileExists("general.filtering.fia.blacklist");
 
     // validate annotation settings
     checkSettingFileExists("general.annotation.file");
@@ -320,6 +346,7 @@ void Settings::validateSettings(){
 
     // validate visualization settings
     checkSettingRange("general.visualization.enable", boolean);
+    checkSettingPathExists("general.visualization.path");
     checkSettingRange("general.visualization.full", boolean);
     checkSettingRange("general.visualization.partial", boolean);
 
@@ -366,6 +393,13 @@ void Settings::checkSettingFileExists(const std::string &setting) {
     std::ifstream f(path.c_str());
     if(!f.good())
         throw std::logic_error("[CONFIG] Invalid path for " + setting + "!"); 
+}
+
+void Settings::checkSettingPathExists(const std::string &setting) {
+    // std::string path = this->config.get<std::string>(setting);
+    const std::filesystem::path path{this->config.get<std::string>(setting)};
+    if(!std::filesystem::exists(path))
+        throw std::logic_error("[CONFIG] Directory for " + setting + "does not exist!"); 
 }
 
 void Settings::checkSettingGreaterEqual(const std::string &setting, const int &threshold){

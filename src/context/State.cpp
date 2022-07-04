@@ -45,7 +45,37 @@ State::State()
 
 State::~State()
 {
+    /* Delete gate_types objects */
+    for(auto gate_type : this->m_cell_library->gate_types()){
+        if(gate_type.second != nullptr){
+            delete gate_type.second;
+        }
+    }
 
+    /* Delete m_cell_library object */
+    if(this->m_cell_library != nullptr){
+        delete this->m_cell_library;
+        this->m_cell_library = nullptr;
+    }
+
+    /* Delete fault_types objects */
+    for(auto fault_type : this->m_fault_library->fault_types()){
+        if(fault_type.second != nullptr){
+            delete fault_type.second;
+        }
+    }
+
+    /* Delete m_fault_library object */
+    if(this->m_fault_library != nullptr){
+        delete this->m_fault_library;
+        this->m_fault_library = nullptr;
+    }
+
+    /* Delete m_netlist_model object */
+    if(this->m_netlist_model != nullptr){
+        delete this->m_netlist_model;
+        this->m_netlist_model = nullptr;
+    }
 }
 
 /* 

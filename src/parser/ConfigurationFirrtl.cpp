@@ -75,6 +75,9 @@ ConfigurationFirrtl::execute(const Settings *settings, State *state)
     if (state->m_netlist_model->num_pins() == 0) {
         throw std::logic_error("[PARSER] No pin was parsed.");
     }
+
+    delete grammar;
+    grammar = nullptr;
 }
 
 
@@ -187,8 +190,8 @@ ConfigurationFirrtl::postprocess(State *state) {
     std::vector<verica::Module*> modules_to_remove;
     auto iter = state->m_netlist_model->modules().begin();
     while(iter != state->m_netlist_model->modules().end()) {
-        if (iter->second->parent() == nullptr && iter->second != state->m_netlist_model->topmodule()) {
-            modules_to_remove.push_back(iter->second);
+        if (iter->second->parent() == nullptr && iter->second.get() != state->m_netlist_model->topmodule()) {
+            modules_to_remove.push_back(iter->second.get());
         }
         iter++;
     }

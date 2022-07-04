@@ -87,19 +87,19 @@ class Service
     protected:
 
         /* Service name */
-        std::string m_name;
+        std::string m_name = "";
 
         /* Service configuration */
-        Configuration *m_config;
+        Configuration *m_config = nullptr;
 
         /* Current logger */
-        Logger *m_logger;
+        Logger *m_logger = nullptr;
 
         /* Current user settings */
-        Settings *m_settings;
+        Settings *m_settings = nullptr;
 
         /* Current state */
-        State *m_state;    
+        State *m_state = nullptr;    
 };
 
 #endif // __VERICA_SERVICE_HPP_

@@ -28,8 +28,6 @@
 
 #include "Configuration.hpp"
 
-enum Composability { NI, SNI, PINI, CNI, CSNI, ICSNI };
-
 class ConfigurationComposability : public Configuration
 {
     public:

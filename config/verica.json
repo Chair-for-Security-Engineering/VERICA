@@ -6,7 +6,7 @@
         "memory": 8,
         "netlist":
         {
-            "file": "test/case-study-nina/and_snina_d1_k2.v",
+            "file": "test/dom/dom1.v",
             "name": "",
             "module": ""
         },
@@ -17,13 +17,22 @@
         },
         "filtering":
         {
-            "type": "none",
-            "whitelist": "model/whitelist",
-            "blacklist": "model/blacklist"
+            "sca":
+            {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia":
+            {
+                "type": "none",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "model/fia-blacklist"
+            }
         },
         "annotation":
         {
-            "file": "test/case-study-nina/annotations.json",
+            "file": "test/dom/annotations.json",
             "apply": true
         },
         "cudd":
@@ -33,6 +42,7 @@
         "visualization":
         {
             "enable": true,
+            "path": "dot/",
             "full": true,
             "partial": true
         }
@@ -57,19 +67,19 @@
         "analysis": 
         {
             "uniformity": false,
-            "probing": false,
-            "p-ni": true,
-            "p-sni": true,
+            "probing": true,
+            "p-ni": false,
+            "p-sni": false,
             "pini": false
         }
     },
 
     "fault-injection":
     {
-        "enable": true,
+        "enable": false,
         "configuration":
         {
-            "number": 2,
+            "number": 1,
             "variate": 1,
             "interrupt": false
         },
@@ -81,15 +91,15 @@
         "analysis":
         {
             "reduced_complexity": false,
-            "strategy": "detection",
-            "f-ni": true,
-            "f-sni": true
+            "strategy": "correction",
+            "f-ni": false,
+            "f-sni": false
         }
     },
 
     "combined": 
     {
-        "enable": true,
+        "enable": false,
         "analysis":
         {
             "c-ni": false,

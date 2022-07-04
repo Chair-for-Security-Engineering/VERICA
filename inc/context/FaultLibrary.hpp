@@ -43,7 +43,7 @@ class FaultLibrary
 
     private:
 
-        // Test fault types
+        // Test fault types 
         std::map<std::string, FaultTemplate*> m_fault_types =
         { 
             {"buf",  new FaultTemplate(0, {"A"}, {"Z"},  {{"!A", "0", "1"}})},

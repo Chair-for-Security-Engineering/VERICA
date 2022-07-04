@@ -55,13 +55,13 @@ BOOST_FIXTURE_TEST_CASE(Elaboration_Trivial_Netlist_Test, TestConfigurationElabo
     std::string conf_str(CONFIG_ARG_PARAM + trivialNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    TestEnvironment* testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::MULTI_THREADING);
-    for(auto w : testEnv->getState()->m_netlist_model->module_under_test()->wires()) {
-        testEnv->getState()->m_netlist_model->resize_bdd_vectors(w->uid(), 1);
+    TestEnvironment testEnv {argc, argv, TestEnvironment::execPhases::MULTI_THREADING};
+    for(auto w : testEnv.getState()->m_netlist_model->module_under_test()->wires()) {
+        testEnv.getState()->m_netlist_model->resize_bdd_vectors(w->uid(), 1);
     }
 
     // Check the elaborate function.
-    BOOST_REQUIRE_NO_THROW(elaborate(testEnv->getState()->m_netlist_model, testEnv->getState()->m_managers[0], 0, testEnv->getSettings()->getMasking()));
+    BOOST_REQUIRE_NO_THROW(elaborate(testEnv.getState()->m_netlist_model, testEnv.getState()->m_managers[0], 0, testEnv.getSettings()->getMasking()));
 }
 
 // The gate_store functions MUST throw an exception when given a model without any input pins.
@@ -70,18 +70,18 @@ BOOST_FIXTURE_TEST_CASE(Elaboration_No_Input_Pin_Exception_Test, TestConfigurati
     std::string conf_str(CONFIG_ARG_PARAM + trivialNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    TestEnvironment* testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::MODEL_POSTPROCESSING);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::MODEL_POSTPROCESSING};
 
-    testEnv->getState()->m_netlist_model = new verica::Netlist("CLEAN_NETLIST_FOR_TEST");   // Use a clean netlist.
+    testEnv.getState()->m_netlist_model = new verica::Netlist("CLEAN_NETLIST_FOR_TEST");   // Use a clean netlist.
 
-    verica::Netlist* testModel = testEnv->getState()->m_netlist_model;
+    verica::Netlist* testModel = testEnv.getState()->m_netlist_model;
     verica::Module* testModule = testModel->add_module("TEST_MODULE");
     verica::Pin* testPin = testModel->add_pin("TEST_PIN", testModule, false);
     verica::Wire* testWire = testModel->add_wire("TEST_WIRE", testModule);
     testModel->set_wire_source(0, 0);
     testModel->set_module_under_test(testModule);
     
-    Cudd_Manager manager = (testEnv->getState()->m_managers)[0];
+    Cudd_Manager manager = (testEnv.getState()->m_managers)[0];
     std::map<int, BDD> secrets = booleanMasking(manager, netlistToMap(testModel, manager));
 
     // Check the gate_store_functions function.
@@ -95,6 +95,7 @@ BOOST_FIXTURE_TEST_CASE(Elaboration_No_Input_Pin_Exception_Test, TestConfigurati
 
     // Check the gate_store_secrets function.
     BOOST_REQUIRE_THROW(gate_store_secrets(testModel, testWire, secrets, manager, 0), std::logic_error);
+
 }
 
 // The gate_store_functions function MUST throw an exception when given a pin with an unsupported gate identifier.
@@ -103,15 +104,15 @@ BOOST_FIXTURE_TEST_CASE(Elaboration_Unsupported_Gate_Identifier_Exception_Test, 
     std::string conf_str(CONFIG_ARG_PARAM + trivialNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    TestEnvironment* testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::MODEL_POSTPROCESSING);
+    TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::MODEL_POSTPROCESSING};
 
-    testEnv->getState()->m_netlist_model = new verica::Netlist("CLEAN_NETLIST_FOR_TEST");   // Use a clean netlist.
+    testEnv.getState()->m_netlist_model = new verica::Netlist("CLEAN_NETLIST_FOR_TEST");   // Use a clean netlist.
 
-    verica::Netlist* testModel = testEnv->getState()->m_netlist_model;
+    verica::Netlist* testModel = testEnv.getState()->m_netlist_model;
     verica::Module* testModule = testModel->add_module("TEST_MODULE");
     /* Get highest gate identifier */
     int highest_identifier = -1;
-    const std::map<std::string, CellTemplate*> gate_types = testEnv->getState()->m_cell_library->gate_types();
+    const std::map<std::string, CellTemplate*> gate_types = testEnv.getState()->m_cell_library->gate_types();
     for (std::pair<std::string, CellTemplate*> gate_type : gate_types) {
         for (int i = 0; i < ((gate_type.second)->m_identifier).size(); i++) {
             if (((gate_type.second)->m_identifier)[i] > highest_identifier) { highest_identifier = ((gate_type.second)->m_identifier)[i]; }
@@ -123,7 +124,7 @@ BOOST_FIXTURE_TEST_CASE(Elaboration_Unsupported_Gate_Identifier_Exception_Test, 
     testModel->set_wire_source(0, 0);
     testModel->set_module_under_test(testModule);
 
-    Cudd_Manager manager = (testEnv->getState()->m_managers)[0];
+    Cudd_Manager manager = (testEnv.getState()->m_managers)[0];
 
     // Check the gate_store_functions function.
     BOOST_REQUIRE_THROW(gate_store_functions(testModel, testWire, manager, 0), std::logic_error);
