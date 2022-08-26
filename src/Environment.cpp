@@ -652,6 +652,7 @@ Environment::analyze_sca(T &strategy, std::string name, const Composability type
     bool cancel = false;
 
     /* Perform multi-threading analysis */
+    int simulation_counter = 0;
     #pragma omp parallel num_threads(this->m_settings->getCores()) shared(m_analyzer, m_state, cancel)
     #pragma omp for schedule(dynamic)
     for (unsigned int idx = 0; idx < this->m_state->m_probe_combinations[0].size(); idx++){
@@ -674,6 +675,11 @@ Environment::analyze_sca(T &strategy, std::string name, const Composability type
             }
             #pragma omp cancel for
         }
+
+        /* Progress */
+        #pragma omp atomic
+        simulation_counter++;
+        this->m_logger->progress(simulation_counter, this->m_state->m_probe_combinations[0].size());
     }
 
     /* Merge multi-threading results */

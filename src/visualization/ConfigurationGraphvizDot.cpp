@@ -190,9 +190,11 @@ bool ConfigurationGraphvizDot::export_flaws(State *state, const Settings *settin
             sub_gates.insert(current_pin->parent_module());
 
             for(auto next : current_pin->parent_module()->input_pins()){
-                const verica::Pin* new_pin = get_next_pin(next->fan_in(), mut);
-                if(std::find(mut->input_pins().begin(), mut->input_pins().end(), new_pin) == mut->input_pins().end()){
-                    to_visit.push_back(new_pin);
+                if(!next->is_const()){
+                    const verica::Pin* new_pin = get_next_pin(next->fan_in(), mut);
+                    if(std::find(mut->input_pins().begin(), mut->input_pins().end(), new_pin) == mut->input_pins().end()){
+                        to_visit.push_back(new_pin);
+                    }
                 }
             }
         }
@@ -213,9 +215,11 @@ bool ConfigurationGraphvizDot::export_flaws(State *state, const Settings *settin
             sub_gates.insert(current_pin->parent_module());
 
             for(auto next : current_pin->parent_module()->input_pins()){
-                const verica::Pin* new_pin = get_next_pin(next->fan_in(), mut);
-                if(std::find(mut->input_pins().begin(), mut->input_pins().end(), new_pin) == mut->input_pins().end()){
-                    to_visit.push_back(new_pin);
+                if(!next->is_const()){
+                    const verica::Pin* new_pin = get_next_pin(next->fan_in(), mut);
+                    if(std::find(mut->input_pins().begin(), mut->input_pins().end(), new_pin) == mut->input_pins().end()){
+                        to_visit.push_back(new_pin);
+                    }
                 }
             }
         }
@@ -326,20 +330,22 @@ void ConfigurationGraphvizDot::add_edges(std::string &graph, std::set<std::strin
     std::string align_inputs = "  {rank=same ";
     for(auto g : gates){
         for(auto p : g->input_pins()){
-            const verica::Pin* next_pin = p->fan_in()->source_pin();
-            while(!next_pin->parent_module()->gate() && std::find(mut->input_pins().begin(), mut->input_pins().end(), next_pin) == mut->input_pins().end()){
-                next_pin = next_pin->fan_in()->source_pin();
-            }
-            if(std::find(mut->input_pins().begin(), mut->input_pins().end(), next_pin) != mut->input_pins().end()){
-                std::string new_input = "IN" + std::to_string(next_pin->uid()); 
-                graph += "  " + new_input + " -> " + std::to_string(g->uid()) + ";\n";
-                align_inputs += new_input + " ";
+            if(!p->is_const()){
+                const verica::Pin* next_pin = p->fan_in()->source_pin();
+                while(!next_pin->parent_module()->gate() && std::find(mut->input_pins().begin(), mut->input_pins().end(), next_pin) == mut->input_pins().end()){
+                    next_pin = next_pin->fan_in()->source_pin();
+                }
+                if(std::find(mut->input_pins().begin(), mut->input_pins().end(), next_pin) != mut->input_pins().end()){
+                    std::string new_input = "IN" + std::to_string(next_pin->uid()); 
+                    graph += "  " + new_input + " -> " + std::to_string(g->uid()) + ";\n";
+                    align_inputs += new_input + " ";
 
-                // Identify annotated inputs
-                if(next_pin->port_type() == verica::Refresh) n_randomness.insert(new_input);
-                if(next_pin->port_type() == verica::None) n_input.insert(next_pin);
-            } else {
-                graph += "  " + std::to_string(next_pin->parent_module()->uid()) + " -> " + std::to_string(g->uid()) + ";\n";
+                    // Identify annotated inputs
+                    if(next_pin->port_type() == verica::Refresh) n_randomness.insert(new_input);
+                    if(next_pin->port_type() == verica::None) n_input.insert(next_pin);
+                } else {
+                    graph += "  " + std::to_string(next_pin->parent_module()->uid()) + " -> " + std::to_string(g->uid()) + ";\n";
+                }
             }
         }
     }

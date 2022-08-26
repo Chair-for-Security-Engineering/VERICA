@@ -639,12 +639,42 @@ void verica::Netlist::set_constant_input(int pin_uid, int const_value) {
  * =========================================================================================
  */
 void verica::Netlist::set_parent_module(Module *child, Module *parent){
+    // parent->m_children.push_back(child);
+    // child->m_parent = parent;
+
+    // for(auto w : child->m_wires){
+    //     add_wire_to_parents(parent, w);
+    // }
+
+
     parent->m_children.push_back(child);
-    child->m_parent = parent;
+    size_t index = 0;
+
+    if(child->m_parent != nullptr){
+        for (std::vector<const verica::Module*>::iterator it = child->m_parent->m_children.begin(); it != child->m_parent->m_children.end(); ) {
+            if (*it == child) {
+                it = child->m_parent->m_children.erase(it);
+            } else {
+                ++it;
+            }   
+        }
+    }
+        
 
     for(auto w : child->m_wires){
+        if(child->m_parent != nullptr){
+            for (std::vector<const verica::Wire*>::iterator it = child->m_parent->m_wires.begin(); it != child->m_parent->m_wires.end(); ) {
+                if (*it == w) {
+                    it = child->m_parent->m_wires.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
         add_wire_to_parents(parent, w);
     }
+    
+    child->m_parent = parent;
 }
 
 void verica::Netlist::add_wire_to_parents(Module *parent, const Wire *wire){
@@ -680,7 +710,7 @@ verica::Netlist::remove_unconnected_pins(){
     int cnt_pins = 0;
     std::vector<verica::Pin*> pins_to_remove;
     for (auto const & p : m_pins){
-        if(p.second->fan_in() == nullptr && p.second->fan_out() == nullptr) {
+        if(p.second->fan_in() == nullptr && p.second->fan_out() == nullptr && !p.second->is_const()) {
                 pins_to_remove.push_back(p.second.get());
         }
     }

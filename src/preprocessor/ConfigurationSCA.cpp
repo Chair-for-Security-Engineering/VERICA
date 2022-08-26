@@ -113,9 +113,10 @@ ConfigurationSCA::determine_shared_inputs(State *state)
     for(auto v : variables) state->m_shared_variables.push_back(v);
 
     /* Find smallest inputs sharing */
-    int minimal = 0;
-    for (unsigned int index = 0; index < state->m_shared_inputs.size(); index++)
-        minimal = (state->m_shared_inputs[index].size() < state->m_shared_inputs[minimal].size()) ? index : minimal;
+    int minimal = (*state->m_shared_inputs.begin()).first;
+    for(auto m : state->m_shared_inputs)
+        minimal = (m.second.size() < state->m_shared_inputs[minimal].size()) ? m.first : minimal;
+
     state->m_min_shared_inputs = state->m_shared_inputs[minimal];
 }
 

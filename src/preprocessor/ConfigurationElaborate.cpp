@@ -56,7 +56,7 @@ ConfigurationElaborate::execute(const Settings *settings, State *state)
                 maximum_layer = w->source_pin()->fan_in()->depth_index();
             } else {
                 for(auto p : w->source_pin()->parent_module()->input_pins()) {
-                    maximum_layer = (p->fan_in()->depth_index() > maximum_layer) ? p->fan_in()->depth_index() : maximum_layer;
+                    if(p->fan_in() != nullptr) maximum_layer = (p->fan_in()->depth_index() > maximum_layer) ? p->fan_in()->depth_index() : maximum_layer;
                 }
             }
             state->m_netlist_model->set_depth_index(w->uid(), maximum_layer+1);
@@ -159,7 +159,14 @@ ConfigurationElaborate::gate_store_functions(verica::Netlist* model, const veric
         // evaluate BDDs based on the gate identifiers
         std::vector<const verica::Pin*> input_pins = wire->source_pin()->parent_module()->input_pins();
         std::vector<BDD> operands;
-        for(auto p : input_pins) operands.push_back(p->fan_in()->golden_functions(core));
+        for(auto p : input_pins) {
+            if(p->is_const()){
+                BDD const_in = p->const_input() ? manager.bddOne() : manager.bddZero();
+                operands.push_back(const_in);
+            } else {
+                operands.push_back(p->fan_in()->golden_functions(core));
+            }
+        }
         switch (wire->source_pin()->gate_identifier()){
             case 0:
                 model->set_bdd_golden_function(wire->uid(), operands[0], core);
@@ -212,7 +219,7 @@ ConfigurationElaborate::gate_store_variables(verica::Netlist* model, const veric
         model->insert_variable(wire->uid(), wire->source_pin()->fan_in()->variables(core), core);
     } else if(wire->source_pin()->parent_module()->input_pins().size() > 0) {
         for(auto elem : wire->source_pin()->parent_module()->input_pins()){
-            model->insert_variable(wire->uid(), elem->fan_in()->variables(core), core);
+            if(elem->fan_in() != nullptr) model->insert_variable(wire->uid(), elem->fan_in()->variables(core), core);
         }
     } else {
         throw std::logic_error("[ELABORATE] Module with zero input pins detected (gate_store_variables())!");
@@ -234,7 +241,7 @@ ConfigurationElaborate::gate_store_registers(verica::Netlist* model, const veric
             model->insert_register(wire->uid(), wire, core);
         } else {
             for(auto elem : wire->source_pin()->parent_module()->input_pins()){
-                model->insert_register(wire->uid(), elem->fan_in()->registers(core), core);
+                if(elem->fan_in() != nullptr) model->insert_register(wire->uid(), elem->fan_in()->registers(core), core);
             }
         }       
     } else {
@@ -265,7 +272,7 @@ ConfigurationElaborate::gate_store_secrets(verica::Netlist* model, const verica:
     } else if(wire->source_pin()->parent_module()->input_pins().size() > 0) {
         model->set_bdd_secret(wire->uid(), manager.bddOne(), core);
         for(auto elem : wire->source_pin()->parent_module()->input_pins()){
-            model->set_bdd_secret(wire->uid(), wire->secrets(core) & elem->fan_in()->secrets(core), core);
+            if(elem->fan_in() != nullptr) model->set_bdd_secret(wire->uid(), wire->secrets(core) & elem->fan_in()->secrets(core), core);
         }     
     } else {
         throw std::logic_error("[ELABORATE] Module with zero input pins detected (gate_store_secrets())!");
@@ -289,7 +296,7 @@ ConfigurationElaborate::find_input_register_index(const verica::Netlist* model, 
 
     // for(auto p : wire->source_pin()->parent_module()->input_pins()){
     for(auto p : next_pin->parent_module()->input_pins()){
-        if(std::find(input_pins.begin(), input_pins.end(), p) == input_pins.end()){
+        if(std::find(input_pins.begin(), input_pins.end(), p) == input_pins.end() && !p->is_const()){
             const verica::Pin* next_pin_next = p->fan_in()->source_pin();
             while (!next_pin_next->parent_module()->gate() && std::find(input_pins.begin(), input_pins.end(), next_pin_next) == input_pins.end()){
                 next_pin_next = next_pin_next->fan_in()->source_pin();

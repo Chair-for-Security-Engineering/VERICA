@@ -475,9 +475,10 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
 void
 ConfigurationComposability::insert(const ConfigurationComposability* configuration)
 {
-    for (auto combination : configuration->failing_probes())
+    for (auto combination : configuration->failing_probes()){
         if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
             this->m_failing_probes.push_back(combination);
+    }
 
     for (auto combination : configuration->combined_failing_probes())
         this->m_combined_leaking_probes.push_back(combination);

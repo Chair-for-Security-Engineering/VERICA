@@ -46,9 +46,7 @@ ConfigurationFiltering::execute(const Settings *settings, State *state){
         this->apply_filter(settings, state, true, true);
     } else if (settings->getFaultFilteringType() != "none") {
         throw std::logic_error("Unrecognized filtering strategy (supported strategies: none/whitelist/blacklist)!");
-    } else {
-        clear_filter(state);
-    }
+    } 
 }
 
 void
@@ -165,7 +163,7 @@ ConfigurationFiltering::apply_filter(const Settings *settings, State *state, con
         filter[idx].erase(std::remove(filter[idx].begin(), filter[idx].end(), '\n'), filter[idx].end());
         filter[idx].erase(std::remove(filter[idx].begin(), filter[idx].end(), '\r'), filter[idx].end());
     }
-    
+
     /* Remove empty strings from filter */
     filter.erase(std::remove_if(filter.begin(), filter.end(), [](std::string str){return str.empty();}), filter.end());
 

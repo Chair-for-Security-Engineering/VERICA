@@ -1,7 +1,7 @@
 # VERICA - Verification of Combined Attacks
 
 
-This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*]().
+This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*](https://eprint.iacr.org/2022/484.pdf).
 
 
 ## 1. Features
@@ -293,7 +293,7 @@ Please see `LICENSE` for further license instructions.
 
 ## Publications
 
-J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering](). (preprint)
+J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering](https://eprint.iacr.org/2022/484.pdf). (preprint)
 
 \\
 
