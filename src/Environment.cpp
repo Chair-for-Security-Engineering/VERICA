@@ -472,6 +472,11 @@ Environment::execute()
                         }
 
 
+                        // Analyze ICSNI security
+                        if (this->m_settings->getCombinedICSNI()){
+                            analyze_combined(icsni_threads[thread_num], thread_num);
+                        }
+
                         // Determine number of input faults for CNI and CSNI
                         if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI()){
                             std::vector<const verica::Pin*> input_pins = m_state->m_netlist_model->module_under_test()->input_pins();
@@ -503,11 +508,6 @@ Environment::execute()
                         // Analyze CSNI security
                         if (this->m_settings->getCombinedCSNI()){
                             analyze_combined(csni_threads[thread_num], thread_num);
-                        }
-
-                        // Analyze ICSNI security
-                        if (this->m_settings->getCombinedICSNI()){
-                            analyze_combined(icsni_threads[thread_num], thread_num);
                         }
 
                         if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI()){
@@ -578,7 +578,7 @@ Environment::execute()
                 report_combined(composability_csni, csni_threads);
             }
 
-            /* Report CSNI results */
+            /* Report ICSNI results */
             if (this->m_settings->getCombinedICSNI()) {
                 report_combined(composability_icsni, icsni_threads);
             }
