@@ -312,6 +312,11 @@ J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA -
 
 In order to reproduce the results of the case studies from the paper, we prepared a dedicated folder `case-studies/` which contains all configuration files that were used to generate the evaluation results. Additionally, we provide the log files of the experiments containing the numbers reported in the paper's tables. 
 
+
+## Acknowledgment
+
+We would like to thank the anonymous reviewers from the CHES'22 artifact submission committee that provided us with useful comments and suggestions to improve our framework and the instructions to run VERICA.
+
 \\
 
 # Appendix
