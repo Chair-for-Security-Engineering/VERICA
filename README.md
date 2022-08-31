@@ -47,7 +47,7 @@ Parent              | Parameter                     | Allowed Parameter         
 --------------------|-------------------------------|-----------------------------------------------|----------------------
 `general`           | `verbose`                     | 0,1,2,3                                       | Verbosity level.
 --                  | `cores`                       | 0-X                                           | Number of cores that should be used by VERICA. Settings `cores` to zero, automatically selects the  maximum available cores        
---                  | `memory`                      | positive integer                              | Memory used by each core.
+--                  | `memory`                      | positive integer                              | Memory used by each core in GB.
 --                  | `netlist/file`                | Valid path                                    | Path to the Verilog description of the circuit under test.
 --                  | `netlist/name`                | --                                            | Not supported yet.
 --                  | `netlist/module`              | --                                            | Not supported yet.
@@ -61,7 +61,7 @@ Parent              | Parameter                     | Allowed Parameter         
 --                  | `cudd/reordering`             | `true`, `false`                               | Enables a dynamic reordering of BDDs supported by the CUDD library. In most cases, VERICA is faster with disabled dynamic reordering.
 `side-channel`      | `enable`                      | `true`, `false`                               | Enables/disables side-channel verification.
 --                  | `configuration/order`         | 0-X                                           | Determines the security order that should be analyzed. If the order is set to 0, VERICA automatically determines the highest possible security order.
---                  | `configuration/variate`       | 0-X                                           | Select between univariate (0) or multivariate analyses (1-X).
+--                  | `configuration/variate`       | 0-X                                           | Select between univariate (1) or multivariate analyses (2-X). (0) creates all probe combinations between all logic stages.
 --                  | `configuration/masking`       | 0, 1                                          | Select between Boolean masking (0) and arithmetic masking (1, not tested yet).
 --                  | `configuration/interrupt`     | `true`, `false`                               | Interrupts the side-channel verification process in case a security flaw is detected (use with caution - not tested yet). Not fully implemented yet!
 --                  | `model/glitches`              | `true`, `false`                               | Use the glitch-extended $d$-probing model.
@@ -169,7 +169,7 @@ If VERICA is executed with the exemplary configuration file `config/verica_examp
 ----------------------------------------------------------------------------------------------------
      0.445    PREPROCESSOR     MODEL POSTPROCESSING  Removed clock tree from netlist (3 wires were removed).
      0.445    PREPROCESSOR     MODEL POSTPROCESSING  No control signals were found.
-     0.445    PREPROCESSOR     MODEL POSTPROCESSING  Removed 19 unconnected pins.
+     0.445    PREPROCESSOR     MODEL POSTPROCESSING  Removed 17 unconnected pins.
      0.445    PREPROCESSOR     MODEL POSTPROCESSING  Removed 0 unconnected wires.
 ----------------------------------------------------------------------------------------------------
      0.445    PREPROCESSOR     MODEL POSTPROCESSING  SUCCESS
@@ -266,6 +266,19 @@ If VERICA is executed with the exemplary configuration file `config/verica_examp
      0.778    VERICA           COMBINED              DONE!
 ```
 
+## Architecture
+
+The main file `verica.cpp` of VERICA only creates an object `Environment` which handles the entire verification. An environment object consists of a settings object, a state object, and a logger. The `settings` object parses at the time of construction the forwarded `config`-file and stores all settings while providing corresponding access functions. The `state` object is used to store global variables and data (e.g., the netlist model, information about the SCA and FIA verification, etc.). The logger is used to create consistent outputs throughout the entire preprocessing and verification.
+
+Besides these basic objects, VERICA creates five additional "configuration" objects: `parser`, `preprocessor`, `injector`, `analyzer`, `visualizer`. The `parser` object reads the cell library and accepts parsing strategies that are able to parse `FIRRTL`, `VERILOG`, and `NETLIST` files. The `FIRRTL` and `VERILOG` parser utilize the BOOST library. Independent of the netlist format, VERICA generates a model of the circuit under test which is stored in a `netlist` object. Each netlist model consists of `modules`, `wires`, and `pins`. The final circuit model is stored in the `state` object.
+
+The `preprocessor` object takes care of many different steps. First, the `annotation.json` file is loaded and parsed. The parsed information are added to the netlist model. Second, a `filtering` strategy is loaded to the preprocessor which applies the black- and whitelists to the model. Third, a `multi-threading` object is loaded which prepares the framework for parallel executions of the verification. Fourth, a `model-postprocessing` is applied which has several tasks. The first task ist to remove all clock and control networks from the netlist model. Afterwards, unconnected pins and wires are removed. Eventually, all wires from the netlist model are sorted in a topological order. Fifth, VERICA loads an `elaborate` strategy into the preprocessor. Based on the netlist model, all BDDs are created and additional information for the SCA verification is generated. Sixth, a `FIA` preprocessor is loaded which performs important configurations required for the FIA verification, i.e., determining fault mappings, fault locations, propagation paths, and preparing the framework for FIA related multi-threading tasks. Seventh, a `SCA` strategy is loaded into the preprocessor which determines all valid probe combinations for the SCA verification.
+
+Based on the configuration file, different SCA and FIA analysis strategies are loaded and executed. All available strategies are implemented in the `analyzer/` folder. `ConfigurationComposability` implements the verification of all SCA related composability notions. `ConfigurationCorrection` and `configurationDetection` handle the verification of countermeasures against fault attacks and are able to verify FIA composability notions for correction and detection based countermeasures, respectively. `ConfigurationSIFA` is applied in case a design should be checked for the resistance against SIFA-based attacks. `ConfigurationProbing` is used to verify probing security while `ConfigurationUniformity` verifies the uniformity of the design under test.
+
+Eventually, VERICA supports the visualization as a `.dot`-graph of the design under test. It is possible to create a graph for the entire netlist model or only for the part that is involved in security violations. Additionally, leaking probes and effective faults (if occur) are highlighted in the graph which should assist the designer to fix flawed parts. 
+ 
+
 ## Troubleshooting
 
 Here are some common issues you may encounter during execution along with possible fixes.
@@ -294,6 +307,10 @@ Please see `LICENSE` for further license instructions.
 ## Publications
 
 J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering](https://eprint.iacr.org/2022/484.pdf). (preprint)
+
+### Reproduce results of the case studies
+
+In order to reproduce the results of the case studies from the paper, we prepared a dedicated folder `case-studies/` which contains all configuration files that were used to generate the evaluation results. Additionally, we provide the log files of the experiments containing the numbers reported in the paper's tables. 
 
 \\
 

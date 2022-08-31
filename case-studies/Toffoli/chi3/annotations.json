@@ -1,0 +1,47 @@
+{
+    "type":
+    {
+        "clock": ["clk"],
+        "control": [],
+        "refresh": ["rand"],
+        "error_flag": []
+    },
+    "primary_input_identifier":
+    {
+        "0": []
+    },
+    "share_domain":
+    {
+        "input":
+        {
+            "0": ["share0_in[4:0]"],
+            "1": ["share1_in[4:0]"]
+        },
+        "output":
+        {
+            "0": ["share0_out[4:0]"],
+            "1": ["share1_out[4:0]"]
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+            "0": ["share0_in[0]", "share1_in[0]"],
+            "1": ["share0_in[1]", "share1_in[1]"],
+            "2": ["share0_in[2]", "share1_in[2]"],
+            "3": ["share0_in[3]", "share1_in[3]"],
+            "4": ["share0_in[4]", "share1_in[4]"]
+        },
+        "output":
+        {
+            "0": ["share0_out[0]", "share1_out[0]"],
+            "1": ["share0_out[1]", "share1_out[1]"],
+            "2": ["share0_out[2]", "share1_out[2]"],
+            "3": ["share0_out[3]", "share1_out[3]"],
+            "4": ["share0_out[4]", "share1_out[4]"]
+        }
+        
+    }
+
+}

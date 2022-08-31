@@ -2,11 +2,11 @@
     "general":
     {
         "verbose": 2,
-        "cores": 2,
-        "memory": 4,
+        "cores": 16,
+        "memory": 8,
         "netlist":
         {
-            "file": "test/case-study-nina/and_snina_d1_k1.v",
+            "file": "test/case-study-nina/and_sinina_d2_k2.v",
             "name": "",
             "module": ""
         },
@@ -17,18 +17,9 @@
         },
         "filtering":
         {
-            "sca":
-            {
-                "type": "none",
-                "whitelist": "model/sca-whitelist",
-                "blacklist": "model/sca-blacklist"
-            },
-            "fia":
-            {
-                "type": "none",
-                "whitelist": "model/fia-whitelist",
-                "blacklist": "model/fia-blacklist"
-            }
+            "type": "none",
+            "whitelist": "model/whitelist",
+            "blacklist": "model/blacklist"
         },
         "annotation":
         {
@@ -38,13 +29,6 @@
         "cudd":
         {
             "reordering": false
-        },
-        "visualization":
-        {
-            "enable": true,
-            "path": "dot/",
-            "full": true,
-            "partial": true
         }
     },
 
@@ -53,7 +37,7 @@
         "enable": false,
         "configuration":
         {
-            "order": 1,
+            "order": 2,
             "variate": 0,
             "masking": 0,
             "interrupt": false
@@ -68,8 +52,8 @@
         {
             "uniformity": false,
             "probing": false,
-            "p-ni": false,
-            "p-sni": false,
+            "ni": false,
+            "sni": true,
             "pini": false
         }
     },
@@ -79,21 +63,21 @@
         "enable": false,
         "configuration":
         {
-            "number": 1,
+            "number": 2,
             "variate": 1,
             "interrupt": false
         },
         "model": 
         {
-            "mapping": "model/setreset.txt",
-            "location": "cs"
+            "mapping": "model/set.txt",
+            "location": "c"
         },
         "analysis":
         {
             "reduced_complexity": false,
-            "strategy": "detection",
-            "f-ni": false,
-            "f-sni": false
+            "strategy": "correction",
+            "na": false,
+            "sna": true
         }
     },
 
@@ -103,8 +87,8 @@
         "analysis":
         {
             "c-ni": false,
-            "c-sni": true,
-            "ic-sni": false
+            "c-sni": false,
+            "ic-sni": true
         }
     }
 }

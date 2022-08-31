@@ -2,49 +2,33 @@
     "general":
     {
         "verbose": 2,
-        "cores": 2,
-        "memory": 4,
+        "cores": 16,
+        "memory": 8,
         "netlist":
         {
-            "file": "test/case-study-nina/and_snina_d1_k1.v",
+            "file": "test/case-study-toffoli/aes-104.nl",
             "name": "",
             "module": ""
         },
         "library":
         {
-            "file": "cell/nang45.txt",
-            "name": "NANG45"
+            "file": "cell/Instructions.txt",
+            "name": "NL"
         },
         "filtering":
         {
-            "sca":
-            {
-                "type": "none",
-                "whitelist": "model/sca-whitelist",
-                "blacklist": "model/sca-blacklist"
-            },
-            "fia":
-            {
-                "type": "none",
-                "whitelist": "model/fia-whitelist",
-                "blacklist": "model/fia-blacklist"
-            }
+            "type": "none",
+            "whitelist": "model/whitelist",
+            "blacklist": "model/blacklist"
         },
         "annotation":
         {
-            "file": "test/case-study-nina/annotations.json",
-            "apply": true
+            "file": "test/case-study-toffoli/annotations.json",
+            "apply": false
         },
         "cudd":
         {
             "reordering": false
-        },
-        "visualization":
-        {
-            "enable": true,
-            "path": "dot/",
-            "full": true,
-            "partial": true
         }
     },
 
@@ -67,16 +51,16 @@
         "analysis": 
         {
             "uniformity": false,
-            "probing": false,
-            "p-ni": false,
-            "p-sni": false,
+            "probing": true,
+            "ni": false,
+            "sni": false,
             "pini": false
         }
     },
 
     "fault-injection":
     {
-        "enable": false,
+        "enable": true,
         "configuration":
         {
             "number": 1,
@@ -91,19 +75,19 @@
         "analysis":
         {
             "reduced_complexity": false,
-            "strategy": "detection",
-            "f-ni": false,
-            "f-sni": false
+            "strategy": "sifa",
+            "na": false,
+            "sna": false
         }
     },
 
     "combined": 
     {
-        "enable": true,
+        "enable": false,
         "analysis":
         {
             "c-ni": false,
-            "c-sni": true,
+            "c-sni": false,
             "ic-sni": false
         }
     }

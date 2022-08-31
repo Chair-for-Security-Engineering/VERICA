@@ -29,9 +29,9 @@ CXX_RELEASE_FLAGS	:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -std=c
 CXX_DEBUG_FLAGS		:= -Wall -Wextra -pedantic -m64 -fopenmp -march=native -g3 -Og -fsanitize=address -std=c++17
 CXX_TEST_FLAGS		:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c++17 -D UNITTEST
 
-LD_RELEASE_FLAGS	:= -m64 -fopenmp 
-LD_DEBUG_FLAGS		:= -m64 -fopenmp -fsanitize=address
-LD_TEST_FLAGS		:= -m64 -fopenmp -D UNITTEST
+LD_RELEASE_FLAGS	:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR)
+LD_DEBUG_FLAGS		:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR) -fsanitize=address
+LD_TEST_FLAGS		:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR) -D UNITTEST
 
 # EXTERNAL INCLUDES
 INCLUDES			:= -I $(INCLUDE_DIR) -I "./inc/cudd"

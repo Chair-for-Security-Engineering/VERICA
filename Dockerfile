@@ -1,5 +1,5 @@
 # Get the base Ubuntu image from Docker Hub
-FROM ubuntu:latest
+FROM ubuntu:20.04
 
 # Prevent apt from opening interactive dialogues
 ARG DEBIAN_FRONTEND=noninteractive

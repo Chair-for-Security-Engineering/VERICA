@@ -2,11 +2,11 @@
     "general":
     {
         "verbose": 2,
-        "cores": 2,
-        "memory": 4,
+        "cores": 16,
+        "memory": 8,
         "netlist":
         {
-            "file": "test/case-study-nina/and_snina_d1_k1.v",
+            "file": "test/case-study-nina/xor_nina_d1_k1.v",
             "name": "",
             "module": ""
         },
@@ -17,18 +17,9 @@
         },
         "filtering":
         {
-            "sca":
-            {
-                "type": "none",
-                "whitelist": "model/sca-whitelist",
-                "blacklist": "model/sca-blacklist"
-            },
-            "fia":
-            {
-                "type": "none",
-                "whitelist": "model/fia-whitelist",
-                "blacklist": "model/fia-blacklist"
-            }
+            "type": "none",
+            "whitelist": "model/whitelist",
+            "blacklist": "model/blacklist"
         },
         "annotation":
         {
@@ -38,13 +29,6 @@
         "cudd":
         {
             "reordering": false
-        },
-        "visualization":
-        {
-            "enable": true,
-            "path": "dot/",
-            "full": true,
-            "partial": true
         }
     },
 
@@ -60,7 +44,7 @@
         },
         "model":
         {
-            "glitches": true,
+            "glitches": false,
             "transitions": false,
             "couplings": false
         },
@@ -68,8 +52,8 @@
         {
             "uniformity": false,
             "probing": false,
-            "p-ni": false,
-            "p-sni": false,
+            "ni": true,
+            "sni": false,
             "pini": false
         }
     },
@@ -91,9 +75,9 @@
         "analysis":
         {
             "reduced_complexity": false,
-            "strategy": "detection",
-            "f-ni": false,
-            "f-sni": false
+            "strategy": "correction",
+            "na": true,
+            "sna": false
         }
     },
 
@@ -102,8 +86,8 @@
         "enable": true,
         "analysis":
         {
-            "c-ni": false,
-            "c-sni": true,
+            "c-ni": true,
+            "c-sni": false,
             "ic-sni": false
         }
     }

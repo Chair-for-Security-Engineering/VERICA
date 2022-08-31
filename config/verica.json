@@ -2,8 +2,8 @@
     "general":
     {
         "verbose": 2,
-        "cores": 16,
-        "memory": 8,
+        "cores": 4,
+        "memory": 4,
         "netlist":
         {
             "file": "test/dom/dom1.v",
