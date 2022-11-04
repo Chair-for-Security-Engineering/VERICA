@@ -580,6 +580,10 @@ void verica::Netlist::set_pin_share_index(int uid, int share_index) {
     m_pins[uid]->m_share_index = share_index;
 }
 
+void verica::Netlist::set_pin_fault_domain(int uid, int fault_domain) {
+    m_pins[uid]->m_fault_domain = fault_domain;
+}
+
 void verica::Netlist::set_pin_type(Pin *p, Flag type) {
     p->m_port_type = type;
 }

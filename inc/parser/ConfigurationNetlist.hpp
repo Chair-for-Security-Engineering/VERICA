@@ -2,7 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -34,6 +35,9 @@ class ConfigurationNetlist : public Configuration
 {
     public:
         ConfigurationNetlist(std::string name) : Configuration(name) { };
+
+        /* Initialize strategy */
+        void initialize(const Settings *settings, State *state) override;
 
         /* Parse design for given settings */
         void execute(const Settings *settings, State *state) override;

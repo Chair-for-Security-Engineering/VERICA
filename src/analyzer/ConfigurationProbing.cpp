@@ -2,7 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -136,12 +137,7 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
 }
 
 void
-ConfigurationProbing::finalize(const Settings *settings, State *state)
-{
-    /* Trivial probe combination */
-    if (settings->getSideChannelOrder() == 0)
-        this->m_failing_probes.push_back(state->m_min_shared_inputs);
-
+ConfigurationProbing::finalize(const Settings *settings, State *state) {
     /* Sort failing probe combinations by size (small to large) */
     std::sort(this->m_failing_probes.begin(), this->m_failing_probes.end(), [](const std::vector<const verica::Wire*> & a, const std::vector<const verica::Wire*> & b){ return a.size() < b.size(); });
 }

@@ -1,12 +1,13 @@
 /*
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
- * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * AUTHOR  : Jan Richter-Brockmann (jan.richter-brockmann@rub.de) 
+ *           Pascal Sasdrich (pascal.sasdrich@rub.de)
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
- * Copyright (c) 2021, Pascal Sasdrich
+ * Copyright (c) 2022, Jan Richter-Brockmann and Pascal Sasdrich
  *
  * All rights reserved.
  *
@@ -198,7 +199,7 @@ Environment::execute()
         ConfigurationUniformity uniformity{"UNIFORMITY"};
 
         /* Initialize uniformity strategy */
-        uniformity.initialize(this->m_state);
+        uniformity.initialize(this->m_settings, this->m_state);
 
         /* Perform uniformity analysis */
         this->m_analyzer->configure(&uniformity);
@@ -296,20 +297,151 @@ Environment::execute()
     }
 
 
-    /*
+
+    /* 
+     * =====================================================================================
+     * [COMBINED-ISOLATING NON-INTERFERENCE] 
+     * =====================================================================================
+     */
+    if (this->m_settings->getCombinedCINI())
+    {
+        /* Create new composability verification strategy */
+        ConfigurationComposability *composability_cini = new ConfigurationComposability("CINI", CINI);
+        std::vector<ConfigurationComposability*> cini_threads(this->m_settings->getCores());
+
+        /* Initialize CINI strategy */
+        composability_cini->initialize(this->m_settings, this->m_state);
+     
+        /* Initialize multi-threading strategies */        
+        for (int core = 0; core < this->m_settings->getCores(); core++)
+        {
+            cini_threads[core] = new ConfigurationComposability("CINI-CORE" + std::to_string(core), CINI);
+            cini_threads[core]->initialize(this->m_settings, this->m_state);
+        }
+
+        /* Early-abort variable */
+        bool cancel = false;
+
+        #pragma omp parallel num_threads(this->m_settings->getCores()) shared(m_analyzer, m_state, cancel)
+        #pragma omp for schedule(dynamic)
+        for (unsigned int idx = 0; idx < this->m_state->m_probe_combinations[0].size(); idx++)
+        {
+            #pragma omp cancellation point for
+
+            /* Thread number */
+            int thread_num = omp_get_thread_num();
+
+            /* Set current probe combination */
+            cini_threads[thread_num]->current_probes(this->m_state->m_probe_combinations[thread_num][idx]);
+
+            /* Analyze */
+            this->m_analyzer->configure(cini_threads[thread_num]);
+            this->m_analyzer->execute();
+
+            /* Early abort */
+            if (!cini_threads[thread_num]->independent() && !cancel && this->m_settings->getSideChannelInterrupt())
+            {
+                #pragma omp critical
+                {
+                    cancel = true;
+                }
+                #pragma omp cancel for
+            }
+        }
+
+        /* Merge multi-threading results */
+        for (int core = 0; core < this->m_settings->getCores(); core++)
+            composability_cini->insert(cini_threads[core]);
+            
+        /* Finalize NI strategy */
+        composability_cini->finalize(this->m_settings, this->m_state);
+
+        /* Report composability results */
+        this->m_analyzer->configure(composability_cini);
+        this->m_analyzer->report();
+    }
+
+
+    /* 
+     * =====================================================================================
+     * [INDEPENDENT COMBINED-ISOLATING NON-INTERFERENCE] 
+     * =====================================================================================
+     */
+    if (this->m_settings->getCombinedICINI())
+    {
+        /* Create new composability verification strategy */
+        ConfigurationComposability *composability_icini = new ConfigurationComposability("ICINI", ICINI);
+        std::vector<ConfigurationComposability*> icini_threads(this->m_settings->getCores());
+
+        /* Initialize ICINI strategy */
+        composability_icini->initialize(this->m_settings, this->m_state);
+     
+        /* Initialize multi-threading strategies */        
+        for (int core = 0; core < this->m_settings->getCores(); core++)
+        {
+            icini_threads[core] = new ConfigurationComposability("ICINI-CORE" + std::to_string(core), ICINI);
+            icini_threads[core]->initialize(this->m_settings, this->m_state);
+        }
+
+        /* Early-abort variable */
+        bool cancel = false;
+
+        #pragma omp parallel num_threads(this->m_settings->getCores()) shared(m_analyzer, m_state, cancel)
+        #pragma omp for schedule(dynamic)
+        for (unsigned int idx = 0; idx < this->m_state->m_probe_combinations[0].size(); idx++)
+        {
+            #pragma omp cancellation point for
+
+            /* Thread number */
+            int thread_num = omp_get_thread_num();
+
+            /* Set current probe combination */
+            icini_threads[thread_num]->current_probes(this->m_state->m_probe_combinations[thread_num][idx]);
+
+            /* Analyze */
+            this->m_analyzer->configure(icini_threads[thread_num]);
+            this->m_analyzer->execute();
+
+            /* Early abort */
+            if (!icini_threads[thread_num]->independent() && !cancel && this->m_settings->getSideChannelInterrupt())
+            {
+                #pragma omp critical
+                {
+                    cancel = true;
+                }
+                #pragma omp cancel for
+            }
+        }
+
+        /* Merge multi-threading results */
+        for (int core = 0; core < this->m_settings->getCores(); core++)
+            composability_icini->insert(icini_threads[core]);
+            
+        /* Finalize NI strategy */
+        composability_icini->finalize(this->m_settings, this->m_state);
+
+        /* Report composability results */
+        this->m_analyzer->configure(composability_icini);
+        this->m_analyzer->report();
+    }
+
+
+    /* 
      * =====================================================================================
      * [COMBINED] Fault Injection VERification (FIVER) & Statistical Independence Leakage VERification (SILVER)
      * =====================================================================================
-     */
+     */    
     if(this->m_settings->getFaultInjection() || this->m_settings->getCombined()){
         /* Create new fault verification strategy */
         std::unique_ptr<Configuration> fault_strategy;
 
         if (this->m_settings->getFaultAnalysisStrategy() == "detection"){   
             fault_strategy = std::make_unique<ConfigurationFaultDetection>("FAULT-DETECTION");
+            fault_strategy->initialize(m_settings, m_state);
         }
         else if (this->m_settings->getFaultAnalysisStrategy() == "correction"){
             fault_strategy = std::make_unique<ConfigurationFaultCorrection>("FAULT-CORRECTION");
+            fault_strategy->initialize(m_settings, m_state);
         }
         else if (this->m_settings->getFaultAnalysisStrategy() == "sfa"){
             fault_strategy = std::make_unique<ConfigurationFaultSFA>("FAULT-SFA");
@@ -346,9 +478,16 @@ Environment::execute()
         ConfigurationComposability composability_icsni{"ICSNI", ICSNI};
         std::vector<ConfigurationComposability> icsni_threads{};
 
-        /* New multi-threading strategies */
-        for (int core = 0; core < this->m_settings->getCores(); core++)
-        {
+        /* New CINI strategy */
+        ConfigurationComposability composability_cini{"CINI", CINI};
+        std::vector<ConfigurationComposability> cini_threads{};
+
+        /* New ICINI strategy */
+        ConfigurationComposability composability_icini{"ICINI", ICINI};
+        std::vector<ConfigurationComposability> icini_threads{};
+
+        /* New multi-threading strategies */  
+        for (int core = 0; core < this->m_settings->getCores(); core++){
             ConfigurationProbing configProbing{"FIA+PROBING-CORE" + std::to_string(core), NONE};
             probing_threads.push_back(configProbing);
 
@@ -361,6 +500,7 @@ Environment::execute()
             ConfigurationComposability configComposabilityPINI{"FIA+PINI-CORE" + std::to_string(core), PINI};
             pini_threads.push_back(configComposabilityPINI);
 
+
             ConfigurationComposability configComposabilityCNI{"CNI-CORE" + std::to_string(core), CNI};
             cni_threads.push_back(configComposabilityCNI);
 
@@ -369,7 +509,14 @@ Environment::execute()
 
             ConfigurationComposability configComposabilityISCNI{"ICSNI-CORE" + std::to_string(core), ICSNI};
             icsni_threads.push_back(configComposabilityISCNI);
-        }
+
+
+            ConfigurationComposability configComposabilityCINI{"CINI-CORE" + std::to_string(core), CINI};
+            cini_threads.push_back(configComposabilityCINI);
+
+            ConfigurationComposability configComposabilityICINI{"ICINI-CORE" + std::to_string(core), ICINI}; 
+            icini_threads.push_back(configComposabilityICINI);
+        }       
 
         /* Perform analysis */
         for(int n = 1; n <= this->m_settings->getNumberOfFaults(); ++n){
@@ -385,7 +532,10 @@ Environment::execute()
             composability_csni.initialize(this->m_settings, this->m_state);
             composability_icsni.initialize(this->m_settings, this->m_state);
 
-            /* Reset multi-threading strategies */
+            composability_cini.initialize(this->m_settings, this->m_state);
+            composability_icini.initialize(this->m_settings, this->m_state);
+
+            /* Reset multi-threading strategies */  
             for (int core = 0; core < this->m_settings->getCores(); core++)
             {
                 probing_threads[core].initialize(this->m_settings, this->m_state);
@@ -396,7 +546,10 @@ Environment::execute()
                 cni_threads[core].initialize(this->m_settings, this->m_state);
                 csni_threads[core].initialize(this->m_settings, this->m_state);
                 icsni_threads[core].initialize(this->m_settings, this->m_state);
-            }
+
+                cini_threads[core].initialize(this->m_settings, this->m_state);
+                icini_threads[core].initialize(this->m_settings, this->m_state);
+            }        
 
             /* Early-abort variable */
             bool cancel_fia = false;
@@ -421,8 +574,7 @@ Environment::execute()
 
                     // get thread number
                     int thread_num = omp_get_thread_num();
-
-
+                    
                     std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> target_fault_collection;
                     target_fault_collection = this->m_injector->prepeare_fault_mappings_for_injection(location);
                     for(unsigned int idx_fault_pair=0; idx_fault_pair<target_fault_collection.size(); ++idx_fault_pair){
@@ -471,22 +623,23 @@ Environment::execute()
                             analyze_combined(pini_threads[thread_num], thread_num);
                         }
 
-
                         // Analyze ICSNI security
                         if (this->m_settings->getCombinedICSNI()){
                             analyze_combined(icsni_threads[thread_num], thread_num);
                         }
 
-                        // Determine number of input faults for CNI and CSNI
-                        if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI()){
+                        // Analyze ICINI security
+                        if (this->m_settings->getCombinedICINI()) {
+                            analyze_combined(icini_threads[thread_num], thread_num);
+                        }
+
+                        // Update probe combinations
+                        if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI() || this->m_settings->getCombinedCINI()){
                             std::vector<const verica::Pin*> input_pins = m_state->m_netlist_model->module_under_test()->input_pins();
                             for(auto w : target_fault_collection[idx_fault_pair].first) {
                                 if(std::find(input_pins.begin(), input_pins.end(), w->source_pin()) != input_pins.end() && w->source_pin()->port_type() != verica::Refresh) m_state->m_current_number_of_input_faults[thread_num]++;
                             }
-                        }
 
-                        // Update probe combinations
-                        if(m_settings->getCombinedCNI() || m_settings->getCombinedCSNI()){
                             if(idx_fault_pair == 0){
                                 std::vector<const verica::Wire*> modified;
                                 for (auto w : location){
@@ -500,6 +653,7 @@ Environment::execute()
                             }
                         }
 
+
                         // Analyze CNI security
                         if (this->m_settings->getCombinedCNI()){
                             analyze_combined(cni_threads[thread_num], thread_num);
@@ -510,7 +664,13 @@ Environment::execute()
                             analyze_combined(csni_threads[thread_num], thread_num);
                         }
 
-                        if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI()){
+
+                        // Analyze CINI security
+                        if (this->m_settings->getCombinedCINI()) {
+                            analyze_combined(cini_threads[thread_num], thread_num);
+                        }
+
+                        if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI() || this->m_settings->getCombinedCINI()){
                             /* Reset input fault counter */
                             m_state->m_current_number_of_input_faults[thread_num] = 0;
                         }
@@ -537,9 +697,11 @@ Environment::execute()
                     this->m_logger->progress(simulation_counter, this->m_injector->permuted_fault_locations().size());
                 }
 
-                std::cout << std::endl;
-
             } while(!cancel_fia && !this->m_injector->permutation_done());
+
+            /* Footer for injector */
+            if(this->m_settings->getVerbose() > 0)
+                this->m_logger->footer(this->m_injector->name(), "", ""); 
 
 
             /* Report fault verification results */
@@ -578,9 +740,19 @@ Environment::execute()
                 report_combined(composability_csni, csni_threads);
             }
 
-            /* Report ICSNI results */
+            /* Report CSNI results */
             if (this->m_settings->getCombinedICSNI()) {
                 report_combined(composability_icsni, icsni_threads);
+            }
+
+            /* Report CINI results */
+            if (this->m_settings->getCombinedCINI()) {
+                report_combined(composability_cini, cini_threads);
+            }
+
+            /* Report ICINI results */
+            if (this->m_settings->getCombinedICINI()) {
+                report_combined(composability_icini, icini_threads);
             }
 
             /* Report details for combined analysis */

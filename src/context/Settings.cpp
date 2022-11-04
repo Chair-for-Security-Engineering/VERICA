@@ -2,8 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -275,6 +275,10 @@ bool Settings::getFaultFSNI() const {
     return (this->config.get<bool>("fault-injection.enable") && this->config.get<bool>("fault-injection.analysis.f-sni"));
 }
 
+bool Settings::getFaultFINI() const {
+    return (this->config.get<bool>("fault-injection.enable") && this->config.get<bool>("fault-injection.analysis.fini"));
+}
+
 bool Settings::getCombined() const {
     return this->config.get<bool>("combined.enable");
 }
@@ -292,7 +296,15 @@ bool Settings::getCombinedICSNI() const {
 }
 
 bool Settings::getFaultComposability() const {
-    return (getFaultFNI() || getFaultFSNI() || getCombinedCNI() || getCombinedCSNI() || getCombinedICSNI());
+    return (getFaultFNI() || getFaultFSNI() || getCombinedCNI() || getCombinedCSNI() || getCombinedICSNI() || getCombinedCINI() || getCombinedICINI());
+}
+
+bool Settings::getCombinedCINI() const {
+    return (this->config.get<bool>("combined.enable") && this->config.get<bool>("combined.analysis.cini"));
+}
+
+bool Settings::getCombinedICINI() const {
+    return (this->config.get<bool>("combined.enable") && this->config.get<bool>("combined.analysis.icini"));
 }
 
 std::string Settings::getFaultMappingPath() const {
@@ -375,12 +387,15 @@ void Settings::validateSettings(){
     checkSettingRange("fault-injection.analysis.strategy", fault_strategy);
     checkSettingRange("fault-injection.analysis.f-ni", boolean);
     checkSettingRange("fault-injection.analysis.f-sni", boolean);
+    checkSettingRange("fault-injection.analysis.fini", boolean);
 
     // validate Combined settings
     checkSettingRange("combined.enable", boolean);
     checkSettingRange("combined.analysis.c-ni", boolean);
     checkSettingRange("combined.analysis.c-sni", boolean);
     checkSettingRange("combined.analysis.ic-sni", boolean);
+        checkSettingRange("combined.analysis.cini", boolean);
+    checkSettingRange("combined.analysis.icini", boolean);
 }
 
 template<typename T> void Settings::checkSettingRange(const std::string &setting, const std::vector<T> &validSettings){

@@ -2,8 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -107,6 +107,7 @@ class Settings
         std::string getFaultAnalysisStrategy() const;
         bool getFaultFNI() const;
         bool getFaultFSNI() const;
+        bool getFaultFINI() const;
 
 
         /* Combined */
@@ -115,6 +116,8 @@ class Settings
         bool getCombinedCNI() const;
         bool getCombinedCSNI() const;
         bool getCombinedICSNI() const;
+        bool getCombinedCINI() const;
+        bool getCombinedICINI() const;
 
 
 

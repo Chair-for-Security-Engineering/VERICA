@@ -33,6 +33,9 @@ class ConfigurationModelPostprocessing : public Configuration
     public:
         ConfigurationModelPostprocessing(std::string name) : Configuration(name) { };
 
+        /* Initialize strategy */
+        void initialize(const Settings *settings, State *state) override;
+
         /* Filter design for given settings */
         void execute(const Settings *settings, State *state) override;
         

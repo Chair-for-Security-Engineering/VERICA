@@ -27,6 +27,10 @@
 #include "analyzer/ConfigurationFaultSIFA.hpp"
 #include "util.hpp"
 
+void
+ConfigurationFaultSIFA::initialize(const Settings *settings, State *state){
+
+}  
 
 void
 ConfigurationFaultSIFA::execute(const Settings *settings, State *state) 

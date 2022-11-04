@@ -2,7 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -26,7 +27,16 @@
 #include "preprocessor/ConfigurationSCA.hpp"
 
 void
-ConfigurationSCA::execute(const Settings *settings, State *state) {    
+ConfigurationSCA::initialize(const Settings *settings, State *state){
+
+}  
+
+void
+ConfigurationSCA::execute(const Settings *settings, State *state) {
+    // Disable auto dynamic reordering 
+    /**! @todo: dynamic variable reordering not working for side-channel verification */
+    for(auto man : state->m_managers) man.AutodynDisable();
+    
     // Compute shared inputs
     determine_shared_inputs(state);
 

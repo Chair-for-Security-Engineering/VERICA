@@ -1,7 +1,7 @@
 # VERICA - Verification of Combined Attacks
 
 
-This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*](https://eprint.iacr.org/2022/484.pdf).
+This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*](https://eprint.iacr.org/2022/484.pdf). Additionally, we extended the functionalities of VERICA with respect to combined composability notions in [*CINI MINIS: Domain Isolation for Fault and Combined Security*](https://eprint.iacr.org/2022/1131.pdf).
 
 
 ## 1. Features
@@ -53,9 +53,12 @@ Parent              | Parameter                     | Allowed Parameter         
 --                  | `netlist/module`              | --                                            | Not supported yet.
 --                  | `library/file`                | `cell/Instructions.txt`, `cell/nang45.txt`    | Description of supported gate types. Use `Instructions.txt` to process `.nl` files, and `nang45.txt` to process Verilog gate level netlists.
 --                  | `library/name`                | String                                        | Name of the cell. If using `Instructions.txt` set it to `NL`, if using `nang45.txt` set it to `NANG45`.
---                  | `filtering/type`              | `none`, `white`, `black`                      | Type of filtering that should be applied.
---                  | `filtering/whitelist`         | Valid path                                    | Path to file containing modules that should be whitelisted.
---                  | `filtering/blacklist`         | Valid path                                    | Path to file containing modules that should be blacklisted.
+--                  | `filtering/sca/type`          | `none`, `white`, `black`                      | Type of filtering that should be applied to the SCA verification.
+--                  | `filtering/sca/whitelist`     | Valid path                                    | Path to file containing modules that should be whitelisted for the SCA verification.
+--                  | `filtering/sca/blacklist`     | Valid path                                    | Path to file containing modules that should be blacklisted for the SCA verification.
+--                  | `filtering/fia/type`          | `none`, `white`, `black`                      | Type of filtering that should be applied to the FIA verification.
+--                  | `filtering/fia/whitelist`     | Valid path                                    | Path to file containing modules that should be whitelisted for the FIA verification.
+--                  | `filtering/fia/blacklist`     | Valid path                                    | Path to file containing modules that should be blacklisted for the FIA verification.
 --                  | `annotation/file`             | Valid path                                    | Path to a json file containing possible annotations for inputs and outputs. This is mandatory for shared implementations (share domain and share index need to be set).
 --                  | `annotation/apply`            | `true`, `false`                               | Indicates if the annotations should be parsed and applied or not.
 --                  | `cudd/reordering`             | `true`, `false`                               | Enables a dynamic reordering of BDDs supported by the CUDD library. In most cases, VERICA is faster with disabled dynamic reordering.
@@ -80,12 +83,15 @@ Parent              | Parameter                     | Allowed Parameter         
 --                  | `model/location`              | `c`, `s`, `cs`                                | Location parameter for fault injection. Only combinational gates (`c`), only sequential (memory) gates (`s`), both gate types (`cs`).
 --                  | `analysis/reduced_complexity` | `true`, `false`                               | Applies a complexity reduction originally proposed with FIVER.
 --                  | `analysis/strategy`           | `detection`, `correction`, `sifa`, `sfa`      | Defines the analysis strategy applied to a faulted circuit.
---                  | `analysis/f-ni`               | `true`, `false`                               | Enables/disables the verification of the P-NI-property. If enabled, input faults are considered as well.
---                  | `analysis/f-sni`              | `true`, `false`                               | Enables/disables the verification of the P-SNI-property. If enabled, input faults are considered as well.
+--                  | `analysis/f-ni`               | `true`, `false`                               | Enables/disables the verification of the F-NI-property. If enabled, input faults are considered as well.
+--                  | `analysis/f-sni`              | `true`, `false`                               | Enables/disables the verification of the F-SNI-property. If enabled, input faults are considered as well.
+--                  | `analysis/fini`               | `true`, `false`                               | Enables/disables the verification of the FINI-property. If enabled, input faults are considered as well.
 `combined`          | `enable`                      | `true`, `false`                               | Enables/disables combined analysis.
 --                  | `analysis/c-ni`               | `true`, `false`                               | Enables/disables the verification of the C-NI-property.
 --                  | `analysis/c-sni`              | `true`, `false`                               | Enables/disables the verification of the C-SNI-property.
 --                  | `analysis/ic-sni`             | `true`, `false`                               | Enables/disables the verification of the IC-SNI-property.
+--                  | `analysis/cini`               | `true`, `false`                               | Enables/disables the verification of the CINI-property.
+--                  | `analysis/icini`              | `true`, `false`                               | Enables/disables the verification of the ICINI-property.
 
 
 ### 4.2 Expected Output
@@ -306,11 +312,12 @@ Please see `LICENSE` for further license instructions.
 
 ## Publications
 
-J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering](https://eprint.iacr.org/2022/484.pdf). (preprint)
+1. J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering](https://eprint.iacr.org/2022/484.pdf). CHES 2022
+2. J. Feldtkeller, J. Richter-Brockmann, P. Sasdrich, T. Güneysu (2022): [CINI MINIS: Domain Isolation for Fault and Combined Security](https://eprint.iacr.org/2022/1131.pdf). CCS 2022
 
 ### Reproduce results of the case studies
 
-In order to reproduce the results of the case studies from the paper, we prepared a dedicated folder `case-studies/` which contains all configuration files that were used to generate the evaluation results. Additionally, we provide the log files of the experiments containing the numbers reported in the paper's tables. 
+In order to reproduce the results of the case studies from the papers, we prepared a dedicated folder `case-studies/` which contains all configuration files that were used to generate the evaluation results. Additionally, we provide the log files of the experiments containing the numbers reported in the paper's tables. 
 
 
 ## Acknowledgment

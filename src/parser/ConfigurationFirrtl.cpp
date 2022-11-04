@@ -2,8 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Niklas Entschladen (niklas.entschladen@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2022, Pascal Sasdrich
@@ -28,6 +28,11 @@
 
 #include "parser/firrtl/SkipperFirrtl.hpp"
 #include "parser/firrtl/GrammarFirrtl.hpp"
+
+void
+ConfigurationFirrtl::initialize(const Settings *settings, State *state){
+
+}
 
 void
 ConfigurationFirrtl::execute(const Settings *settings, State *state)

@@ -74,7 +74,8 @@
             "reduced_complexity": false,
             "strategy": "detection",
             "f-ni": false,
-            "f-sni": false
+            "f-sni": false,
+            "fini": false
         }
     },
     "combined": {
@@ -82,7 +83,9 @@
         "analysis": {
             "c-ni": false,
             "c-sni": false,
-            "ic-sni": false
+            "ic-sni": false,
+            "cini": false,
+            "icini": false
         }
     }
 }

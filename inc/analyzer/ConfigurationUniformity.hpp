@@ -2,7 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -35,7 +36,7 @@ class ConfigurationUniformity : public Configuration
         ConfigurationUniformity(std::string name) : Configuration(name) { };
     
         /* Initialize analysis for given context & configuration */
-        void initialize(State *state);
+        void initialize(const Settings *settings, State *state) override;
 
         /* Perform analysis for given context & configuration */
         void execute(const Settings *settings, State *state) override;
@@ -52,7 +53,7 @@ class ConfigurationUniformity : public Configuration
 
         int m_variable_count;
         
-        std::map<int, std::vector<const verica::Wire*>> m_output_shares;
+        std::vector<std::map<int, std::vector<const verica::Wire*>>> m_output_shares;
 };
 
 #endif // __VERICA_ANALYZER_CONFIGURATION_UNIFORMITY_HPP_

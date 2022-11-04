@@ -2,7 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -35,6 +36,11 @@
 
 #include <string>
 #include <vector>
+
+void
+NetlistComposer::initialize(const Settings *settings, State *state){
+
+} 
 
 void
 NetlistComposer::execute(const Settings *settings, State *state)

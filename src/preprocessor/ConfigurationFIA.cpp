@@ -2,7 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -25,6 +26,11 @@
 
 #include "parser/Parser.hpp"
 #include "preprocessor/ConfigurationFIA.hpp"
+
+void
+ConfigurationFIA::initialize(const Settings *settings, State *state){
+
+}  
 
 void
 ConfigurationFIA::execute(const Settings *settings, State *state) {
@@ -70,11 +76,12 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
 
             state->m_na_security.push_back(0);
             state->m_sna_security.push_back(0);
+            state->m_fini_security.push_back(0);
+            state->m_cini_security.push_back(0);
 
             state->m_current_number_of_input_faults.push_back(0);
-        }
-        // state->m_map_unshared_outputs_faulty.resize(settings->getCores());
-        // state->m_map_unshared_outputs_golden.resize(settings->getCores());
+        }   
+
         state->m_leaking_fault_injections.resize(settings->getCores());
         state->m_current_fault_injections.resize(settings->getCores());
         state->m_unshared_output_combinations.resize(settings->getCores());
@@ -98,19 +105,6 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
                             state->m_data_output_wires.push_back(p->fan_in());
             }
         }
-
-
-        // // For SFA, and SIFA, the unshared outouts are required
-        // if(settings->getFaultAnalysisStrategy() == "sifa" || settings->getFaultAnalysisStrategy() == "sfa"){
-        //     for(int core=0; core < settings->getCores(); ++core){
-        //         for (auto p : state->m_netlist_model->module_under_test()->output_pins()) {
-        //             if(std::find(state->m_data_output_wires.begin(), state->m_data_output_wires.end(), p->fan_in()) != state->m_data_output_wires.end()){
-        //                 state->m_map_unshared_outputs_faulty[core][p->share_index()].push_back(p->fan_in()->faulty_functions(core));
-        //                 state->m_map_unshared_outputs_golden[core][p->share_index()].push_back(p->fan_in()->golden_functions(core));
-        //             }
-        //         }
-        //     }
-        // }
     }
 }
 
@@ -137,7 +131,10 @@ ConfigurationFIA::report(std::string service, const Logger *logger, const Settin
             logger->log(service, this->m_name, "   FSNI:            true");
         else
             logger->log(service, this->m_name, "   FSNI:            false");
-
+        if(settings->getFaultFINI())
+            logger->log(service, this->m_name, "   FINI:            true");
+        else
+            logger->log(service, this->m_name, "   FINI:            false");
         if(settings->getFaultAnalysisStrategy() == "sifa" || settings->getFaultAnalysisStrategy() == "sfa"){
             if(state->m_error_flags.empty()) {
                 logger->log(service, this->m_name, "WARNING: Countermeasures for the selected strategy (" + settings->getFaultAnalysisStrategy() + ") usually implements error flags which were were not selected!");

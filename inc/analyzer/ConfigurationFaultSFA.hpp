@@ -34,7 +34,10 @@ class ConfigurationFaultSFA : public Configuration
     public:
 
         ConfigurationFaultSFA(std::string name) : Configuration(name) { };
-    
+
+        /* Initialize strategy */
+        void initialize(const Settings *settings, State *state) override;
+            
         /* Perform analysis for given context & configuration */
         void execute(const Settings *settings, State *state) override;
 

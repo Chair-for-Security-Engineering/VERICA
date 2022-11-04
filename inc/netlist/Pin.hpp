@@ -104,6 +104,16 @@ namespace verica
             const int& share_domain() const { return m_share_domain; }
 
             /** 
+             * Each input and output pin can be associated with a fault domain (for duplication based countermeasures).
+             * The i-th fault domain indicates the i-th duplication of the original input.
+             *
+             * @brief Accessor function for pin fault domain.
+             *
+             * @returns The fault domain of the pin.
+             */
+            const int& fault_domain() const { return m_fault_domain; }
+
+            /** 
              * Each pin is either an input or an output pin of the parent module.
              *
              * @brief Accessor function for the pin direction.
@@ -216,12 +226,15 @@ namespace verica
             int m_share_index = -1;         /**< Share index of the pin (Masking) */
             int m_share_domain = -1;        /**< Share domain of the pin (Masking) */
 
+            /* Duplication */
+            int m_fault_domain = -1;        /**< Fault domain of the pin (Duplication) */
+
             /* Direction */
             bool m_is_input;                /**< Input/output pin (Direction) */
 
             /* Annotations */
             Flag m_port_type = None;        /**< Type of the pin (Annotations) */
-            int m_gate_identifier = -1;
+            int m_gate_identifier = -1;     /**< Identifies the Boolean function */
 
             /* Constant input */
             bool m_const_input = false;

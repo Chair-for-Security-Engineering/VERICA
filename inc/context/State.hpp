@@ -2,8 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -34,7 +34,7 @@
 #include "context/FaultLibrary.hpp"
 
 // Used for SCA analysis
-enum Composability {NONE, NI, SNI, PINI, CNI, CSNI, ICSNI };
+enum Composability { NONE, NI, SNI, PINI, CNI, CSNI, ICSNI, CINI, ICINI };
 
 class State
 {
@@ -56,6 +56,9 @@ class State
         std::map<int, std::vector<const verica::Wire*>> m_shared_inputs;
         std::vector<const verica::Wire*> m_min_shared_inputs;
         std::vector<const verica::Wire*> m_shared_variables;
+
+        std::map<int, std::vector<const verica::Pin*>> m_shared_outputs;
+        std::vector<const verica::Pin*> m_min_shared_outputs;
         unsigned int m_num_output_shares = 0;
 
         /* SCA: Probe combinations */
@@ -92,6 +95,8 @@ class State
         std::vector<double> m_scenarios;
         std::vector<double> m_na_security;
         std::vector<double> m_sna_security;
+        std::vector<double> m_fini_security;
+        std::vector<double> m_cini_security;
 
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> m_current_fault_injections;
         std::vector<int> m_current_number_of_input_faults;
@@ -100,6 +105,8 @@ class State
         std::vector<std::pair<int, int>> m_verified_cni_orders = {std::make_pair(0,0)};
         std::vector<std::pair<int, int>> m_verified_csni_orders = {std::make_pair(0,0)};
         std::vector<std::pair<int, int>> m_verified_icsni_orders = {std::make_pair(0,0)};
+        std::vector<std::pair<int, int>> m_verified_cini_orders = {std::make_pair(0,0)};
+        std::vector<std::pair<int, int>> m_verified_icini_orders = {std::make_pair(0,0)};
 
         /* Fault/Probe Pair for Visualization */
         std::vector<const verica::Wire*> m_visualization_faults;

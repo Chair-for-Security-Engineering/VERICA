@@ -3,7 +3,7 @@
     {
         "verbose": 2,
         "cores": 4,
-        "memory": 4,
+        "memory": 2,
         "netlist":
         {
             "file": "test/dom/dom1.v",
@@ -47,7 +47,6 @@
             "partial": true
         }
     },
-
     "side-channel":
     {
         "enable": true,
@@ -79,7 +78,7 @@
         "enable": false,
         "configuration":
         {
-            "number": 1,
+            "number": 2,
             "variate": 1,
             "interrupt": false
         },
@@ -93,7 +92,8 @@
             "reduced_complexity": false,
             "strategy": "correction",
             "f-ni": false,
-            "f-sni": false
+            "f-sni": false,
+            "fini": false
         }
     },
 
@@ -103,8 +103,10 @@
         "analysis":
         {
             "c-ni": false,
-            "c-sni": true,
-            "ic-sni": false
+            "c-sni": false,
+            "ic-sni": false,
+            "cini": false,
+            "icini": false
         }
     }
 }

@@ -2,8 +2,8 @@
     "general":
     {
         "verbose": 2,
-        "cores": 16,
-        "memory": 8,
+        "cores": 4,
+        "memory": 2,
         "netlist":
         {
             "file": "test/case-study-nina/and_snina_d1_k1.v",
@@ -93,7 +93,8 @@
             "reduced_complexity": false,
             "strategy": "detection",
             "f-ni": false,
-            "f-sni": false
+            "f-sni": false,
+            "fini": false
         }
     },
 
@@ -104,7 +105,9 @@
         {
             "c-ni": false,
             "c-sni": true,
-            "ic-sni": false
+            "ic-sni": false,
+            "cini": false,
+            "icini": false
         }
     }
 }

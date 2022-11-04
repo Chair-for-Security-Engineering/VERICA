@@ -43,6 +43,17 @@
             "3": ["data_out[3]", "data_out[7]", "data_out[11]"]
         }
         
+    },
+    "fault_domain":
+    {
+        "input":
+        {
+
+        },
+        "output":
+        {
+
+        }
     }
 
 }

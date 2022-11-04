@@ -1,0 +1,41 @@
+ 
+****************************************
+Report : area
+Design : CINI_HPC2
+Version: E-2010.12-SP2
+Date   : Thu Apr 28 11:25:39 2022
+****************************************
+
+Library(s) Used:
+
+    NangateOpenCellLibrary (File: /usr/flow/designkits/synthesis/nangate_45nm/NangateopenCellLibrary_fast.db)
+
+Number of ports:                           21
+Number of nets:                           116
+Number of cells:                          102
+Number of combinational cells:             66
+Number of sequential cells:                36
+Number of macros:                           0
+Number of buf/inv:                          6
+Number of references:                       6
+
+Combinational area:         71.819999
+Noncombinational area:     162.791994
+Net Interconnect area:      undefined  (Wire load has zero net area)
+
+Total cell area:           234.611993
+Total area:                 undefined
+
+Hierarchical area distribution
+------------------------------
+
+                                  Global cell area          Local cell area
+                                  ------------------  --------------------------- 
+Hierarchical cell                 Absolute   Percent  Combi-    Noncombi-  Black
+                                  Total      Total    national  national   boxes   Design
+--------------------------------  ---------  -------  --------  ---------  ------  ---------
+CINI_HPC2                          234.6122    100.0   71.8200   162.7921  0.0000  CINI_HPC2
+--------------------------------  ---------  -------  --------  ---------  ------  ---------
+Total                                                  71.8200   162.7921  0.0000
+
+1

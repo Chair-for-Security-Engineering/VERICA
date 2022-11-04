@@ -40,8 +40,18 @@
             "2": ["share0_out[2]", "share1_out[2]", "c_out"],
             "3": ["share0_out[3]", "share1_out[3]"],
             "4": ["share0_out[4]", "share1_out[4]"]
+        }   
+    },
+    "fault_domain":
+    {
+        "input":
+        {
+
+        },
+        "output":
+        {
+
         }
-        
     }
 
 }

@@ -150,6 +150,7 @@ namespace verica
 
             void set_pin_share_domain(int uid, int share_domain);
             void set_pin_share_index(int uid, int share_index);
+            void set_pin_fault_domain(int uid, int fault_domain);
             void set_pin_type(Pin *p, Flag port_type);
             void set_pin_type(int uid, Flag port_type);
             void set_pin_gate_identifier(int uid, int gate_identifier);

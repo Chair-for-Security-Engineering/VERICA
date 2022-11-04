@@ -2,8 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -253,7 +253,7 @@ void Logger::progress(unsigned int counter, unsigned int max) const
             }
             std::cout << "] " << int(progress * 100.0) << " %\r";
             std::cout.flush();
-            if (int(progress * 100.0) >= 100) std::cout << "\33[2K\033[A";
+            if (int(progress * 100.0) >= 100) std::cout << "\33[2K\033[A \n";
         }
     }
 }

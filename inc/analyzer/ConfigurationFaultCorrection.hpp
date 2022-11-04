@@ -34,13 +34,18 @@ class ConfigurationFaultCorrection : public Configuration
     public:
 
         ConfigurationFaultCorrection(std::string name) : Configuration(name) { };
+
+        /* Initialize strategy */
+        void initialize(const Settings *settings, State *state) override;
     
         /* Perform analysis for given context & configuration */
         void execute(const Settings *settings, State *state) override;
 
         /* Report analysis results for given context & configuration */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
-        
+    
+    private:
+        std::vector<std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>>> m_effective_fault_injections;
 };
 
 #endif // __VERICA_ANALYZER_CONFIGURATION_FAULT_DETECTION_HPP_

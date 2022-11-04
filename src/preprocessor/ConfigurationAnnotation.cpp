@@ -36,10 +36,15 @@ using boost::spirit::qi::char_;
 using boost::spirit::qi::as_string;
 
 void
+ConfigurationAnnotation::initialize(const Settings *settings, State *state){
+
+}  
+
+void
 ConfigurationAnnotation::execute(const Settings *settings, State *state) {
     if(settings->getAnnotation()){
         /* Read annotation file */
-        boost::property_tree::read_json(settings->getAnnotationFilePath(), annotations);
+        boost::property_tree::read_json(settings->getAnnotationFilePath(), m_annotations);
 
         /* Construct a mapping between wire names and wire pointers */
         std::map<std::string, const verica::Wire*> name_to_wire;
@@ -60,11 +65,17 @@ ConfigurationAnnotation::execute(const Settings *settings, State *state) {
         /* Parse and set share index for inputs */
         parse_and_set_share_index(state, name_to_wire, true);
 
-        /* Parse and set share domain for inputs */
+        /* Parse and set share domain for outputs */
         parse_and_set_share_domain(state, name_to_wire, false);
 
-        /* Parse and set share index for inputs */
+        /* Parse and set share index for outputs */
         parse_and_set_share_index(state, name_to_wire, false);
+
+        /* Parse and set fault domain for inputs */
+        parse_and_set_fault_domain(state, name_to_wire, true);
+
+        /* Parse and set fault domain for outputs */
+        parse_and_set_fault_domain(state, name_to_wire, false);
     }
 }
 
@@ -146,6 +157,15 @@ ConfigurationAnnotation::report(std::string service, const Logger *logger, const
                     logger->log(service, this->m_name, ITEM + s); 
             }
         } 
+
+        // Fault Domain
+        logger->log(service, this->m_name, Logger::reporting_number(m_num_of_annotated_fault_domain_wires, "wire was", "wires were") + " tagged with a fault domain.");
+        if(m_fault_domain_wires_not_found.size() != 0){
+            logger->log(service, this->m_name, "WARNING: " + Logger::reporting_number(m_fault_domain_wires_not_found.size(), "wire", "wires") + " could not be identified in the MUT.");    
+            if(settings->getVerbose() > 2)
+                for(auto s : m_fault_domain_wires_not_found)
+                    logger->log(service, this->m_name, ITEM + s); 
+        }
     } else {
         logger->log(service, this->m_name, "Annotation parsing disabled.");
     }
@@ -168,7 +188,7 @@ ConfigurationAnnotation::parse_and_set_types(State *state, std::map<std::string,
 
     for(auto key : keywords){
         std::vector<std::string> names;
-        for(auto elem : annotations.get_child("type." + key)) names.push_back(elem.second.get_value<std::string>());
+        for(auto elem : m_annotations.get_child("type." + key)) names.push_back(elem.second.get_value<std::string>());
 
 
         std::vector<std::string> single_wire_names;
@@ -222,7 +242,7 @@ void
 ConfigurationAnnotation::parse_and_set_piids(State *state, std::map<std::string, const verica::Wire*> &name_to_wire){    
     /* Get for each variable the corresponding ports */
     std::map<int, std::vector<std::string>> inputs;
-    for(auto piid : annotations.get_child("primary_input_identifier")){
+    for(auto piid : m_annotations.get_child("primary_input_identifier")){
         std::vector<std::string> temp;
         for(auto elem : piid.second){
             temp.push_back(elem.second.get_value<std::string>());
@@ -252,7 +272,7 @@ ConfigurationAnnotation::parse_and_set_share_domain(State *state, std::map<std::
     std::map<int, std::vector<std::string>> inputs;
     std::string path = "share_domain";
     path += for_input ? ".input" : ".output";
-    for(auto domain : annotations.get_child(path)){
+    for(auto domain : m_annotations.get_child(path)){
         std::vector<std::string> temp;
         for(auto elem : domain.second){
             temp.push_back(elem.second.get_value<std::string>());
@@ -290,7 +310,7 @@ ConfigurationAnnotation::parse_and_set_share_index(State *state, std::map<std::s
     std::map<int, std::vector<std::string>> inputs;
     std::string path = "share_index";
     path += for_input ? ".input" : ".output";
-    for(auto index : annotations.get_child(path)){
+    for(auto index : m_annotations.get_child(path)){
         std::vector<std::string> temp;
         for(auto elem : index.second){
             temp.push_back(elem.second.get_value<std::string>());
@@ -312,6 +332,40 @@ ConfigurationAnnotation::parse_and_set_share_index(State *state, std::map<std::s
                 } else {
                     for(auto p : w->target_pins())
                         state->m_netlist_model->set_pin_share_index(p->uid(), index_pair.first);
+                }
+            }        
+        }
+    }
+}
+
+void
+ConfigurationAnnotation::parse_and_set_fault_domain(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input){    
+    /* Get for each variable the corresponding ports */
+    std::map<int, std::vector<std::string>> inputs;
+    std::string path = "fault_domain";
+    path += for_input ? ".input" : ".output";
+    for(auto domain : m_annotations.get_child(path)){
+        std::vector<std::string> temp;
+        for(auto elem : domain.second){
+            temp.push_back(elem.second.get_value<std::string>());
+        }
+        inputs[std::stoi(domain.first.data())] = temp;        
+    }
+
+    /* Set the share domains */ 
+    for(auto domain_pair : inputs){
+        for(auto s : domain_pair.second){   
+            // parse string
+            std::vector<std::string> wire_names = parse_wire(s);
+            std::vector<const verica::Wire*> wire_ids = create_list_of_vlog_wires(name_to_wire, wire_names, m_fault_domain_wires_not_found);
+            m_num_of_annotated_fault_domain_wires += wire_ids.size();
+
+            for(auto w : wire_ids){
+                if(for_input){
+                    state->m_netlist_model->set_pin_fault_domain(w->source_pin()->uid(), domain_pair.first);
+                } else {
+                    for(auto p : w->target_pins())
+                        state->m_netlist_model->set_pin_fault_domain(p->uid(), domain_pair.first);
                 }
             }        
         }

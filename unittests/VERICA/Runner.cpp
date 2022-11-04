@@ -2,8 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Niklas Entschladen (niklas.entschladen@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -35,6 +35,7 @@
 
 int main(int argc, char* argv[], char* envp[]){
     /* Start unit tests */
-    int res = boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
+    int exit_code = boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
+	return exit_code;
 }
 #endif

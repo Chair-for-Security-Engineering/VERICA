@@ -2,8 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Niklas Entschladen (niklas.entschladen@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
- *           https://eprint.iacr.org/2021/936.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2022, Pascal Sasdrich
@@ -33,6 +33,9 @@ class ConfigurationFirrtl : public Configuration
 {
     public:
         ConfigurationFirrtl(std::string name) : Configuration(name) { };
+
+        /* Initialize strategy */
+        void initialize(const Settings *settings, State *state) override;
 
         /* Parse design for given settings */
         void execute(const Settings *settings, State *state) override;

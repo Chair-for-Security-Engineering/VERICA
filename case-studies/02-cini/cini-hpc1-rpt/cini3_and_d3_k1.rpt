@@ -1,0 +1,41 @@
+ 
+****************************************
+Report : area
+Design : CINI3
+Version: E-2010.12-SP2
+Date   : Mon Apr 25 10:43:00 2022
+****************************************
+
+Library(s) Used:
+
+    NangateOpenCellLibrary (File: /usr/flow/designkits/synthesis/nangate_45nm/NangateopenCellLibrary_fast.db)
+
+Number of ports:                           50
+Number of nets:                           489
+Number of cells:                          452
+Number of combinational cells:            356
+Number of sequential cells:                96
+Number of macros:                           0
+Number of buf/inv:                          8
+Number of references:                       8
+
+Combinational area:        389.423992
+Noncombinational area:     434.111984
+Net Interconnect area:      undefined  (Wire load has zero net area)
+
+Total cell area:           823.535976
+Total area:                 undefined
+
+Hierarchical area distribution
+------------------------------
+
+                                  Global cell area          Local cell area
+                                  ------------------  --------------------------- 
+Hierarchical cell                 Absolute   Percent  Combi-    Noncombi-  Black
+                                  Total      Total    national  national   boxes   Design
+--------------------------------  ---------  -------  --------  ---------  ------  ---------
+CINI3                              823.5344    100.0  389.4242   434.1122  0.0000  CINI3
+--------------------------------  ---------  -------  --------  ---------  ------  ---------
+Total                                                 389.4242   434.1122  0.0000
+
+1

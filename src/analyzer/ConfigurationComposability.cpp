@@ -2,7 +2,8 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
- * DOCUMENT: https://eprint.iacr.org/2020/634.pdf
+ * DOCUMENT: https://eprint.iacr.org/2022/484
+ *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
  * Copyright (c) 2021, Pascal Sasdrich
@@ -25,8 +26,7 @@
 
 #include "analyzer/ConfigurationComposability.hpp"
 
-ConfigurationComposability::ConfigurationComposability(std::string name, const Composability type) : Configuration(name)
-{
+ConfigurationComposability::ConfigurationComposability(std::string name, const Composability type) : Configuration(name) {
     this->m_type = type;
 }
 
@@ -34,14 +34,12 @@ void
 ConfigurationComposability::initialize(const Settings *settings, State *state) {
     /* Get maximum order of security */
     this->m_max_order = (settings->getSideChannelOrder() > 0) ? settings->getSideChannelOrder() : state->m_min_shared_inputs.size() - 1;
-    //this->m_max_order -= (m_type == CNI || m_type == CSNI) ? state->m_current_number_of_injected_faults : 0;
-    if(m_type == CNI || m_type == CSNI){
+    if(m_type == CNI || m_type == CSNI || m_type == CINI){
         if(this->m_max_order > state->m_current_number_of_injected_faults) 
             this->m_max_order -= state->m_current_number_of_injected_faults;
         else
             this->m_max_order = 0;
     }
-
     
     /* Clear failing probes (from previous runs) */
     this->m_failing_probes.clear();
@@ -52,11 +50,16 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
     /* Current thread number */
     int threadNum = omp_get_thread_num();
 
-    /* Trivial cases: No probes, unshared input, or sharing smaller than target order */
-    if (this->m_max_order == 0 || state->m_min_shared_inputs.size() < 2 || state->m_min_shared_inputs.size() <= this->m_max_order){
+    /* Trivial cases: No probes, unshared input */
+    if (this->m_max_order == 0 || state->m_min_shared_inputs.size() < 2){ 
         this->m_independent = false;
-        this->m_failing_probes.push_back(state->m_min_shared_inputs);
     } else {
+        /* Trivial case: sharing smaller than target order */
+        if(state->m_min_shared_inputs.size() <= this->m_max_order){
+            this->m_independent = false;
+            this->m_failing_probes.push_back(state->m_min_shared_inputs);   
+        } 
+
         /* Current combination of probes */
         std::vector<const verica::Wire*> extended_probes;
         
@@ -71,7 +74,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         }
 
         /* Define share combination threshold (NI/SNI/PINI) */
-        int input_faults = ((this->m_type == CNI || this->m_type == CSNI) ? (state->m_current_number_of_injected_faults - state->m_current_number_of_input_faults[threadNum]) : 0);
+        int input_faults = ((this->m_type == CNI || this->m_type == CSNI || this->m_type == CINI) ? (state->m_current_number_of_injected_faults - state->m_current_number_of_input_faults[threadNum]) : 0);
         int threshold = (this->m_current_probes.size() + input_faults) - ((this->m_type == SNI || this->m_type == CSNI || this->m_type == ICSNI) ? num_output_probes : 0);
 
 
@@ -91,7 +94,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                 // ensure that only one of the duplicated variables is added to the extended probes
                 if(std::find(mut->input_pins().begin(), mut->input_pins().end(), reg->source_pin()) != mut->input_pins().end()){
                     for(auto ext : extended_probes){
-                        if(reg->primary_input_identifier() == ext->primary_input_identifier()) var_included = true;   // variable is already inclued
+                        if(reg->primary_input_identifier() == ext->primary_input_identifier()) var_included = true;   // variable is already included
                     }
                 }
                 if(!var_included) extended_probes.push_back(reg);
@@ -105,7 +108,8 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         }
 
         /* Collect observation & support */
-        for (int64_t comb = 1; comb < (1 << extended_probes.size()); comb++) {
+        // bool independent = true;
+        for (uint64_t comb = 1; comb < (1 << extended_probes.size()); comb++) {
 
             BDD observe = state->m_managers[threadNum].bddOne();
             std::set<const verica::Wire*> support;
@@ -138,7 +142,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                         /* Sort shares into buckets */
                         shares[idx].push_back(input);
 
-                        if (m_type == PINI)
+                        if (m_type == PINI || m_type == CINI || m_type == ICINI)
                         {
                             domains.insert(input->source_pin()->share_domain());
                             trivial &= (domains.size() <= (unsigned int)threshold); 
@@ -187,9 +191,8 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                     domains.clear();
                     for(auto w : combination){
                         domains.insert(w->source_pin()->share_domain());
-                    }                    
-
-                    if (m_type != PINI || (domains.size() <= (unsigned int)threshold)) {
+                    }
+                    if ((m_type != PINI && m_type != CINI && m_type != ICINI) || (domains.size() <= (unsigned int)threshold)) {
                         this->m_independent = true;
 
                         std::vector<uint32_t> track_primary_input_idx;
@@ -258,12 +261,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
 }
 
 void
-ConfigurationComposability::finalize(const Settings *settings, State *state) 
-{
-    /* Trivial probe combination */
-    if (settings->getSideChannelOrder() == 0)
-        this->m_failing_probes.push_back(state->m_min_shared_inputs);    
-
+ConfigurationComposability::finalize(const Settings *settings, State *state) {
     /* Sort failing probe combinations by size (small to large) */
     std::sort(this->m_failing_probes.begin(), this->m_failing_probes.end(), [](const std::vector<const verica::Wire*> & a, const std::vector<const verica::Wire*> & b){ return a.size() < b.size(); });
 }
@@ -340,29 +338,31 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
         }
     }
 
-    /* Print CNI/CSNI/ICSNI related verification results */
+    /* Print CNI/CSNI/ICSNI/CINI/ICINI related verification results */
     bool success = true;
 
-    if(this->m_type == CNI || this->m_type == CSNI || this->m_type == ICSNI){
+    if(this->m_type == CNI || this->m_type == CSNI || this->m_type == ICSNI || this->m_type == CINI || this->m_type == ICINI){
         if (settings->getVerbose() >= VBASE) {            
             /* Check Fault Security */
             double secure = 0;
             if(this->m_type == CNI){
                 for(auto v : state->m_na_security) secure += v;
-            } else if (this->m_type == CSNI || this->m_type == ICSNI) {
+            } else if(this->m_type == CSNI || this->m_type == ICSNI) {
                 for(auto v : state->m_sna_security) secure += v;
-            } 
+            } else {
+                for(auto v : state->m_cini_security) secure += v;
+            }
 
             /* Some pre-computations (targeted and verified security orders) */
             int k_target = state->m_current_number_of_injected_faults;                                                          // number of injected faults
-            int d_target = (this->m_type == ICSNI) ? this->m_max_order : this->m_max_order + k_target;                          // security order d of the gadget under test (verified SCA order + number of injected faults)
-            
+            int d_target = (this->m_type == ICSNI || this->m_type == ICINI) ? this->m_max_order : this->m_max_order + k_target; // security order d of the gadget under test (verified SCA order + number of injected faults)
+
             int verified_d = (this->m_failing_probes.size() != 0) ? this->m_failing_probes[0].size() - 1 : this->m_max_order;   // verified order of the SCA verification
             int verified_k = (secure == 0) ? k_target : -1;                                                                     // verified order of the FIA verification
 
             /* Track security orders */
             if(verified_k != -1){
-                std::pair<int, int> order = (this->m_type == ICSNI) ? std::make_pair(verified_d, verified_k) : std::make_pair(verified_d + verified_k, verified_k);    // new order
+                std::pair<int, int> order = (this->m_type == ICSNI || this->m_type == ICINI) ? std::make_pair(verified_d, verified_k) : std::make_pair(verified_d + verified_k, verified_k);    // new order
                 std::vector<std::pair<int, int>> *verified_orders;
                 if(this->m_type == CNI) {
                     verified_orders = &state->m_verified_cni_orders;
@@ -370,7 +370,11 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
                     verified_orders = &state->m_verified_csni_orders;
                 } else if(this->m_type == ICSNI) {
                     verified_orders = &state->m_verified_icsni_orders;                    
-                } 
+                } else if(this->m_type == CINI) {
+                    verified_orders = &state->m_verified_cini_orders;
+                } else {
+                    verified_orders = &state->m_verified_icini_orders;
+                }
 
                 if(order.second == 0){
                     // push back verified SCA security orders without fault injections
@@ -406,7 +410,7 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
     } 
 
     /* Print final result to footer */
-    if(this->m_type == CNI || this->m_type == CSNI || this->m_type == ICSNI){
+    if(this->m_type == CNI || this->m_type == CSNI || this->m_type == ICSNI || this->m_type == CINI || this->m_type == ICINI){
         if (success) {
             logger->footer(service, this->m_name, SUCCESS); 
         } else {
@@ -446,7 +450,13 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
             } else if(this->m_type == ICSNI) {
                 verified_orders = state->m_verified_icsni_orders;
                 type = "ICSNI";
-            }             
+            } else if(this->m_type == CINI) {
+                verified_orders = state->m_verified_cini_orders;
+                type = "CINI";
+            } else {
+                verified_orders = state->m_verified_icini_orders;
+                type = "ICINI";
+            }           
 
             // report analysis results
             logger->header("ANALYSIS REPORT " + type);

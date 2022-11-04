@@ -27,6 +27,10 @@
 #include "analyzer/ConfigurationFaultSFA.hpp"
 #include "util.hpp"
 
+void
+ConfigurationFaultSFA::initialize(const Settings *settings, State *state){
+
+}  
 
 void
 ConfigurationFaultSFA::execute(const Settings *settings, State *state) 

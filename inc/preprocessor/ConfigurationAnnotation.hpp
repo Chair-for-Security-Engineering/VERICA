@@ -44,6 +44,9 @@ class ConfigurationAnnotation : public Configuration
     public:
         ConfigurationAnnotation(std::string name) : Configuration(name) { };
 
+        /* Initialize strategy */
+        void initialize(const Settings *settings, State *state) override;
+
         /* Filter design for given settings */
         void execute(const Settings *settings, State *state) override;
         
@@ -81,6 +84,13 @@ class ConfigurationAnnotation : public Configuration
         void parse_and_set_share_index(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input);
 
         /**
+         * @brief Parses and sets the fault domains.
+         * @param settings Pointer to the settings.
+         * @param state Pointer to the state.
+        */
+        void parse_and_set_fault_domain(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input);
+
+        /**
          * @brief Gets the parsed list from the annotation.json file and searches for the corresponding wires in the netlist. A vector of the found wires is returned.
          * @param state Pointer to the state.
          * @param name_to_wire A map between the wire names and the wires.
@@ -97,7 +107,7 @@ class ConfigurationAnnotation : public Configuration
         
 
         /* Boost property tree */
-        boost::property_tree::ptree annotations;
+        boost::property_tree::ptree m_annotations;
 
         /* Member variables */
         int m_num_of_annotated_clock_wires = 0;
@@ -120,6 +130,9 @@ class ConfigurationAnnotation : public Configuration
 
         int m_num_of_annotated_share_index_wires = 0;
         std::vector<std::string> m_share_index_wires_not_found;
+
+        int m_num_of_annotated_fault_domain_wires = 0;
+        std::vector<std::string> m_fault_domain_wires_not_found;        
 };
 
 #endif // __VERICA_PREPROCESSOR_CONFIGURATION_ANNOTATION_HPP_

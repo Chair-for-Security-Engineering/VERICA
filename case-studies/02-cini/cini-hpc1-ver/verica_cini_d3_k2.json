@@ -1,0 +1,103 @@
+{
+    "general":
+    {
+        "verbose": 3,
+        "cores": 16,
+        "memory": 8,
+        "netlist":
+        {
+            "file": "test/cini/cini3_and_d3_k2.v",
+            "name": "",
+            "module": ""
+        },
+        "library":
+        {
+            "file": "cell/nang45.txt",
+            "name": "NANG45"
+        },
+        "filtering":
+        {
+            "type": "none",
+            "whitelist": "model/whitelist",
+            "blacklist": "model/blacklist"
+        },
+        "annotation":
+        {
+            "file": "test/cini/annotations-cini3.json",
+            "apply": true
+        },
+        "cudd":
+        {
+            "reordering": false
+        },
+        "visualization":
+        {
+            "enable": true,
+            "full": true,
+            "partial": true
+        }
+    },
+
+    "side-channel":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "order": 3,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": false
+        },
+        "model":
+        {
+            "glitches": true,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis": 
+        {
+            "uniformity": false,
+            "probing": false,
+            "p-ni": true,
+            "p-sni": true,
+            "pini": false
+        }
+    },
+
+    "fault-injection":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "number": 2,
+            "variate": 1,
+            "interrupt": false
+        },
+        "model": 
+        {
+            "mapping": "model/setreset.txt",
+            "location": "cs"
+        },
+        "analysis":
+        {
+            "reduced_complexity": false,
+            "strategy": "correction",
+            "f-ni": false,
+            "f-sni": false,
+            "fini": false
+        }
+    },
+
+    "combined": 
+    {
+        "enable": true,
+        "analysis":
+        {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false,
+            "cini": true,
+            "icini": false
+        }
+    }
+}

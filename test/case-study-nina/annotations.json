@@ -42,6 +42,16 @@
             "0": ["port_c_0", "port_c_1", "port_c_2"]
         }
         
-    }
+    },
+    "fault_domain":
+    {
+        "input":
+        {
 
+        },
+        "output":
+        {
+
+        }
+    }
 }

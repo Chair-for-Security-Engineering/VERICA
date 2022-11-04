@@ -25,7 +25,10 @@
 
 #include "preprocessor/ConfigurationModelPostprocessing.hpp"
 
+void
+ConfigurationModelPostprocessing::initialize(const Settings *settings, State *state){
 
+}  
 
 void
 ConfigurationModelPostprocessing::execute(const Settings *settings, State *state) {
