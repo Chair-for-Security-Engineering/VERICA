@@ -284,6 +284,45 @@ Based on the configuration file, different SCA and FIA analysis strategies are l
 
 Eventually, VERICA supports the visualization as a `.dot`-graph of the design under test. It is possible to create a graph for the entire netlist model or only for the part that is involved in security violations. Additionally, leaking probes and effective faults (if occur) are highlighted in the graph which should assist the designer to fix flawed parts. 
  
+## Synopsis Design Compiler
+
+Most of the examples in the repository are generated with Synopsis Design Compiler using the standard cell library NANG45. The following commands should be used for the synthesis script in order to generate a Verilog gate-level netlist that can be processed by VERICA.
+
+```
+set_dont_use [get_lib_cells NangateOpenCellLibrary/FA*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/HA*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/AOI*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/OAI*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/MUX*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/CLKBUF*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/OR3*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/OR4*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/OR5*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/NOR3*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/NOR4*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/NOR5*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/XNOR3*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/XNOR4*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/XNOR5*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/XOR3*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/XOR4*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/XOR5*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/AND3*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/AND4*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/AND5*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/NAND3*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/NAND4*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/NAND5*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/BUF*]
+```
+
+Additionally, you can use the flowing commands to force the synthesizer to compile, keep the hierarchy and make a flattened netlist of the design.
+
+```
+compile -map_effort medium -area_effort medium
+compile_ultra -no_autoungroup
+ungroup -all -flatten
+```
 
 ## Troubleshooting
 
