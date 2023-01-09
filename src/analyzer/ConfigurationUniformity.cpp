@@ -52,12 +52,13 @@ ConfigurationUniformity::initialize(const Settings *settings, State *state)
         }
         this->m_output_shares.push_back(output_shares_per_fault_domain);
     }
+
 }
 
 void
 ConfigurationUniformity::execute(const Settings *settings, State *state)
 {
-    (void)settings; // We do not need a settings object in this function. However, it must be given as paramter due to an overwriting. 
+    (void)settings; // We do not need a settings object in this function. However, it must be given as parameter due to an overwriting. 
 
     /* Initialize */
     this->m_uniform = true;
@@ -65,15 +66,19 @@ ConfigurationUniformity::execute(const Settings *settings, State *state)
     /* Generate & check all possible (intra) output combinations */
     for(auto output_shares : this->m_output_shares){
         std::vector<std::vector<BDD>> intra(output_shares.size());
-        for (unsigned int idx = 0; idx < output_shares.size() && this->m_uniform; idx++) {
-            for (uint64_t comb = 1; comb < ((1ull << output_shares[idx].size()) - 1) && this->m_uniform; comb++) {
-                intra[idx].push_back(state->m_managers[0].bddZero());
-                for (unsigned int elem = 0; elem < output_shares[idx].size(); elem++) {
-                    if (comb & (1 << elem)) intra[idx].back() ^= output_shares[idx][elem]->functions(0);
+        unsigned int share_cnt = 0;
+        for (auto output_shares_map : output_shares){
+            for (uint64_t comb = 1; comb < ((1ull << output_shares_map.second.size()) - 1) && this->m_uniform; comb++) {
+                intra[share_cnt].push_back(state->m_managers[0].bddZero());
+                for (unsigned int elem = 0; elem < output_shares_map.second.size(); elem++) {
+                    if (comb & (1 << elem)) intra[share_cnt].back() ^= output_shares_map.second[elem]->functions(0);
                 }
 
-                if (abs(state->m_managers[0].bdd_satcountln(intra[idx].back(), this->m_variable_count) - this->m_variable_count + 1) > DOUBLE_COMPARE_THRESHOLD) this->m_uniform = false;
+                if (abs(state->m_managers[0].bdd_satcountln(intra[share_cnt].back(), this->m_variable_count) - this->m_variable_count + 1) > DOUBLE_COMPARE_THRESHOLD) this->m_uniform = false;
             }
+            share_cnt++;
+
+            if(!this->m_uniform) break;
         }
 
         /* Generate & check all possible (inter) output combinations */
