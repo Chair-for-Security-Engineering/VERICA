@@ -303,62 +303,10 @@ Environment::execute()
      * [COMBINED-ISOLATING NON-INTERFERENCE] 
      * =====================================================================================
      */
-    if (this->m_settings->getCombinedCINI())
-    {
+    if (this->m_settings->getCombinedCINI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability *composability_cini = new ConfigurationComposability("CINI", CINI);
-        std::vector<ConfigurationComposability*> cini_threads(this->m_settings->getCores());
-
-        /* Initialize CINI strategy */
-        composability_cini->initialize(this->m_settings, this->m_state);
-     
-        /* Initialize multi-threading strategies */        
-        for (int core = 0; core < this->m_settings->getCores(); core++)
-        {
-            cini_threads[core] = new ConfigurationComposability("CINI-CORE" + std::to_string(core), CINI);
-            cini_threads[core]->initialize(this->m_settings, this->m_state);
-        }
-
-        /* Early-abort variable */
-        bool cancel = false;
-
-        #pragma omp parallel num_threads(this->m_settings->getCores()) shared(m_analyzer, m_state, cancel)
-        #pragma omp for schedule(dynamic)
-        for (unsigned int idx = 0; idx < this->m_state->m_probe_combinations[0].size(); idx++)
-        {
-            #pragma omp cancellation point for
-
-            /* Thread number */
-            int thread_num = omp_get_thread_num();
-
-            /* Set current probe combination */
-            cini_threads[thread_num]->current_probes(this->m_state->m_probe_combinations[thread_num][idx]);
-
-            /* Analyze */
-            this->m_analyzer->configure(cini_threads[thread_num]);
-            this->m_analyzer->execute();
-
-            /* Early abort */
-            if (!cini_threads[thread_num]->independent() && !cancel && this->m_settings->getSideChannelInterrupt())
-            {
-                #pragma omp critical
-                {
-                    cancel = true;
-                }
-                #pragma omp cancel for
-            }
-        }
-
-        /* Merge multi-threading results */
-        for (int core = 0; core < this->m_settings->getCores(); core++)
-            composability_cini->insert(cini_threads[core]);
-            
-        /* Finalize NI strategy */
-        composability_cini->finalize(this->m_settings, this->m_state);
-
-        /* Report composability results */
-        this->m_analyzer->configure(composability_cini);
-        this->m_analyzer->report();
+        ConfigurationComposability composability_cini{"CINI", CINI};
+        analyze_sca(composability_cini, "CINI", CINI);
     }
 
 
@@ -367,62 +315,10 @@ Environment::execute()
      * [INDEPENDENT COMBINED-ISOLATING NON-INTERFERENCE] 
      * =====================================================================================
      */
-    if (this->m_settings->getCombinedICINI())
-    {
+    if (this->m_settings->getCombinedICINI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability *composability_icini = new ConfigurationComposability("ICINI", ICINI);
-        std::vector<ConfigurationComposability*> icini_threads(this->m_settings->getCores());
-
-        /* Initialize ICINI strategy */
-        composability_icini->initialize(this->m_settings, this->m_state);
-     
-        /* Initialize multi-threading strategies */        
-        for (int core = 0; core < this->m_settings->getCores(); core++)
-        {
-            icini_threads[core] = new ConfigurationComposability("ICINI-CORE" + std::to_string(core), ICINI);
-            icini_threads[core]->initialize(this->m_settings, this->m_state);
-        }
-
-        /* Early-abort variable */
-        bool cancel = false;
-
-        #pragma omp parallel num_threads(this->m_settings->getCores()) shared(m_analyzer, m_state, cancel)
-        #pragma omp for schedule(dynamic)
-        for (unsigned int idx = 0; idx < this->m_state->m_probe_combinations[0].size(); idx++)
-        {
-            #pragma omp cancellation point for
-
-            /* Thread number */
-            int thread_num = omp_get_thread_num();
-
-            /* Set current probe combination */
-            icini_threads[thread_num]->current_probes(this->m_state->m_probe_combinations[thread_num][idx]);
-
-            /* Analyze */
-            this->m_analyzer->configure(icini_threads[thread_num]);
-            this->m_analyzer->execute();
-
-            /* Early abort */
-            if (!icini_threads[thread_num]->independent() && !cancel && this->m_settings->getSideChannelInterrupt())
-            {
-                #pragma omp critical
-                {
-                    cancel = true;
-                }
-                #pragma omp cancel for
-            }
-        }
-
-        /* Merge multi-threading results */
-        for (int core = 0; core < this->m_settings->getCores(); core++)
-            composability_icini->insert(icini_threads[core]);
-            
-        /* Finalize NI strategy */
-        composability_icini->finalize(this->m_settings, this->m_state);
-
-        /* Report composability results */
-        this->m_analyzer->configure(composability_icini);
-        this->m_analyzer->report();
+        ConfigurationComposability composability_icini{"ICINI", ICINI};
+        analyze_sca(composability_icini, "ICINI", ICINI);
     }
 
 
@@ -587,7 +483,7 @@ Environment::execute()
                         this->m_analyzer->execute();
 
                         // Update probe combinations
-                        if(m_settings->getSideChannelAnalysisProbing() || m_settings->getSideChannelAnalysisNI() || m_settings->getSideChannelAnalysisSNI() || m_settings->getSideChannelAnalysisPINI() || m_settings->getCombinedICSNI()){
+                        if(m_settings->getSideChannelAnalysisProbing() || m_settings->getSideChannelAnalysisNI() || m_settings->getSideChannelAnalysisSNI() || m_settings->getSideChannelAnalysisPINI() || m_settings->getCombinedICSNI() || m_settings->getCombinedICINI()){
                             if(idx_fault_pair == 0){
                                 std::vector<const verica::Wire*> modified;
                                 for (auto w : location)

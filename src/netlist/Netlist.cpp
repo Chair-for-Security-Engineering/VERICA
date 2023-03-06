@@ -453,7 +453,8 @@ void verica::Netlist::remove_wire(int uid){
         w->m_source_pin->m_fan_out = nullptr;
     }
     for(auto pin : w->target_pins()){
-        pin->m_fan_in = nullptr;  
+        // pin->m_fan_in = nullptr;  
+        m_pins[pin->uid()]->m_fan_in = nullptr;
     }
 
     /* Remove wire pointer from netlist */

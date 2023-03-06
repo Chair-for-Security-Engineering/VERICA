@@ -74,6 +74,9 @@ class ConfigurationSCA : public Configuration
 
         /* Holds all possible probe positions */
         std::vector<const verica::Wire*> m_positions;
+
+        /* Holds all combinations of abort signals */
+        std::vector<std::vector<const verica::Wire*>> m_abort_signals;
         
 };
 

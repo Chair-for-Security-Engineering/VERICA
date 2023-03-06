@@ -189,4 +189,17 @@ ConfigurationFiltering::apply_filter(const Settings *settings, State *state, con
             }
         }
     }
+
+    for(auto& p : state->m_netlist_model->module_under_test()->input_pins()){
+        for(auto name : filter){
+            if(p->fan_out() != nullptr){
+                if(p->fan_out()->name().find(name) != std::string::npos){
+                    if(strategy)
+                        state->m_netlist_model->ignore_fia_wire(p->fan_out()->uid(), blacklist_filter);
+                    else
+                        state->m_netlist_model->ignore_sca_wire(p->fan_out()->uid(), blacklist_filter);
+                }
+            }
+        }
+    }
 }

@@ -60,17 +60,17 @@ class ConfigurationComposability : public Configuration
         const std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>>& combined_leaking_faults() const { return this->m_combined_leaking_fault_injections; };
 
         /* Mutator function(s) */
-        void current_probes(const std::vector<const verica::Wire*> current_probes) { this->m_current_probes = current_probes; };
+        void current_probes(const std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>> current_probes) { this->m_current_probes = current_probes; };
 
     private:    
         void inter_vector_combinations_and(const std::vector<std::vector<std::set<const verica::Wire*>>> &intra, unsigned int offset, std::set<const verica::Wire*> combination, std::vector<std::set<const verica::Wire*>> &inter);
 
         Composability m_type;
 
-        unsigned int m_max_order;                                           /**< Maximum security order for current design */
-        bool m_independent;                                                 /**< Statistical independence for current probe combination */
-        std::vector<const verica::Wire*> m_current_probes;                  /**< Container for current probe combination */
-        std::vector<std::vector<const verica::Wire*>> m_failing_probes;     /**< Container for failing probe combinations */
+        unsigned int m_max_order;                                                                           /**< Maximum security order for current design */
+        bool m_independent;                                                                                 /**< Statistical independence for current probe combination */
+        std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>> m_current_probes;     /**< Container for current probe combination separated into real and virtual probes */
+        std::vector<std::vector<const verica::Wire*>> m_failing_probes;                                     /**< Container for failing probe combinations */
 
         /* Container for failing probe combinations for combined analyses */ 
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> m_combined_leaking_fault_injections;

@@ -83,6 +83,7 @@ Parent              | Parameter                     | Allowed Parameter         
 --                  | `model/location`              | `c`, `s`, `cs`                                | Location parameter for fault injection. Only combinational gates (`c`), only sequential (memory) gates (`s`), both gate types (`cs`).
 --                  | `analysis/reduced_complexity` | `true`, `false`                               | Applies a complexity reduction originally proposed with FIVER.
 --                  | `analysis/strategy`           | `detection`, `correction`, `sifa`, `sfa`      | Defines the analysis strategy applied to a faulted circuit.
+--                  | `analysis/logic-level-error-flag` | `true`, `false`                           | Indicates weather an error is indicated by a high logic level `true` or low logic level `false`.
 --                  | `analysis/f-ni`               | `true`, `false`                               | Enables/disables the verification of the F-NI-property. If enabled, input faults are considered as well.
 --                  | `analysis/f-sni`              | `true`, `false`                               | Enables/disables the verification of the F-SNI-property. If enabled, input faults are considered as well.
 --                  | `analysis/fini`               | `true`, `false`                               | Enables/disables the verification of the FINI-property. If enabled, input faults are considered as well.
@@ -124,152 +125,158 @@ If VERICA is executed with the exemplary configuration file `config/verica_examp
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: DESIGN UNDER TEST
 ----------------------------------------------------------------------------------------------------
-     0.004    PARSER           VERILOG               source: test/case-study-nina/and_snina_d1_k1.v
-     0.004    PARSER           VERILOG                  module(s) : 4
-     0.004    PARSER           VERILOG                  gate(s)   : 38
-     0.004    PARSER           VERILOG                   - comb.  : 22
-     0.004    PARSER           VERILOG                   - seq.   : 16
-     0.004    PARSER           VERILOG                  wire(s)   : 89
-     0.004    PARSER           VERILOG                  pin(s)    : 190
-     0.004    PARSER           VERILOG               WARNING: detected 19 unconnected pins!
+     0.007    PARSER           VERILOG               source: test/case-study-nina/and_snina_d1_k1.v
+     0.007    PARSER           VERILOG                  module(s) : 4
+     0.007    PARSER           VERILOG                  gate(s)   : 38
+     0.007    PARSER           VERILOG                   - comb.  : 22
+     0.007    PARSER           VERILOG                   - seq.   : 16
+     0.008    PARSER           VERILOG                  wire(s)   : 89
+     0.008    PARSER           VERILOG                  pin(s)    : 190
+     0.008    PARSER           VERILOG               WARNING: detected 19 unconnected pins!
 ----------------------------------------------------------------------------------------------------
-     0.004    PARSER           VERILOG               SUCCESS
+     0.008    PARSER           VERILOG               SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: ANNOTATIONS
 ----------------------------------------------------------------------------------------------------
-     0.004    PREPROCESSOR     ANNOTATION            1 input wire was tagged as clock input.
-     0.004    PREPROCESSOR     ANNOTATION            0 input wires were tagged as control inputs.
-     0.004    PREPROCESSOR     ANNOTATION            WARNING: 1 wire could not be tagged as control input in the MUT.
-     0.004    PREPROCESSOR     ANNOTATION            1 input wire was tagged as refresh inputs.
-     0.004    PREPROCESSOR     ANNOTATION            WARNING: 2 wires could not be tagged as refresh input in the MUT.
-     0.004    PREPROCESSOR     ANNOTATION            2 output wires were tagged as error flags.
-     0.004    PREPROCESSOR     ANNOTATION            WARNING: 1 wire could not be tagged as error flag in the MUT.
-     0.004    PREPROCESSOR     ANNOTATION            8 input wires were tagged with PIIDs.
-     0.004    PREPROCESSOR     ANNOTATION            WARNING: 28 wires could not be identified in the MUT.
-     0.004    PREPROCESSOR     ANNOTATION            12 wires were tagged with a share domain.
-     0.004    PREPROCESSOR     ANNOTATION            WARNING: 3 wires could not be identified in the MUT.
-     0.004    PREPROCESSOR     ANNOTATION            12 wires were tagged with a share index.
-     0.004    PREPROCESSOR     ANNOTATION            WARNING: 3 wires could not be identified in the MUT.
+     0.008    PREPROCESSOR     ANNOTATION            1 input wire was tagged as clock input.
+     0.008    PREPROCESSOR     ANNOTATION            0 input wires were tagged as control inputs.
+     0.008    PREPROCESSOR     ANNOTATION            WARNING: 1 wire could not be tagged as control input in the MUT.
+     0.008    PREPROCESSOR     ANNOTATION            1 input wire was tagged as refresh inputs.
+     0.008    PREPROCESSOR     ANNOTATION            WARNING: 2 wires could not be tagged as refresh input in the MUT.
+     0.008    PREPROCESSOR     ANNOTATION            2 output wires were tagged as error flags.
+     0.008    PREPROCESSOR     ANNOTATION            WARNING: 1 wire could not be tagged as error flag in the MUT.
+     0.008    PREPROCESSOR     ANNOTATION            8 input wires were tagged with PIIDs.
+     0.008    PREPROCESSOR     ANNOTATION            WARNING: 28 wires could not be identified in the MUT.
+     0.008    PREPROCESSOR     ANNOTATION            12 wires were tagged with a share domain.
+     0.008    PREPROCESSOR     ANNOTATION            WARNING: 3 wires could not be identified in the MUT.
+     0.008    PREPROCESSOR     ANNOTATION            12 wires were tagged with a share index.
+     0.008    PREPROCESSOR     ANNOTATION            WARNING: 3 wires could not be identified in the MUT.
+     0.008    PREPROCESSOR     ANNOTATION            0 wires were tagged with a fault domain.
 ----------------------------------------------------------------------------------------------------
-     0.004    PREPROCESSOR     ANNOTATION            SUCCESS
+     0.008    PREPROCESSOR     ANNOTATION            SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: FILTERING
 ----------------------------------------------------------------------------------------------------
-     0.005    PREPROCESSOR     FILTERING             Filtering for side-channel verification is disabled!
-     0.005    PREPROCESSOR     FILTERING             Filtering for fault-injection verification is disabled!
+     0.008    PREPROCESSOR     FILTERING             Filtering for side-channel verification is disabled!
+     0.008    PREPROCESSOR     FILTERING             Filtering for fault-injection verification is disabled!
 ----------------------------------------------------------------------------------------------------
-     0.005    PREPROCESSOR     FILTERING             SUCCESS
+     0.008    PREPROCESSOR     FILTERING             SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO
 ----------------------------------------------------------------------------------------------------
-     0.444    PREPROCESSOR     MULTI-THREADING       cores: 16
-     0.444    PREPROCESSOR     MULTI-THREADING       memory: 128 GB
+     0.027    PREPROCESSOR     MULTI-THREADING       cores: 2
+     0.027    PREPROCESSOR     MULTI-THREADING       memory: 4 GB
 ----------------------------------------------------------------------------------------------------
-     0.444    PREPROCESSOR     MULTI-THREADING       SUCCESS
+     0.027    PREPROCESSOR     MULTI-THREADING       SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: MODEL POSTPROCESSING
 ----------------------------------------------------------------------------------------------------
-     0.445    PREPROCESSOR     MODEL POSTPROCESSING  Removed clock tree from netlist (3 wires were removed).
-     0.445    PREPROCESSOR     MODEL POSTPROCESSING  No control signals were found.
-     0.445    PREPROCESSOR     MODEL POSTPROCESSING  Removed 17 unconnected pins.
-     0.445    PREPROCESSOR     MODEL POSTPROCESSING  Removed 0 unconnected wires.
+     0.027    PREPROCESSOR     MODEL POSTPROCESSING  Removed clock tree from netlist (3 wires were removed).
+     0.027    PREPROCESSOR     MODEL POSTPROCESSING  No control signals were found.
+     0.027    PREPROCESSOR     MODEL POSTPROCESSING  Removed 17 unconnected pins.
+     0.027    PREPROCESSOR     MODEL POSTPROCESSING  Removed 0 unconnected wires.
 ----------------------------------------------------------------------------------------------------
-     0.445    PREPROCESSOR     MODEL POSTPROCESSING  SUCCESS
+     0.027    PREPROCESSOR     MODEL POSTPROCESSING  SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO
 ----------------------------------------------------------------------------------------------------
-     0.501    PREPROCESSOR     ELABORATE             stage(s): 
-     0.501    PREPROCESSOR     ELABORATE                logic    : 3
-     0.501    PREPROCESSOR     ELABORATE                register : 2
+     0.028    PREPROCESSOR     ELABORATE             stage(s): 
+     0.028    PREPROCESSOR     ELABORATE                logic    : 3
+     0.028    PREPROCESSOR     ELABORATE                register : 2
 ----------------------------------------------------------------------------------------------------
-     0.513    PREPROCESSOR     ELABORATE             SUCCESS
+     0.028    PREPROCESSOR     ELABORATE             SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: Configure FIA
 ----------------------------------------------------------------------------------------------------
-     0.513    PREPROCESSOR     FIA                   Identified 47 gates as target gates for fault injection.
-     0.513    PREPROCESSOR     FIA                   Applied parameters:
-     0.513    PREPROCESSOR     FIA                      number:          1
-     0.513    PREPROCESSOR     FIA                      variate:         1
-     0.513    PREPROCESSOR     FIA                      fault mapping:   model/setreset.txt
-     0.513    PREPROCESSOR     FIA                      location:        cs
-     0.514    PREPROCESSOR     FIA                      strategy:        detection
-     0.514    PREPROCESSOR     FIA                      FNI:             false
-     0.514    PREPROCESSOR     FIA                      FSNI:            false
+     0.028    PREPROCESSOR     FIA                   Identified 47 gates as target gates for fault injection.
+     0.028    PREPROCESSOR     FIA                   Applied parameters:
+     0.028    PREPROCESSOR     FIA                      number:          1
+     0.028    PREPROCESSOR     FIA                      variate:         1
+     0.028    PREPROCESSOR     FIA                      fault mapping:   model/setreset.txt
+     0.028    PREPROCESSOR     FIA                      location:        cs
+     0.028    PREPROCESSOR     FIA                      strategy:        detection
+     0.028    PREPROCESSOR     FIA                      logic-level:     low
+     0.028    PREPROCESSOR     FIA                      FNI:             false
+     0.028    PREPROCESSOR     FIA                      FSNI:            false
+     0.028    PREPROCESSOR     FIA                      FINI:            false
 ----------------------------------------------------------------------------------------------------
-     0.514    PREPROCESSOR     FIA                   SUCCESS
+     0.028    PREPROCESSOR     FIA                   SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: Configure SCA
 ----------------------------------------------------------------------------------------------------
-     0.549    PREPROCESSOR     SCA                   Disabled auto-dynamic reordering for BDDs.
-     0.549    PREPROCESSOR     SCA                   Determined 2 shared inputs.
-     0.549    PREPROCESSOR     SCA                      Minimum number of shares: 2
-     0.549    PREPROCESSOR     SCA                   Determined 31 probe positions.
+     0.029    PREPROCESSOR     SCA                   Disabled auto-dynamic reordering for BDDs.
+     0.029    PREPROCESSOR     SCA                   Determined 2 shared inputs.
+     0.029    PREPROCESSOR     SCA                      Minimum number of shares: 2
+     0.029    PREPROCESSOR     SCA                   Determined 31 probe positions.
+     0.029    PREPROCESSOR     SCA                   Determined 3 combinations of abort signals.
 ----------------------------------------------------------------------------------------------------
-     0.549    PREPROCESSOR     SCA                   SUCCESS
-
+     0.029    PREPROCESSOR     SCA                   SUCCESS
+ 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT
 ----------------------------------------------------------------------------------------------------
-     0.628    ANALYZER         CSNI                  model parameters:
-     0.628    ANALYZER         CSNI                     glitches    : yes
-     0.628    ANALYZER         CSNI                     transitions : no
-     0.628    ANALYZER         CSNI                     couplings   : no
-     0.628    ANALYZER         CSNI                  verification:
-     0.628    ANALYZER         CSNI                     targeted : (1, 0) security
-     0.629    ANALYZER         CSNI                     verified : (1, 0) security
+     0.034    ANALYZER         CSNI                  model parameters:
+     0.034    ANALYZER         CSNI                     glitches    : yes
+     0.034    ANALYZER         CSNI                     transitions : no
+     0.034    ANALYZER         CSNI                     couplings   : no
+     0.034    ANALYZER         CSNI                  verification:
+     0.034    ANALYZER         CSNI                     targeted : (1, 0) security
+     0.034    ANALYZER         CSNI                     verified : side-channel security
+     0.034    ANALYZER         CSNI                     verified : fault-injection security
 ----------------------------------------------------------------------------------------------------
-     0.629    ANALYZER         CSNI                  SUCCESS
+     0.034    ANALYZER         CSNI                  SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: EVALUATION (n=1)
 ----------------------------------------------------------------------------------------------------
-     0.629    INJECTOR                               Found 3 valid stages to inject faults.
-     0.629    INJECTOR                               Got a new batch of permuted fault locations with 29 entries. I am going to analyze it...
-     0.679    INJECTOR                               Got a new batch of permuted fault locations with 16 entries. I am going to analyze it...
-     0.728    INJECTOR                               Got a new batch of permuted fault locations with 2 entries. I am going to analyze it...
+     0.034    INJECTOR                               Found 3 valid stages to inject faults.
+     0.034    INJECTOR                               Got a new batch of permuted fault locations with 29 entries. I am going to analyze it...
+     0.038    INJECTOR                               Got a new batch of permuted fault locations with 16 entries. I am going to analyze it...
+     0.039    INJECTOR                               Got a new batch of permuted fault locations with 2 entries. I am going to analyze it...
+----------------------------------------------------------------------------------------------------
+     0.040    INJECTOR                               
+
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT
 ----------------------------------------------------------------------------------------------------
-     0.777    ANALYZER         CSNI                  model parameters:
-     0.777    ANALYZER         CSNI                     glitches    : yes
-     0.777    ANALYZER         CSNI                     transitions : no
-     0.777    ANALYZER         CSNI                     couplings   : no
-     0.777    ANALYZER         CSNI                  verification:
-     0.777    ANALYZER         CSNI                     targeted : (0, 1) security
-     0.777    ANALYZER         CSNI                     verified : (0, 1) security
+     0.040    ANALYZER         CSNI                  model parameters:
+     0.040    ANALYZER         CSNI                     glitches    : yes
+     0.040    ANALYZER         CSNI                     transitions : no
+     0.040    ANALYZER         CSNI                     couplings   : no
+     0.040    ANALYZER         CSNI                  verification:
+     0.040    ANALYZER         CSNI                     targeted : (0, 1) security
+     0.040    ANALYZER         CSNI                     failed   : side-channel security
+     0.040    ANALYZER         CSNI                     verified : fault-injection security
 ----------------------------------------------------------------------------------------------------
-     0.777    ANALYZER         CSNI                  SUCCESS
+     0.040    ANALYZER         CSNI                  FAILURE
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT CSNI
 ----------------------------------------------------------------------------------------------------
-     0.778    ANALYZER         CSNI                  verification:
-     0.778    ANALYZER         CSNI                     targeted : (1, 1)-CSNI
-     0.778    ANALYZER         CSNI                     verified : (0, 0)-CSNI
-     0.778    ANALYZER         CSNI                     verified : (1, 0)-CSNI
-     0.778    ANALYZER         CSNI                     verified : (1, 1)-CSNI
+     0.040    ANALYZER         CSNI                  verification:
+     0.040    ANALYZER         CSNI                     targeted : (1, 1)-CSNI
 ----------------------------------------------------------------------------------------------------
-     0.778    ANALYZER         CSNI                  SUCCESS
+     0.040    ANALYZER         CSNI                  FAILURE
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: VISUALIZATION
 ----------------------------------------------------------------------------------------------------
-     0.778    VISUALIZER       GRAPHVIZ (DOT)        Exported full circuit to dot/circuit.dot.
-     0.778    VISUALIZER       GRAPHVIZ (DOT)        Exported subgraph of security flaws to dot/circuit_flaw.dot.
+     0.040    VISUALIZER       GRAPHVIZ (DOT)        Exported full circuit to dot/circuit.dot.
+     0.040    VISUALIZER       GRAPHVIZ (DOT)        Exported subgraph of security flaws to dot/circuit_flaw.dot.
 ----------------------------------------------------------------------------------------------------
-     0.778    VISUALIZER       GRAPHVIZ (DOT)        SUCCESS
+     0.040    VISUALIZER       GRAPHVIZ (DOT)        SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO
 ----------------------------------------------------------------------------------------------------
-     0.778    VERICA           COMBINED              DONE!
+     0.040    VERICA           COMBINED              DONE!
 ```
 
 ## Architecture
@@ -362,6 +369,8 @@ In order to reproduce the results of the case studies from the papers, we prepar
 ## Acknowledgment
 
 We would like to thank the anonymous reviewers from the CHES'22 artifact submission committee that provided us with useful comments and suggestions to improve our framework and the instructions to run VERICA.
+
+Additionally, we would like to thank Siemen Dhooghe, who pointed us to a bug in the combined composability verifications for detection-based countermeasures. 
 
 \\
 

@@ -72,6 +72,9 @@ ConfigurationSCA::report(std::string service, const Logger *logger, const Settin
             logger->log(service, this->m_name, ITEM + "Minimum number of shares: " + std::to_string(state->m_min_shared_inputs.size()));
             logger->log(service, this->m_name, "Determined " + std::to_string(m_positions.size()) + " probe positions.");
         }
+        if(settings->getCombinedCNI() || settings->getCombinedCSNI() || settings->getCombinedCINI()){
+            logger->log(service, this->m_name, "Determined " + std::to_string(this->m_abort_signals.size()) + " combinations of abort signals.");
+        }
     }
 
     /* Print footer */
@@ -165,8 +168,29 @@ ConfigurationSCA::determine_probe_positions(State *state, const Settings *settin
     } 
     else {
         for(auto w : state->m_netlist_model->module_under_test()->wires()){
+            bool is_output_pin = false;
+            for (auto target : w->target_pins()) 
+                is_output_pin |= (target->parent_module() == state->m_netlist_model->module_under_test());
+
             // Only add wire if not blacklisted
             if(!w->sca_ignore()) m_positions.push_back(w);
+        }
+    }
+
+    /* Add abort signal to probe positions if combined analysis is enabled */
+    if(settings->getCombinedCNI() || settings->getCombinedCSNI() || settings->getCombinedCINI()){
+        // collect abort signals (error flags)
+        std::vector<const verica::Wire*> error_flags;
+        for(auto p : state->m_netlist_model->module_under_test()->output_pins()){
+            if(p->port_type() == verica::ErrorFlag) error_flags.push_back(p->fan_in());
+        }
+
+        for(unsigned int comb=1; comb <= ((1 << error_flags.size())-1); comb++){
+            std::vector<const verica::Wire*> new_comb;
+            for(unsigned int bit=0; bit < error_flags.size(); bit++){
+                if((comb >> bit) & 1) new_comb.push_back(error_flags[bit]);
+            }
+            this->m_abort_signals.push_back(new_comb);
         }
     }
 
@@ -197,25 +221,22 @@ ConfigurationSCA::update_probe_combinations(State *state, const Settings *settin
             std::vector<const verica::Wire*> probes;
             int min = 0;
             int max = 0;
+            int num_output_probes = 0;
 
             /* Check distance of probes (register stages) for multi-variate analysis */
-            for (unsigned int idx = 0; idx < bitmask.size(); idx++)
-            {
-                if (bitmask[idx])
-                {
+            for (unsigned int idx = 0; idx < bitmask.size(); idx++) {
+                if (bitmask[idx]) {
                     /* Generate probe combination */
                     probes.push_back(m_positions[idx]);
 
                     /* Initialize min/max stage index & support BDD */
-                    if (probes.size() == 1) 
-                    {
+                    if (probes.size() == 1) {
                         min = m_positions[idx]->stage_index();
                         max = m_positions[idx]->stage_index();
                     }
 
                     /* Update min/max stage index & support BDD */
-                    else
-                    {
+                    else {
                         min = (min > m_positions[idx]->stage_index()) ? m_positions[idx]->stage_index() : min;
                         max = (max < m_positions[idx]->stage_index()) ? m_positions[idx]->stage_index() : max;
                     }
@@ -228,16 +249,39 @@ ConfigurationSCA::update_probe_combinations(State *state, const Settings *settin
             /* Skip combination if multi-variate threshold exceeded */
             skip |= (((max - min) >= settings->getSideChannelVariate()) && (settings->getSideChannelVariate() != 0));
 
-            /* TODO: Skip if already analyzed but did not change (e.g., not in fault propagation path) */
+            /* Skip if already analyzed but did not change (e.g., not in fault propagation path) */
             bool found = false;
             for (unsigned int elem = 0; elem < probes.size() && !found; elem++)
                 found |= (std::find(modified.begin(), modified.end(), probes[elem]) != modified.end());
             skip |= !found;
 
-            if (!skip)
-                state->m_probe_combinations[thread_num].push_back(probes);
-
+            if (!skip){
+                std::vector<const verica::Wire*> temp;
+                state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, temp));
+            }
         }   
         while(std::prev_permutation(bitmask.begin(), bitmask.end()));
+    }
+
+    /* Add abort signals to updated probe combinations for combined analysis */
+    if(settings->getCombinedCNI() || settings->getCombinedCSNI() || settings->getCombinedCINI()){
+        unsigned int num_original_comb = state->m_probe_combinations[thread_num].size(); 
+
+        for(auto comb : this->m_abort_signals){
+            if(num_original_comb == 0){
+                // empty vector for real probes (only virtual probes are available)
+                std::vector<const verica::Wire*> temp;  
+                state->m_probe_combinations[thread_num].push_back(std::make_pair(temp, comb));
+            } else {
+                for(unsigned int pos=0; pos<num_original_comb; pos++){
+                    // extract real probes
+                    std::vector<const verica::Wire*> real_probes = state->m_probe_combinations[thread_num][pos].first;
+
+                    // combine real probes with "virtual" probes (i.e., abort signals)
+                    state->m_probe_combinations[thread_num].push_back(std::make_pair(real_probes, comb));
+                }
+            }
+        }
+        
     }
 }

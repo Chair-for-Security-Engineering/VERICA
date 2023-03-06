@@ -40,9 +40,13 @@ ConfigurationFaultDetection::execute(const Settings *settings, State *state) {
     bool secure = true;
 
     // Add error flags of the faulty model
-    BDD comp = state->m_managers[core].bddOne();
+    BDD comp = (settings->getFaultLogicLevelErrorFlag()) ? state->m_managers[core].bddZero() : state->m_managers[core].bddOne();
     for(auto w : state->m_error_flags){
-        comp &= w->faulty_functions(core);
+        if(settings->getFaultLogicLevelErrorFlag()){
+            comp |= w->faulty_functions(core);
+        } else {
+            comp &= w->faulty_functions(core);
+        }
     }
 
     // Check if random inputs are faulted
@@ -112,21 +116,36 @@ ConfigurationFaultDetection::execute(const Settings *settings, State *state) {
     }
     
     // Evaluate
-    if ((compprime & (comp)).CountMinterm(state->m_mut_input_size) == 0){
-        state->m_effective[core] += 0;  
+    comp = (settings->getFaultLogicLevelErrorFlag()) ? comp : !comp;
+
+    // We consider the following cases:
+    // comp. output | flag | case
+    //      0       |  0   | ineffective fault
+    //      0       |  1   | ---
+    //      1       |  0   | effective fault
+    //      1       |  1   | detected fault
+
+    // There exists an input assignment for the current fault scenario that leads to an effective fault.
+    if (((compprime & (!comp))).CountMinterm(state->m_mut_input_size) == 0){
+        state->m_effective[core] += 0; 
     } else {
         state->m_effective[core] += 1;
     }
+    // state->m_effective[core] += ((compprime & (!comp))).CountMinterm(state->m_mut_input_size);
 
-    if ((compprime & (!comp)).CountMinterm(state->m_mut_input_size) == 0){
-        state->m_detected[core] += 0;  
-    } else {
-        state->m_detected[core] += 1;
-    }
+    // In this setting, this does not make sense...
+    // There exists no input assignment for the current fault scenario that leads to an undetected fault.
+    // if ((!(compprime & (comp))).CountMinterm(state->m_mut_input_size) == 0){
+    //     state->m_detected[core] += 0;  
+    // } else {
+    //     state->m_detected[core] += 1;
+    // }
+    // state->m_detected[core] += ((compprime & (comp))).CountMinterm(state->m_mut_input_size);
 
     state->m_scenarios[core] += 1;
+    // state->m_scenarios[core] += std::pow(2, state->m_mut_input_size);
 
-    // CheckFNI and FSNI security
+    // Check FNI and FSNI security
     int input_faults = 0;
     std::vector<const verica::Pin*> input_fault_domain;
     for(auto f : state->m_current_fault_injections[core].first){
@@ -207,15 +226,15 @@ ConfigurationFaultDetection::report(std::string service, const Logger *logger, c
     // Fault Injection
     double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
     for(auto v : state->m_effective) effective += v;
-    for(auto v : state->m_detected) detected += v;
+    // for(auto v : state->m_detected) detected += v;
     for(auto v : state->m_scenarios) scenarios += v; 
-    ineffective = scenarios - effective - detected; 
+    // ineffective = scenarios - effective - detected; 
 
     if(settings->getVerbose() > 0) {
-        logger->log(service, this->m_name, "Effective faults:   " + std::to_string(effective));
-        logger->log(service, this->m_name, "Ineffective faults: " + std::to_string(ineffective));
-        logger->log(service, this->m_name, "Detected faults:    " + std::to_string(detected));
-        logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string(scenarios));
+        logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
+        // logger->log(service, this->m_name, "Ineffective faults: " + std::to_string(ineffective));
+        // logger->log(service, this->m_name, "Detected faults:    " + std::to_string(detected));
+        logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
     } 
 
     /* Print footer */

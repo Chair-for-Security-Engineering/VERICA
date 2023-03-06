@@ -57,7 +57,7 @@ class ConfigurationProbing : public Configuration
         const std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>>& combined_leaking_faults() const { return this->m_combined_leaking_fault_injections; };
 
         /* Mutator function(s) */
-        void current_probes(const std::vector<const verica::Wire*> current_probes) { this->m_current_probes = current_probes; };
+        void current_probes(const std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>> current_probes) { this->m_current_probes = current_probes.first; };
 
     private:
         

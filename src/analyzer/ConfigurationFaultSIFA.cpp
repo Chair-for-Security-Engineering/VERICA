@@ -35,7 +35,7 @@ ConfigurationFaultSIFA::initialize(const Settings *settings, State *state){
 void
 ConfigurationFaultSIFA::execute(const Settings *settings, State *state) 
 {
-    (void)settings; // We do not need a settings object in this function. However, it must be given as paramter due to an overwriting. 
+    (void)settings; // We do not need a settings object in this function. However, it must be given as parameter due to an overwriting. 
 
     // Determine running core
     int core = omp_get_thread_num();
@@ -48,14 +48,18 @@ ConfigurationFaultSIFA::execute(const Settings *settings, State *state)
             compare |= (w->faulty_functions(core) ^ w->golden_functions(core));
         }     
     } else {
-        compare = state->m_managers[core].bddOne();
+        compare = (settings->getFaultLogicLevelErrorFlag()) ? state->m_managers[core].bddZero() : state->m_managers[core].bddOne();
         for(auto w : state->m_error_flags){
-            compare &= w->faulty_functions(core);
+            if(settings->getFaultLogicLevelErrorFlag()){
+                compare |= w->faulty_functions(core);
+            } else {
+                compare &= w->faulty_functions(core);
+            }
         }
     }
 
 
-    // Check statistical independenc of the fault-detection signal and any of of the secrets
+    // Check statistical independence of the fault-detection signal and any of of the secrets
     std::vector<BDD> unshared_inputs(state->m_shared_inputs.size());
     for(auto m : state->m_shared_inputs){
         unshared_inputs[m.first] = state->m_managers[core].bddZero();
@@ -65,7 +69,7 @@ ConfigurationFaultSIFA::execute(const Settings *settings, State *state)
     }
 
 
-    // analyse dependencies of all possible combinations of secrets
+    // analyze dependencies of all possible combinations of secrets
     for(int in_comb=1; in_comb < (1 << state->m_shared_inputs.size()); ++in_comb){
         BDD secrets = state->m_managers[core].bddOne();
         for(unsigned int considered_input=0; considered_input < state->m_shared_inputs.size(); ++considered_input){
@@ -185,6 +189,15 @@ ConfigurationFaultSIFA::report(std::string service, const Logger *logger, const 
         logger->footer(service, this->m_name, SUCCESS);
     else
         logger->footer(service, this->m_name, FAILURE);
+
+    /* Add results to state for visualization */
+    std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> effective_fault_injections;
+    for(auto fault : state->m_leaking_fault_injections){
+        effective_fault_injections.insert(effective_fault_injections.end(), fault.begin(), fault.end());
+    }
+
+    if(!effective_fault_injections.empty())
+        state->m_visualization_faults = effective_fault_injections[0].first;
 }
 
 
@@ -206,7 +219,7 @@ ConfigurationFaultSIFA::report(std::string service, const Logger *logger, const 
 // std::vector<std::vector<int>> collect_dependent_outputs;
 // std::vector<std::vector<int>> collect_leaked_inputs;
 
-// // Combine gates that should be checked for independenc
+// // Combine gates that should be checked for independence
 // BDD observed_gates = !compare;
 // std::vector<int> nonzero_gate_idx;
 // for(auto g : state->m_current_fault_injections[core].first){
@@ -214,7 +227,7 @@ ConfigurationFaultSIFA::report(std::string service, const Logger *logger, const 
 //     nonzero_gate_idx.push_back(g->uid());
 // }
 
-// // analyse dependencies of all possible combinations of secrets
+// // analyze dependencies of all possible combinations of secrets
 // for(int in_comb=1; in_comb < (1 << state->m_shared_inputs.size()); ++in_comb){
 //     BDD secrets = state->m_managers[core].bddOne();
 //     std::vector<int> leaked_secrets;

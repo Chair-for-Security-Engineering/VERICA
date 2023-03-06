@@ -1,12 +1,13 @@
 /*
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
- * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
+ * AUTHOR  : Jan Richter-Brockmann (jan.richter-brockmann@rub.de) 
+ *           Pascal Sasdrich (pascal.sasdrich@rub.de)
  * DOCUMENT: https://eprint.iacr.org/2022/484
  *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
- * Copyright (c) 2021, Pascal Sasdrich
+ * Copyright (c) 2022, Jan Richter-Brockmann and Pascal Sasdrich
  *
  * All rights reserved.
  *
@@ -267,6 +268,10 @@ bool Settings::getReduceComplexity() const {
     return this->config.get<bool>("fault-injection.analysis.reduced_complexity");
 }
 
+bool Settings::getFaultLogicLevelErrorFlag() const {
+    return this->config.get<bool>("fault-injection.analysis.logic-level-error-flag");
+}
+
 bool Settings::getFaultFNI() const {
     return (this->config.get<bool>("fault-injection.enable") && this->config.get<bool>("fault-injection.analysis.f-ni"));
 }
@@ -296,7 +301,7 @@ bool Settings::getCombinedICSNI() const {
 }
 
 bool Settings::getFaultComposability() const {
-    return (getFaultFNI() || getFaultFSNI() || getCombinedCNI() || getCombinedCSNI() || getCombinedICSNI() || getCombinedCINI() || getCombinedICINI());
+    return (getFaultFNI() || getFaultFSNI() || getFaultFINI() || getCombinedCNI() || getCombinedCSNI() || getCombinedICSNI() || getCombinedCINI() || getCombinedICINI());
 }
 
 bool Settings::getCombinedCINI() const {
@@ -385,6 +390,7 @@ void Settings::validateSettings(){
     checkSettingRange("fault-injection.model.location", location);
     checkSettingRange("fault-injection.analysis.reduced_complexity", boolean);
     checkSettingRange("fault-injection.analysis.strategy", fault_strategy);
+    checkSettingRange("fault-injection.analysis.logic-level-error-flag", boolean);
     checkSettingRange("fault-injection.analysis.f-ni", boolean);
     checkSettingRange("fault-injection.analysis.f-sni", boolean);
     checkSettingRange("fault-injection.analysis.fini", boolean);
@@ -394,7 +400,7 @@ void Settings::validateSettings(){
     checkSettingRange("combined.analysis.c-ni", boolean);
     checkSettingRange("combined.analysis.c-sni", boolean);
     checkSettingRange("combined.analysis.ic-sni", boolean);
-        checkSettingRange("combined.analysis.cini", boolean);
+    checkSettingRange("combined.analysis.cini", boolean);
     checkSettingRange("combined.analysis.icini", boolean);
 }
 

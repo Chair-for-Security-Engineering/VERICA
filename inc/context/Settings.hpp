@@ -1,12 +1,13 @@
 /*
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
- * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
+ * AUTHOR  : Jan Richter-Brockmann (jan.richter-brockmann@rub.de) 
+ *           Pascal Sasdrich (pascal.sasdrich@rub.de)
  * DOCUMENT: https://eprint.iacr.org/2022/484
  *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
  *
- * Copyright (c) 2021, Pascal Sasdrich
+ * Copyright (c) 2022, Jan Richter-Brockmann and Pascal Sasdrich
  *
  * All rights reserved.
  *
@@ -105,6 +106,7 @@ class Settings
 
         bool getReduceComplexity() const;
         std::string getFaultAnalysisStrategy() const;
+        bool getFaultLogicLevelErrorFlag() const;
         bool getFaultFNI() const;
         bool getFaultFSNI() const;
         bool getFaultFINI() const;

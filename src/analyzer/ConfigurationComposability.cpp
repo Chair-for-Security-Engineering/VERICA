@@ -51,7 +51,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
     int threadNum = omp_get_thread_num();
 
     /* Trivial cases: No probes, unshared input */
-    if (this->m_max_order == 0 || state->m_min_shared_inputs.size() < 2){ 
+    if (state->m_min_shared_inputs.size() < 2){ 
         this->m_independent = false;
     } else {
         /* Trivial case: sharing smaller than target order */
@@ -65,17 +65,21 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         
         /* Count output probes (SNI) */
         int num_output_probes = 0;
-        for (auto current : this->m_current_probes)
-        {
+        std::set<int> output_domains;
+        for (auto current : this->m_current_probes.first) {
             bool is_output_pin = false;
-            for (auto target : current->target_pins()) 
-                is_output_pin |= (target->parent_module() == state->m_netlist_model->module_under_test());
+            for (auto target : current->target_pins()) {
+                if(target->parent_module() == state->m_netlist_model->module_under_test()){
+                    is_output_pin = true;
+                    output_domains.insert(target->share_domain());
+                }
+            }
             num_output_probes += is_output_pin;
         }
 
         /* Define share combination threshold (NI/SNI/PINI) */
-        int input_faults = ((this->m_type == CNI || this->m_type == CSNI || this->m_type == CINI) ? (state->m_current_number_of_injected_faults - state->m_current_number_of_input_faults[threadNum]) : 0);
-        int threshold = (this->m_current_probes.size() + input_faults) - ((this->m_type == SNI || this->m_type == CSNI || this->m_type == ICSNI) ? num_output_probes : 0);
+        int internal_faults = ((this->m_type == CNI || this->m_type == CSNI || this->m_type == CINI) ? (state->m_current_number_of_injected_faults - state->m_current_number_of_input_faults[threadNum]) : 0);
+        int threshold = (this->m_current_probes.first.size() + internal_faults) - ((this->m_type == SNI || this->m_type == CSNI || this->m_type == ICSNI) ? num_output_probes : 0);
 
 
         /* Construct glitch-extended probes */
@@ -83,7 +87,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         {
             // collect all syncronization points
             std::set<const verica::Wire*> registers;
-            for(auto probe : this->m_current_probes)
+            for(auto probe : this->m_current_probes.first)
                 registers.insert(probe->registers(threadNum).begin(), probe->registers(threadNum).end());
 
 
@@ -104,8 +108,11 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         }
         else 
         {
-            extended_probes = this->m_current_probes;
+            extended_probes = this->m_current_probes.first;
         }
+
+        // Add "virtual" probes
+        extended_probes.insert(extended_probes.end(), this->m_current_probes.second.begin(), this->m_current_probes.second.end());
 
         /* Collect observation & support */
         // bool independent = true;
@@ -125,6 +132,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
 
             /* Sort shares into buckets (one bucket per secret) */
             bool trivial = true; std::set<int> domains;
+            if(this->m_type == PINI || this->m_type == CINI || this->m_type == ICINI) domains = output_domains;
             std::vector<std::vector<const verica::Wire*>> shares(state->m_shared_inputs.size());
             for(auto var : support)
             {
@@ -189,6 +197,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                     std::vector<const verica::Wire*> complement;
                     
                     domains.clear();
+                    if(this->m_type == PINI || this->m_type == CINI || this->m_type == ICINI) domains = output_domains;
                     for(auto w : combination){
                         domains.insert(w->source_pin()->share_domain());
                     }
@@ -231,6 +240,18 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                         
                         this->m_independent &= state->m_managers[threadNum].bdd_statindependence(simulate, free);
 
+                        // if(!this->m_independent){
+                        //     // for(auto s : inter){
+                        //         std::cout << "New set for probe " << this->m_current_probes[0]->name() << ": ";
+                        //         for(auto elem : inter[idx]){
+                        //             std::cout << elem->name() << " ";
+                        //         }
+                        //         std::cout << std::endl;
+                        //     // }
+                        // }
+
+
+
                         // for(unsigned int s=0; s < (1 << combination_filtered.size()) && m_independent; ++s){
                         //     BDD simulate = observe;
                         //     for(int elem=0; elem<combination_filtered.size(); ++elem) if(s & (1 << elem)) simulate &= combination_filtered[elem]->functions(threadNum);
@@ -245,9 +266,11 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                     }
                 }
 
+
+
                 if (!this->m_independent){
-                    this->m_failing_probes.push_back(this->m_current_probes);
-                    this->m_combined_leaking_probes.push_back(this->m_current_probes);
+                    this->m_failing_probes.push_back(this->m_current_probes.first);
+                    this->m_combined_leaking_probes.push_back(this->m_current_probes.first);
 
                     // add leaking fault injections
                     if(settings->getFaultInjection() || settings->getCombined())
@@ -359,6 +382,7 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
 
             int verified_d = (this->m_failing_probes.size() != 0) ? this->m_failing_probes[0].size() - 1 : this->m_max_order;   // verified order of the SCA verification
             int verified_k = (secure == 0) ? k_target : -1;                                                                     // verified order of the FIA verification
+            // std::cout << "verified d: "<< verified_d << std::endl;
 
             /* Track security orders */
             if(verified_k != -1){
@@ -397,15 +421,27 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
             logger->log(service, this->m_name, ITEM + "targeted : (" + std::to_string(this->m_max_order) + ", " + std::to_string(k_target) + ") security");
             if(verified_k != -1){
                 if(verified_d == this->m_max_order){
-                    logger->log(service, this->m_name, ITEM + "verified : (" + std::to_string(verified_d) + ", " + std::to_string(verified_k) + ") security");
+                    logger->log(service, this->m_name, ITEM + "verified : side-channel security");
                 } else {
-                    logger->log(service, this->m_name, ITEM + "verified : (" + std::to_string(verified_d) + ", " + std::to_string(verified_k) + ") security ");
+                    logger->log(service, this->m_name, ITEM + "failed   : side-channel security");
                     success &= false;
                 }
+                logger->log(service, this->m_name, ITEM + "verified : fault-injection security");
             } else {
-                logger->log(service, this->m_name, ITEM + "(-, " + std::to_string(k_target) + ") security not possible");
+                logger->log(service, this->m_name, ITEM + "failed   : fault-injection security");
                 success &= false;
             }
+            // if(verified_k != -1){
+            //     if(verified_d == this->m_max_order){
+            //         logger->log(service, this->m_name, ITEM + "verified : (" + std::to_string(verified_d) + ", " + std::to_string(verified_k) + ") security");
+            //     } else {
+            //         logger->log(service, this->m_name, ITEM + "verified : (" + std::to_string(verified_d) + ", " + std::to_string(verified_k) + ") security ");
+            //         success &= false;
+            //     }
+            // } else {
+            //     logger->log(service, this->m_name, ITEM + "(-, " + std::to_string(k_target) + ") security not possible");
+            //     success &= false;
+            // }
         }      
     } 
 
@@ -463,7 +499,7 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
             logger->log(service, this->m_name, "verification:");
             logger->log(service, this->m_name, ITEM + "targeted : (" + std::to_string(settings->getSideChannelOrder()) + ", " + std::to_string(settings->getNumberOfFaults()) + ")-" + type);
             for(auto p : verified_orders){
-                logger->log(service, this->m_name, ITEM + "verified : (" + std::to_string(p.first) + ", " + std::to_string(p.second) + ")-" + type);
+                // logger->log(service, this->m_name, ITEM + "verified : (" + std::to_string(p.first) + ", " + std::to_string(p.second) + ")-" + type);
                 if(p.first == settings->getSideChannelOrder() && p.second == settings->getNumberOfFaults()) check |= true;
             }
 

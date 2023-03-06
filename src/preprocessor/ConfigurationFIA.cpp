@@ -55,7 +55,7 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
         // If fault composability checks are enabled (e.g., FNI, FSNI or some combined checks), input wires need to be added to the valid fault locations
         if(settings->getFaultComposability()){
             for(auto p : state->m_netlist_model->module_under_test()->input_pins()){
-                state->m_faultLocations.push_back(p->fan_out());
+                if(!p->fan_out()->fia_ignore()) state->m_faultLocations.push_back(p->fan_out());
             }
         }
 
@@ -123,6 +123,11 @@ ConfigurationFIA::report(std::string service, const Logger *logger, const Settin
         logger->log(service, this->m_name, "   fault mapping:   " + settings->getFaultMappingPath()); 
         logger->log(service, this->m_name, "   location:        " + settings->getFaultLocation());
         logger->log(service, this->m_name, "   strategy:        " + settings->getFaultAnalysisStrategy());
+        if(settings->getFaultLogicLevelErrorFlag()){    
+            logger->log(service, this->m_name, "   logic-level:     high");
+        } else {
+            logger->log(service, this->m_name, "   logic-level:     low");
+        }
         if(settings->getFaultFNI())
             logger->log(service, this->m_name, "   FNI:             true");
         else

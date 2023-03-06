@@ -333,7 +333,11 @@ void Injector::fault_node(const verica::Wire* wire, verica::fault::Fault fault, 
     std::vector<const verica::Wire*> operands;
 
     // Read operand function(s) from source nodes(s)
-    for(auto p : wire->source_pin()->parent_module()->input_pins()) operands.push_back(p->fan_in());
+    if(wire->source_pin()->parent_module()->gate()){
+        for(auto p : wire->source_pin()->parent_module()->input_pins()) operands.push_back(p->fan_in());
+    } else {
+        operands.push_back(wire);
+    }
 
     // Generate faulty function for gate
     switch (fault){

@@ -62,7 +62,8 @@ class State
         unsigned int m_num_output_shares = 0;
 
         /* SCA: Probe combinations */
-        std::vector<std::vector<std::vector<const verica::Wire*>>> m_probe_combinations;
+        // first entry in the pair contains all real probes while the second entry contains all "virtual" probes (e.g., for simulating abort signals)
+        std::vector<std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>>> m_probe_combinations;
 
         /* CUDD manager */
         std::vector<Cudd_Manager> m_managers;

@@ -2,11 +2,11 @@
     "general":
     {
         "verbose": 2,
-        "cores": 4,
+        "cores": 2,
         "memory": 2,
         "netlist":
         {
-            "file": "test/dom/dom1.v",
+            "file": "test/case-study-nina/and_snina_d1_k1.v",
             "name": "",
             "module": ""
         },
@@ -30,9 +30,10 @@
                 "blacklist": "model/fia-blacklist"
             }
         },
+
         "annotation":
         {
-            "file": "test/dom/annotations.json",
+            "file": "test/case-study-nina/annotations.json",
             "apply": true
         },
         "cudd":
@@ -47,9 +48,10 @@
             "partial": true
         }
     },
+
     "side-channel":
     {
-        "enable": true,
+        "enable": false,
         "configuration":
         {
             "order": 1,
@@ -66,7 +68,7 @@
         "analysis": 
         {
             "uniformity": false,
-            "probing": true,
+            "probing": false,
             "p-ni": false,
             "p-sni": false,
             "pini": false
@@ -78,7 +80,7 @@
         "enable": false,
         "configuration":
         {
-            "number": 2,
+            "number": 1,
             "variate": 1,
             "interrupt": false
         },
@@ -91,6 +93,7 @@
         {
             "reduced_complexity": false,
             "strategy": "correction",
+            "logic-level-error-flag": true,
             "f-ni": false,
             "f-sni": false,
             "fini": false
@@ -99,11 +102,11 @@
 
     "combined": 
     {
-        "enable": false,
+        "enable": true,
         "analysis":
         {
             "c-ni": false,
-            "c-sni": false,
+            "c-sni": true,
             "ic-sni": false,
             "cini": false,
             "icini": false

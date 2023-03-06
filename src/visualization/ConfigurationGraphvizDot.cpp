@@ -109,13 +109,13 @@ bool ConfigurationGraphvizDot::export_full(State *state, const Settings *setting
 
     // Data inputs
     for(auto p : n_input){
-        graph += "  IN" + std::to_string(p->uid()) + " [label=\"IN[" + std::to_string(p->share_index()) + "]_" + std::to_string(p->share_domain()) + "\"";
+        graph += "  IN" + std::to_string(p->uid()) + " [label=\"IN[" + std::to_string(p->share_index()) + "]_" + std::to_string(p->share_domain()) + "_" + std::to_string(p->fault_domain()) + "\"";
         graph += ", shape=plain];\n";
     }
 
     // Data outputs
     for(auto p : n_output){
-        graph += "  OUT" + std::to_string(p->uid()) + " [label=\"OUT[" + std::to_string(p->share_index()) + "]_" + std::to_string(p->share_domain()) + "\"";
+        graph += "  OUT" + std::to_string(p->uid()) + " [label=\"OUT[" + std::to_string(p->share_index()) + "]_" + std::to_string(p->share_domain()) + "_" + std::to_string(p->fault_domain()) + "\"";
         graph += ", shape=plain];\n";
     }
 
@@ -131,7 +131,7 @@ bool ConfigurationGraphvizDot::export_full(State *state, const Settings *setting
                 }
             }
         }
-        graph += "  " + std::to_string(node->uid()) + " [label=\"" + gate_type + ", (" + std::to_string(uid)  + ")" "\"];\n";
+        graph += "  " + std::to_string(node->uid()) + " [label=\"" + gate_type + "\"];\n";
     }
 
     // Registers

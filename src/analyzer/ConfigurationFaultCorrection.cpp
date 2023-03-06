@@ -196,15 +196,15 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
     // Fault Injection
     double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
     for(auto v : state->m_effective) effective += v;
-    for(auto v : state->m_detected) detected += v;
+    // for(auto v : state->m_detected) detected += v;
     for(auto v : state->m_scenarios) scenarios += v; 
-    ineffective = scenarios - effective - detected; 
+    // ineffective = scenarios - effective - detected; 
 
     if(settings->getVerbose() > 0) {
-        logger->log(service, this->m_name, "Effective faults:   " + std::to_string(effective));
-        logger->log(service, this->m_name, "Ineffective faults: " + std::to_string(ineffective));
-        logger->log(service, this->m_name, "Detected faults:    " + std::to_string(detected));
-        logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string(scenarios));
+        logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
+        // logger->log(service, this->m_name, "Ineffective faults: " + std::to_string(ineffective));
+        // logger->log(service, this->m_name, "Detected faults:    " + std::to_string(detected));
+        logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
     }    
 
     /* Print footer */

@@ -2,6 +2,7 @@
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
  * AUTHOR  : Pascal Sasdrich (pascal.sasdrich@rub.de)
+ *         : Jan Richter-Brockmann (jan.richter-brockmann@rub.de)
  * DOCUMENT: https://eprint.iacr.org/2022/484
  *           https://eprint.iacr.org/2022/1131
  * -----------------------------------------------------------------
@@ -78,15 +79,46 @@ ConfigurationElaborate::execute(const Settings *settings, State *state)
         state->m_netlist_model->register_stages() += (state->m_netlist_model->register_stages() <= w->stage_index());
     }
 
-    // Third, identify stage_index for all remaining gates
-    for(auto w : mut->wires()) {
+    // Third, annotate inputs
+    for(auto p : mut->input_pins()) state->m_netlist_model->set_stage_index(p->fan_out()->uid(), 0);
+
+    // Fourth, identify stage_index for all remaining gates
+    std::vector<const verica::Pin*> input_pins = mut->input_pins();
+    for(auto w : mut->wires()){
         if(!w->source_pin()->parent_module()->is_sequential()){
-            state->m_netlist_model->set_stage_index(w->uid(), find_output_register_index(state->m_netlist_model, w));
-            state->m_netlist_model->logic_stages() += (state->m_netlist_model->logic_stages() <= w->stage_index());
+            int idx = 0;
+            if(std::find(mut->input_pins().begin(), mut->input_pins().end(), w->source_pin()) == mut->input_pins().end()){
+                // do not consider input pins
+                bool connected_to_reg = false;
+                int reg_idx = 0;
+                if(w->source_pin()->parent_module()->gate()){    
+                    // current wire is connected to an output of a gate
+                    for(auto p : w->source_pin()->parent_module()->input_pins()){
+                        idx = (p->fan_in()->stage_index() > idx) ? p->fan_in()->stage_index() : idx;
+                        if(p->fan_in()->source_pin()->parent_module()->is_sequential()) {
+                            // inputs of the gate are connected to registers
+                            connected_to_reg |= true;
+                            reg_idx = p->fan_in()->stage_index() + 1;
+                        }
+                    }
+                } else {
+                    // current wire is connected to another wire (e.g., connection between two modules)
+                    idx = w->source_pin()->fan_in()->stage_index();
+                    if(w->source_pin()->fan_in()->source_pin()->parent_module()->is_sequential()) {
+                        // wire is connected to a register
+                        connected_to_reg |= true;
+                        reg_idx = w->source_pin()->fan_in()->stage_index() + 1;
+                    }
+                }
+                if(connected_to_reg) idx = reg_idx;
+            }
+            // set logic stage for current wire and update number of logic stages
+            state->m_netlist_model->set_stage_index(w->uid(), idx);
+            state->m_netlist_model->logic_stages() += (state->m_netlist_model->logic_stages() <= w->stage_index());            
         }
     }
 
-    // Fourth, determine inputs and outputs of the Module Under Test (MUT)
+    // Fifth, determine inputs and outputs of the Module Under Test (MUT)
     state->m_mut_input_size = state->m_netlist_model->module_under_test()->input_pins().size();
     for (auto p : state->m_netlist_model->module_under_test()->output_pins()) state->m_mut_outputs.push_back(p->fan_in());
 }
@@ -94,7 +126,7 @@ ConfigurationElaborate::execute(const Settings *settings, State *state)
 void
 ConfigurationElaborate::report(std::string service, const Logger *logger, const Settings *settings, State *state) const
 {   
-    (void)settings; // We do not need a settings object in this function. However, it must be given as paramter due to an overwriting. 
+    (void)settings; // We do not need a settings object in this function. However, it must be given as parameter due to an overwriting. 
 
     /* Print header */
     logger->header();
@@ -301,7 +333,6 @@ ConfigurationElaborate::find_input_register_index(const verica::Netlist* model, 
         next_pin = next_pin->fan_in()->source_pin();
     }    
 
-    // for(auto p : wire->source_pin()->parent_module()->input_pins()){
     for(auto p : next_pin->parent_module()->input_pins()){
         if(std::find(input_pins.begin(), input_pins.end(), p) == input_pins.end() && !p->is_const()){
             const verica::Pin* next_pin_next = p->fan_in()->source_pin();
@@ -340,7 +371,6 @@ ConfigurationElaborate::find_output_register_index(const verica::Netlist* model,
                 next_wire = p->parent_module()->output_pins()[0]->fan_out();
             }
             int sub_stage_idx = find_output_register_index(model, next_wire);
-            // int sub_stage_idx = find_output_register_index(model, p->parent_module()->output_pins()[0]->fan_out());
 
             stage_idx = (sub_stage_idx < stage_idx) ? sub_stage_idx : stage_idx;
         }
