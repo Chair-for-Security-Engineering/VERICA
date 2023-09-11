@@ -30,21 +30,15 @@
 
 #include "Environment.hpp"
 
-class TestEnvironment
+class TestEnvironment : public Environment
 {
     public:
         /* Enumeration of execution phases */
-        enum execPhases {NONE, CELLLIB, PARSER, ANNOTATION, FILTERING, MULTI_THREADING, MODEL_POSTPROCESSING, ELABORATE, FIA, SCA, COMPLETE};
+        enum class execPhases {NONE, CELLLIB, PARSER, ANNOTATION, FILTERING, MULTI_THREADING, MODEL_POSTPROCESSING, ELABORATE, FIA, SCA, COMPLETE};
 
         /* Constructor(s) */
         TestEnvironment(int argc, char * argv[]);
         TestEnvironment(int argc, char * argv[], execPhases execPhase);
-
-        /* Destructor */
-        ~TestEnvironment();
-
-        /* Create all service objects */
-        void initialize();
 
         /* Controlled evaluation execution */
         void execute();
@@ -69,30 +63,16 @@ class TestEnvironment
         Preprocessor* getPreprocessor();
         void setPreprocessor(Preprocessor*);
 
+        /* Make TestEnvironment preprocessor accessible from outside */
+        Analyzer* getAnalyzer();
+        void setAnalyzer(Analyzer*);
+
+        /* Make Composability type of TestEnvironment accessible from outside */
+        const Composability getType();
+
     private:
         /* Selected initialization phase */
         execPhases execPhase;
-
-        /* Logger */
-        Logger *m_logger;
-
-        /* State */
-        State *m_state;
-
-        /* Settings */
-        Settings *m_settings;
-
-        /* Parser */
-        Parser *m_parser;
-
-        /* Preprocessor */
-        Preprocessor *m_preprocessor;
-
-        /* Injector */
-        Injector *m_injector;
-
-        /* Analyzer */
-        Analyzer *m_analyzer;
 };
 
 #endif // __VERICA_TEST_ENVIRONMENT_HPP_

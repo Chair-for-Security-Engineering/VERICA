@@ -1,0 +1,12 @@
+{
+    "netlist_name" : "uma_d2",
+    "sca-analysis" : "p-ni_std",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 2,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 1,
+        "expected_m_failing_probes": [
+            [{ "uid": 38, "name": "port_a[0]" }, { "uid": 42, "name": "port_a[1]" }, { "uid": 40, "name": "port_a[2]" }]
+        ]
+    }
+}

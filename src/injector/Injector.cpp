@@ -26,7 +26,7 @@
 
 #include "injector/Injector.hpp"
 
-/* 
+/*
  * =========================================================================================
  * Constructor(s)
  * =========================================================================================
@@ -36,7 +36,7 @@ Injector::Injector(std::string name, Logger *logger, Settings *settings, State *
 {
 }
 
-/* 
+/*
  * =========================================================================================
  * Destructor
  * =========================================================================================
@@ -47,13 +47,13 @@ Injector::~Injector()
 
 }
 
-/* 
+/*
  * =========================================================================================
  * Generate Permuted Fault Locations
  * =========================================================================================
  */
 void Injector::get_next_fault_locations(unsigned int number_of_faults){
-    /* Repeatedly used variables */ 
+    /* Repeatedly used variables */
     int variate = this->m_settings->getFaultVariate();
 
     if(m_permutation_done && number_of_faults != m_current_number_of_faults){
@@ -72,7 +72,7 @@ void Injector::get_next_fault_locations(unsigned int number_of_faults){
                 m_stage_numbers.push_back(w->stage_index());
             }
         }
-        if(this->m_settings->getVerbose() > 0) this->m_logger->log(this->m_name, "Found " + std::to_string(m_stage_numbers.size()) + " valid stages to inject faults."); 
+        if(this->m_settings->getVerbose() > 0) this->m_logger->log(this->m_name, "Found " + std::to_string(m_stage_numbers.size()) + " valid stages to inject faults.");
 
         // create a bitmask with number of logic stages indices
         // fill with selected variate value
@@ -89,31 +89,39 @@ void Injector::get_next_fault_locations(unsigned int number_of_faults){
         // Handling univariate, bivariate and multivariate fault injections
         // start to fill a vector with all valid faultLocations for the current analysis
         m_faultLocations.clear();
-        for(unsigned int i=0; i < m_stage_numbers.size(); ++i){
-            if(m_bitmask[i]){
-                std::vector<const verica::Wire*> temp;
-                for(auto loc : m_validFaultLocationsIn){
-                    if((unsigned int)loc->stage_index() == m_stage_numbers[i]){
-                        // if logical stage i should be considered, add all corresponding gates to faultLocations
-                        temp.push_back(loc);
+        if(variate == 0){
+            std::vector<const verica::Wire*> temp;
+            for(auto loc : m_validFaultLocationsIn){
+                temp.push_back(loc);
+            }
+            m_faultLocations.push_back(temp);
+        } else {
+            for(unsigned int i=0; i < m_stage_numbers.size(); ++i){
+                if(m_bitmask[i]){
+                    std::vector<const verica::Wire*> temp;
+                    for(auto loc : m_validFaultLocationsIn){
+                        if((unsigned int)loc->stage_index() == m_stage_numbers[i]){
+                            // if logical stage i should be considered, add all corresponding gates to faultLocations
+                            temp.push_back(loc);
+                        }
                     }
+                    m_faultLocations.push_back(temp);
                 }
-                m_faultLocations.push_back(temp);
             }
         }
 
         // compute total number of combinations to be tested
         m_num_of_combinations = 1;
-        for(int v=0; v<variate; ++v){
-            m_num_of_combinations *=  binomial_coeff((uint64_t)m_faultLocations[v].size(), (uint64_t)m_current_number_of_faults); 
+        for(int v=0; v<m_faultLocations.size(); ++v){
+            m_num_of_combinations *=  binomial_coeff((uint64_t)m_faultLocations[v].size(), (uint64_t)m_current_number_of_faults);
         }
 
         // define bitmasks
         m_bitmasks.clear();
-        for(int var=0; var<variate; ++var){
-                std::vector<bool> bitmask(m_faultLocations[var].size());
-                std::fill(bitmask.begin(), bitmask.begin() + m_current_number_of_faults, true);
-                m_bitmasks.push_back(bitmask);
+        for(int var=0; var<m_faultLocations.size(); ++var){
+            std::vector<bool> bitmask(m_faultLocations[var].size());
+            std::fill(bitmask.begin(), bitmask.begin() + m_current_number_of_faults, true);
+            m_bitmasks.push_back(bitmask);
         }
 
         // reset state variables
@@ -122,7 +130,7 @@ void Injector::get_next_fault_locations(unsigned int number_of_faults){
         m_batch_range = 10e6; // TODO: config?
     }
 
-    /* Determine new batch of permuted fault locations (max. m_batch_range different sets of fault locations) */ 
+    /* Determine new batch of permuted fault locations (max. m_batch_range different sets of fault locations) */
     if(m_batch_start+m_batch_range > m_num_of_combinations){
         m_batch_range = m_num_of_combinations - m_batch_start;
     }
@@ -153,7 +161,7 @@ void Injector::generate_fault_combinations_partly(std::vector<std::vector<const 
         // Determine subpermutations that should be used to determine the target permutation
         std::vector<const verica::Wire*> temp, temp2;
         // determine valid combinations for each logic stage
-        for(int v=0; v<variate; ++v){
+        for(int v=0; v<faultLocations.size(); ++v){
             // get valid combination of gates
             temp = generate_specific_fault_combinations(faultLocations[v], bitmasks[v]);
             // shouldn't be empty
@@ -197,7 +205,7 @@ void Injector::adapt_permuted_fault_locations_for_sna(){
 
 
 
-/* 
+/*
  * =========================================================================================
  * Fault Injection
  * =========================================================================================
@@ -271,7 +279,7 @@ void Injector::inject(std::vector<const verica::Wire*> &wires, std::vector<veric
             this->m_state->m_current_fault_injections[core].second[it] = faultList[idx];
         }
     }
-    
+
     // call injection strategy
     fault_injection_incremental(wires, faultList, core);
 }
@@ -280,7 +288,7 @@ void Injector::interrupt_fault_injection(std::vector<std::pair<std::vector<const
     // This code snippet outputs detailed information about effective fault injections
     if(this->m_state->m_effective[thread_num] != 0 && cancel == false){
         cancel = true;
-        #pragma omp critical 
+        #pragma omp critical
         {
         std::vector<BDD> output_bdds;
         float mindterms_out;
@@ -302,15 +310,15 @@ void Injector::interrupt_fault_injection(std::vector<std::pair<std::vector<const
             }
         }
         }
-    } 
+    }
 }
 
 void Injector::restore_faulty_models(std::vector<const verica::Wire*> &locations, int &thread_num){
     for(auto r : locations){
         this->m_state->m_netlist_model->set_faulty_gate_identifier(r->uid(), r->source_pin()->gate_identifier(), thread_num);
         elaborate_node(r, thread_num);
-        for(int n=r->propagation_path().size()-1; n >=0; --n){  
-            elaborate_node(r->propagation_path()[n], thread_num);
+        for(int n=r->propagation_path_size()-1; n >=0; --n){
+            elaborate_node(r->propagation_path_wire(n), thread_num);
         }
     }
 
@@ -322,8 +330,8 @@ void Injector::restore_faulty_models(std::vector<const verica::Wire*> &locations
 void Injector::fault_injection_incremental(std::vector<const verica::Wire*> &nodes, std::vector<verica::fault::Fault> &faultList, int core){
     for(unsigned int it=0; it < nodes.size(); it++){
         fault_node(nodes[it], faultList[it], core);
-        for(int pos=nodes[it]->propagation_path().size()-1; pos >=0; --pos){   
-            elaborate_node(nodes[it]->propagation_path()[pos], core);
+        for(int pos=nodes[it]->propagation_path_size()-1; pos >=0; --pos){
+            elaborate_node(nodes[it]->propagation_path_wire(pos), core);
         }
     }
 }
@@ -384,7 +392,7 @@ void Injector::fault_node(const verica::Wire* wire, verica::fault::Fault fault, 
         default:
             throw std::logic_error("[INJECTOR] Invalid fault type detected during fault injection!");
             break;
-    } 
+    }
 }
 
 void Injector::elaborate_node(const verica::Wire* wire, int core){
@@ -393,46 +401,43 @@ void Injector::elaborate_node(const verica::Wire* wire, int core){
     } else if(wire->source_pin()->fan_in() != nullptr){
         this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), wire->source_pin()->fan_in()->faulty_functions(core), core );
     } else {
-        std::vector<const verica::Pin*> input_pins = wire->source_pin()->parent_module()->input_pins();
-        std::vector<BDD> operands;
-        for(auto p : input_pins) operands.push_back(p->fan_in()->faulty_functions(core));
         switch (wire->faulty_gate_identifier(core)){
             case 0:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), operands[0], core);
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(),  wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core), core);
                 break;
             case 1:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !operands[0], core);
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), ! wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core), core);
                 break;
             case 2:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), operands[0] & operands[1], core);
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(),  wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core) &  wire->source_pin()->parent_module()->input_pins()[1]->fan_in()->faulty_functions(core), core);
                 break;
             case 3:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !(operands[0] & operands[1]), core);
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !( wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core) &  wire->source_pin()->parent_module()->input_pins()[1]->fan_in()->faulty_functions(core)), core);
                 break;
             case 4:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), operands[0] | operands[1], core);
-                break;   
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(),  wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core) |  wire->source_pin()->parent_module()->input_pins()[1]->fan_in()->faulty_functions(core), core);
+                break;
             case 5:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !(operands[0] | operands[1]), core);
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !( wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core) |  wire->source_pin()->parent_module()->input_pins()[1]->fan_in()->faulty_functions(core)), core);
                 break;
             case 6:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), operands[0] ^ operands[1], core);
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(),  wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core) ^  wire->source_pin()->parent_module()->input_pins()[1]->fan_in()->faulty_functions(core), core);
                 break;
             case 7:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !(operands[0] ^ operands[1]), core);
-                break;  
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !( wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core) ^  wire->source_pin()->parent_module()->input_pins()[1]->fan_in()->faulty_functions(core)), core);
+                break;
             case 8:
                 this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), this->m_state->m_managers[core].bddOne(), core);
-                break;  
+                break;
             case 9:
                 this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), this->m_state->m_managers[core].bddZero(), core);
-                break;      
+                break;
             case 11:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), operands[0], core);
-                break;  
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(),  wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core), core);
+                break;
             case 12:
-                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), !operands[0], core);
-                break;                                   
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), ! wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core), core);
+                break;
             default:
                 throw std::logic_error("[INJECTOR] Gate identifier " + std::to_string(wire->source_pin()->gate_identifier()) + " is not supported!");
         }

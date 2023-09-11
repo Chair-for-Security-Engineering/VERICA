@@ -1,7 +1,7 @@
 /*
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
- * AUTHOR  : Jan Richter-Brockmann (jan.richter-brockmann@rub.de) 
+ * AUTHOR  : Jan Richter-Brockmann (jan.richter-brockmann@rub.de)
  *           Pascal Sasdrich (pascal.sasdrich@rub.de)
  * DOCUMENT: https://eprint.iacr.org/2022/484
  *           https://eprint.iacr.org/2022/1131
@@ -46,7 +46,7 @@ class Settings
         /* Destructor */
         ~Settings();
 
-        /* Member functions reading settings */ 
+        /* Member functions reading settings */
         /* General */
         int getVerbose() const;
         int getCores() const;
@@ -123,7 +123,7 @@ class Settings
 
 
 
-        /* Additional member functions */ 
+        /* Additional member functions */
         bool getFaultComposability() const;
         void setFaultVariate(const int &cores);
 
@@ -131,18 +131,82 @@ class Settings
     private:
 
         /* Validate settings */
-        void validateSettings(); 
-        template<typename T> void checkSettingRange(const std::string &setting, const std::vector<T> &validSettings);
-        void checkSettingFileExists(const std::string& setting);
-        void checkSettingPathExists(const std::string& setting);
-        void checkSettingGreaterEqual(const std::string &setting, const int &threshold);
+        void validateAndInitSettings(boost::property_tree::ptree & config);
+        template<typename rT, typename  iT>
+        rT checkSettingRange(const std::string &setting, const std::vector<iT> &validSettings, boost::property_tree::ptree & config);
+        std::string checkSettingFileExists(const std::string& setting, boost::property_tree::ptree & config);
+        std::string checkSettingPathExists(const std::string& setting, boost::property_tree::ptree & config);
+        int checkSettingGreaterEqual(const std::string &setting, const int &threshold, boost::property_tree::ptree & config);
 
-        /* Boost property tree (parsed from .ini configuration) */
-        boost::property_tree::ptree config;
 
         /* Settings */
         int cores = -1;
+        unsigned long memory = 0;
         int faultVariate = -1;
+        bool reorderingEnabled = false;
+        bool visualizationEnabled = false;
+        std::string visualizationPath = "";
+        bool fullVisualizationEnabled = false;
+        bool partialVisualization = false;
+        int verbose = 0;
+        std::string designFilePath = "";
+        std::string libraryFilePath = "";
+        std::string libraryName = "";
+        bool annotationsEnabled = false;
+        std::string annotationFilePath = "";
+
+
+
+        // Side-Channel Analysis
+        int scaMasking = 0;
+        bool scaEnabled = false;
+        bool scaUniformityEnabled = false;
+        bool scaProbingEnabled = false;
+        bool scaNIEnabled = false;
+        bool scaSNIEnabled = false;
+        bool scaPINIEnabled = false;
+        std::string scaFilteringType = "";
+        std::string scaWhiteList = "";
+        std::string scaBlackList = "";
+        int scaOrder = 0;
+        int scaVariate = 0;
+        bool scaInterruptEnabled = false;
+        bool scaModelGlitchesEnabled = false;
+        bool scaModelTransitionsEnabled = false;
+        bool scaModelCouplingsEnabled = false;
+
+
+
+        // Fault Injection
+        int faultNumberOfFaults = 0;
+        bool faultInjectionEnabled = false;
+        bool faultInterruptEnabled = false;
+        bool faultReduceComplexityEnabled = false;
+        bool faultLogicLevelErrorFlag = false;
+        bool faultFNIEnabled = false;
+        bool faultFSNIEnabled = false;
+        bool faultFINIEnabled = false;
+        std::string faultFilteringType = "";
+        std::string faultWhiteList = "";
+        std::string faultBlackList = "";
+        std::string faultAnalysisStrategy = "";
+        std::string faultMappingPath = "";
+        std::string faultLocation = "";
+
+
+
+        // Combined Analysis
+        bool combinedEnabled = false;
+        bool cniEnabled = false;
+        bool csniEnabled = false;
+        bool icsniEnabled = false;
+        bool ciniEnabled = false;
+        bool iciniEnabled = false;
+
+
+
+        // Composability
+        bool faultComposability = false;
 };
 
 #endif // __VERICA_CONTEXT_SETTINGS_HPP_

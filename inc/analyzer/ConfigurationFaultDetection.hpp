@@ -41,12 +41,24 @@ class ConfigurationFaultDetection : public Configuration
         /* Perform analysis for given context & configuration */
         void execute(const Settings *settings, State *state) override;
 
+        /* Finalize analysis for given context & configuration */
+        void finalize(const Settings *settings, State *state);
+
         /* Report analysis results for given context & configuration */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
 
     private:
 
-        std::vector<std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>>> m_effective_fault_injections;
+        /* Member variables to store effective faults for each strategy independently */
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_fia;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_fni;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_fsni;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_fini;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_cni;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_csni;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_icsni;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_cini;
+        std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_icini;
         
 };
 

@@ -1,0 +1,27 @@
+{
+    "netlist_name" : "dom1",
+    "sca-analysis" : "p-sni_std",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 16,
+        "expected_m_failing_probes": [
+            [ { "uid": 37, "name": "port_a[0]" }, { "uid": 36, "name": "port_a[1]" } ],
+            [ { "uid": 40, "name": "port_r[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 40, "name": "port_r[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 17, "name": "port_r[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 17, "name": "port_r[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 12, "name": "N0[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 13, "name": "N1[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 8, "name": "port_v_0[1]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 11, "name": "port_v_1[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 32, "name": "ref_1_port_v_0[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 35, "name": "ref_1_port_v_1[1]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 23, "name": "port_v_0[1]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 24, "name": "port_v_1[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 21, "name": "port_c[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 20, "name": "port_c[1]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 27, "name": "port_c[0]" }, { "uid": 26, "name": "port_c[1]" } ]       
+        ]
+    }
+}

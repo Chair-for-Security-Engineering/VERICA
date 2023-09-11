@@ -1,0 +1,15 @@
+{
+    "netlist_name" : "dom0",
+    "sca-analysis" : "probing",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 0,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 4,
+        "expected_m_failing_probes": [
+            [ { "uid": 10, "name": "port_a[0]" } ],
+            [ { "uid": 4, "name": "port_u_0[0]" } ], 
+            [ { "uid": 7, "name": "port_c[0]" } ], 
+            [ { "uid": 11, "name": "port_b[0]" } ]
+        ]
+    }
+}

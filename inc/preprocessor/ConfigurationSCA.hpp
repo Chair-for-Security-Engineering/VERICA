@@ -39,12 +39,15 @@ class ConfigurationSCA : public Configuration
 
         /* Filter design for given settings */
         void execute(const Settings *settings, State *state) override;
+
+        /* Finalize analysis for given context & configuration */
+        void finalize(const Settings *settings, State *state) override;
         
         /* Report filter results */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
 
         /* Update */
-        void update (State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, const int thread_num);
+        void update (State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num);
 
     private: TESTABLE
 
@@ -55,6 +58,12 @@ class ConfigurationSCA : public Configuration
         void determine_shared_inputs(State *state);
 
         /**
+        * @brief Determines the shared inputs (i.e., creates a map between each unshared input to its shares).
+        * @param state Pointer to the state.
+        */ 
+        void determine_shared_outputs(State *state);
+
+        /**
         * @brief Determines wires in the model that should be used as probe positions.
         * @param state Pointer to the state.
         * @param settings Pointer to the settings.
@@ -62,14 +71,15 @@ class ConfigurationSCA : public Configuration
         void determine_probe_positions(State *state, const Settings *settings);
 
         /**
-        * @brief Computes all valid probe combinations. The function also incorporates modified pathes due to fault injections 
+        * @brief Computes all valid probe combinations. The function also incorporates modified paths due to fault injections 
         *        by adapting new probe combinations accordingly (i.e., only probes that are effected by the fault injection are considered)
         * @param state Pointer to the state.
         * @param settings Pointer to the settings.
         * @param modified Vector of modified wires (due to fault injections).
         * @param reduce_order Reduces the order (i.e., number of probes per probe combination). This is required for combined analysis, e.g., C-NI.
+        * @param simulate_outputs If true, all outputs with the same share domain are simulated if a probe is placed on one of the corresponding output shares. 
         */ 
-        void update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, const int thread_num);
+        void update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num);
 
 
         /* Holds all possible probe positions */
@@ -77,6 +87,9 @@ class ConfigurationSCA : public Configuration
 
         /* Holds all combinations of abort signals */
         std::vector<std::vector<const verica::Wire*>> m_abort_signals;
+
+        /* Holds all output wires with same share domain */
+        std::map<int, std::vector<const verica::Wire*>> m_outputs_same_domain;
         
 };
 

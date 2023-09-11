@@ -1,0 +1,114 @@
+{
+    "general":
+    {
+        "verbose": 3,
+        "cores": 1,
+        "memory": 8,
+        "netlist":
+        {
+            "file": "unittests/VERICA/Designs/craft-1round-correction/CRAFT_1bitCorrection_3bitRedSize.v",
+            "name": "",
+            "module": "Cipher"
+        },
+        "library":
+        {
+            "file": "cell/nang45.txt",
+            "name": "NANG45"
+        },
+        "filtering":
+        {
+            "sca":
+            {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia":
+            {
+                "type": "black",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "unittests/VERICA/model/fia/craft/correction/CRAFT_1bitCorrection_3bitRedSize_blacklist.txt"
+            }
+        },
+        "annotation":
+        {
+            "file": "unittests/VERICA/Designs/craft-1round-correction/annotations.json",
+            "apply": true
+        },
+        "cudd":
+        {
+            "reordering": true
+        },
+        "visualization":
+        {
+            "enable": true,
+            "path": "dot/",
+            "full": true,
+            "partial": true
+        }
+    },
+
+    "side-channel":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "order": 2,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": false
+        },
+        "model":
+        {
+            "glitches": true,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis":
+        {
+            "uniformity": false,
+            "probing": true,
+            "p-ni": false,
+            "p-sni": false,
+            "pini": false
+        }
+    },
+
+    "fault-injection":
+    {
+        "enable": true,
+        "configuration":
+        {
+            "number": 2,
+            "variate": 1,
+            "interrupt": false
+        },
+        "model":
+        {
+            "mapping": "unittests/VERICA/model/fia/bitflip.txt",
+            "location": "cs"
+        },
+        "analysis":
+        {
+            "reduced_complexity": false,
+            "strategy": "correction",
+            "logic-level-error-flag": true,
+            "f-ni": false,
+            "f-sni": false,
+            "fini": false
+        }
+    },
+
+    "combined":
+    {
+        "enable": false,
+        "analysis":
+        {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false,
+            "cini": false,
+            "icini": false
+        }
+    }
+}

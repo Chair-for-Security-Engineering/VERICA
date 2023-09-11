@@ -3,10 +3,10 @@
     {
         "verbose": 2,
         "cores": 2,
-        "memory": 2,
+        "memory": 8,
         "netlist":
         {
-            "file": "test/case-study-nina/and_snina_d1_k1.v",
+            "file": "test/cini-insecure/hpc1/cini_d2_k1.v",
             "name": "",
             "module": ""
         },
@@ -33,7 +33,7 @@
 
         "annotation":
         {
-            "file": "test/case-study-nina/annotations.json",
+            "file": "test/cini-insecure/hpc1/annotations.json",
             "apply": true
         },
         "cudd":
@@ -54,7 +54,7 @@
         "enable": false,
         "configuration":
         {
-            "order": 1,
+            "order": 2,
             "variate": 0,
             "masking": 0,
             "interrupt": false
@@ -92,7 +92,7 @@
         "analysis":
         {
             "reduced_complexity": false,
-            "strategy": "detection",
+            "strategy": "correction",
             "logic-level-error-flag": false,
             "f-ni": false,
             "f-sni": false,
@@ -106,9 +106,9 @@
         "analysis":
         {
             "c-ni": false,
-            "c-sni": true,
+            "c-sni": false,
             "ic-sni": false,
-            "cini": false,
+            "cini": true,
             "icini": false
         }
     }

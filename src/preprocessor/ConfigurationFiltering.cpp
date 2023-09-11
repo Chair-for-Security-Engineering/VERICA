@@ -56,6 +56,10 @@ ConfigurationFiltering::execute(const Settings *settings, State *state){
 }
 
 void
+ConfigurationFiltering::finalize(const Settings *settings, State *state) {
+}
+
+void
 ConfigurationFiltering::report(std::string service, const Logger *logger, const Settings *settings, State *state) const {    
 
     /* Print header */

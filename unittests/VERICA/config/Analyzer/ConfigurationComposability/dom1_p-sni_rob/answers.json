@@ -1,0 +1,20 @@
+{
+    "netlist_name" : "dom1",
+    "sca-analysis" : "p-sni_rob",
+    "is_inf_theo_sec": "false",
+    "expected_side_channel_order": 0,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 2,
+        "expected_m_failing_probes": [
+                [ { "uid": 27, "name": "port_c[0]" } ],
+                [ { "uid": 26, "name": "port_c[1]" } ]
+        ]
+    },
+    "expected_failing_find": {
+        "expected_m_failing_probes_size": 2,
+        "expected_m_failing_probes": [
+                [ { "uid": 27, "name": "port_c[0]" } ],
+                [ { "uid": 26, "name": "port_c[1]" } ]
+        ]
+    }
+}

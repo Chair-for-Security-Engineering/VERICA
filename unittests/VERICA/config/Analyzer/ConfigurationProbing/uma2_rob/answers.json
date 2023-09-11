@@ -1,0 +1,23 @@
+{
+    "netlist_name" : "uma2",
+    "sca-analysis" : "probing rob",
+    "is_inf_theo_sec": "false",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 1695,
+        "expected_m_failing_probes": [ ]
+    },
+    "expected_failing_find": {
+        "expected_m_failing_probes_size": 8,
+        "expected_m_failing_probes": [
+            [ { "uid": 86, "name": "port_r1[1]" }, { "uid": 70, "name": "mul2_genblk3_hc2_tmp_c1_in[2]" } ],
+            [ { "uid": 87, "name": "port_r1[0]" }, { "uid": 68, "name": "mul2_genblk3_hc2_tmp_c1_in[0]" } ],
+            [ { "uid": 15, "name": "mul1_genblk3_hc2_z_in_0_[0]" }, { "uid": 68, "name": "mul2_genblk3_hc2_tmp_c1_in[0]" } ],
+            [ { "uid": 15, "name": "mul1_genblk3_hc2_z_in_0_[0]" }, { "uid": 70, "name": "mul2_genblk3_hc2_tmp_c1_in[2]" } ],
+            [ { "uid": 15, "name": "mul1_genblk3_hc2_z_in_0_[0]" }, { "uid": 69, "name": "mul2_genblk3_hc2_tmp_c1_in[1]" } ],
+            [ { "uid": 53, "name": "mul1_genblk3_hc2_tmp_c0_in[0]" }, { "uid": 69, "name": "mul2_genblk3_hc2_tmp_c1_in[1]" } ],
+            [ { "uid": 55, "name": "mul1_genblk3_hc2_tmp_c0_in[2]" }, { "uid": 68, "name": "mul2_genblk3_hc2_tmp_c1_in[0]" } ],
+            [ { "uid": 54, "name": "mul1_genblk3_hc2_tmp_c0_in[1]" }, { "uid": 70, "name": "mul2_genblk3_hc2_tmp_c1_in[2]" } ]            
+        ]
+    }
+}

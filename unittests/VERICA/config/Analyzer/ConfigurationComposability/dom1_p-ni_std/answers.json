@@ -1,0 +1,12 @@
+{
+    "netlist_name" : "dom1",
+    "sca-analysis" : "p-ni_std",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 1,
+        "expected_m_failing_probes": [
+            [{ "uid": 37, "name": "port_a[0]" }, { "uid": 36, "name": "port_a[1]" }]
+        ]
+    }
+}

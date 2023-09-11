@@ -94,11 +94,13 @@ ConfigurationElaborate::execute(const Settings *settings, State *state)
                 if(w->source_pin()->parent_module()->gate()){    
                     // current wire is connected to an output of a gate
                     for(auto p : w->source_pin()->parent_module()->input_pins()){
-                        idx = (p->fan_in()->stage_index() > idx) ? p->fan_in()->stage_index() : idx;
-                        if(p->fan_in()->source_pin()->parent_module()->is_sequential()) {
-                            // inputs of the gate are connected to registers
-                            connected_to_reg |= true;
-                            reg_idx = p->fan_in()->stage_index() + 1;
+                        if(!p->is_const()){
+                            idx = (p->fan_in()->stage_index() > idx) ? p->fan_in()->stage_index() : idx;
+                            if(p->fan_in()->source_pin()->parent_module()->is_sequential()) {
+                                // inputs of the gate are connected to registers
+                                connected_to_reg |= true;
+                                reg_idx = p->fan_in()->stage_index() + 1;
+                            }
                         }
                     }
                 } else {
@@ -121,6 +123,10 @@ ConfigurationElaborate::execute(const Settings *settings, State *state)
     // Fifth, determine inputs and outputs of the Module Under Test (MUT)
     state->m_mut_input_size = state->m_netlist_model->module_under_test()->input_pins().size();
     for (auto p : state->m_netlist_model->module_under_test()->output_pins()) state->m_mut_outputs.push_back(p->fan_in());
+}
+
+void
+ConfigurationElaborate::finalize(const Settings *settings, State *state) {
 }
 
 void

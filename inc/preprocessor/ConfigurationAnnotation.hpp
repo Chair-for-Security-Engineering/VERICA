@@ -49,6 +49,9 @@ class ConfigurationAnnotation : public Configuration
 
         /* Filter design for given settings */
         void execute(const Settings *settings, State *state) override;
+
+        /* Finalize analysis for given context & configuration */
+        void finalize(const Settings *settings, State *state) override;
         
         /* Report filter results */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;

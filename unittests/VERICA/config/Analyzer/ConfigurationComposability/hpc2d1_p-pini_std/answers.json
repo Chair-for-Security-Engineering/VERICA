@@ -1,0 +1,12 @@
+{
+    "netlist_name" : "hpc2d1",
+    "sca-analysis" : "p-pini_std",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 1,
+        "expected_m_failing_probes": [   
+            [ { "uid": 32, "name": "io_i0_s0[0]" }, { "uid": 33, "name": "io_i0_s1[0]" } ]               
+        ]
+    }
+}

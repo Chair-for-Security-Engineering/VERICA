@@ -201,6 +201,10 @@ ConfigurationNetlist::execute(const Settings *settings, State *state)
 }
 
 void
+ConfigurationNetlist::finalize(const Settings *settings, State *state) {
+}
+
+void
 ConfigurationNetlist::report(std::string service, const Logger *logger, const Settings *settings, State *state) const
 {
     /* Print logger header */

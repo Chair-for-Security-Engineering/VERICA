@@ -33,6 +33,7 @@
 #include "unittest/TestEnvironment.hpp"
 #include "unittest/TestInjector.hpp"
 
+BOOST_AUTO_TEST_SUITE(Injector_Test_Suite)
 /************************ CONFIGURATIONS ************************/
 const int argc = 2;
 char UNITTEST_EXEC[] = "bin/test/verica";
@@ -42,8 +43,6 @@ std::string reducedComplexityConfig = "unittests/VERICA/config/FIA/complexityRed
 
 const pt::ptree knownAnswers = getKnownAnswers("unittests/VERICA/knownAnswers.json");
 /****************************************************************/
-
-BOOST_AUTO_TEST_SUITE(Injector_Test_Suite)
 
 /* 
  * =========================================================================================

@@ -1,7 +1,7 @@
 /*
  * -----------------------------------------------------------------
  * COMPANY : Ruhr-Universität Bochum, Chair for Security Engineering
- * AUTHOR  : Jan Richter-Brockmann (jan.richter-brockmann@rub.de) 
+ * AUTHOR  : Jan Richter-Brockmann (jan.richter-brockmann@rub.de)
  *           Pascal Sasdrich (pascal.sasdrich@rub.de)
  * DOCUMENT: https://eprint.iacr.org/2022/484
  *           https://eprint.iacr.org/2022/1131
@@ -27,10 +27,11 @@
 
 #include "context/Settings.hpp"
 
+#include <boost/property_tree/ptree_fwd.hpp>
 #include <iostream>
 #include <filesystem>
 
-/* 
+/*
  * =========================================================================================
  * Constructor(s)
  * =========================================================================================
@@ -39,6 +40,9 @@
 Settings::Settings(int argc, char * argv[])
 {
     std::string configurationPath;
+
+    /* Boost property tree (parsed from .json configuration) */
+    boost::property_tree::ptree config;
 
     /* Parsing of command-line arguments */
     try {
@@ -58,8 +62,8 @@ Settings::Settings(int argc, char * argv[])
             std::cout << desc << std::endl;
         } else if (vm.count("config")) {
             configurationPath = vm["config"].as<std::string>();
-            // boost::property_tree::ini_parser::read_ini(configurationPath, this->config);
-            boost::property_tree::read_json(configurationPath, this->config);
+            // boost::property_tree::ini_parser::read_ini(configurationPath, config);
+            boost::property_tree::read_json(configurationPath, config);
         }
 
     } catch (const boost::program_options::error &ex) {
@@ -67,14 +71,14 @@ Settings::Settings(int argc, char * argv[])
     }
 
     // Validate parsed settings
-    validateSettings();
+    validateAndInitSettings(config);
 
-    // Determine current number of cores
-    if (getCores() == 0) 
-        this->cores = omp_get_max_threads();    
+    // Composability
+    this->faultComposability= (this->faultFNIEnabled || this->faultFSNIEnabled || this->faultFINIEnabled ||
+        this->cniEnabled || this->csniEnabled || this->icsniEnabled || this->ciniEnabled || this->iciniEnabled);
 }
 
-/* 
+/*
  * =========================================================================================
  * Destructor
  * =========================================================================================
@@ -85,7 +89,7 @@ Settings::~Settings()
 
 }
 
-/* 
+/*
  * =========================================================================================
  * Member functions
  * =========================================================================================
@@ -95,232 +99,249 @@ void Settings::setFaultVariate(const int& v){
 }
 
 int Settings::getCores() const {
-    if(this->cores == -1) return this->config.get<int>("general.cores");
     return this->cores;
 }
 
 int Settings::getMemory() const {
-    return this->config.get<int>("general.memory");
+    return this->memory;
 }
 
 bool Settings::getReordering() const {
-    return this->config.get<bool>("general.cudd.reordering");
+    return this->reorderingEnabled;
 }
 
 bool Settings::getVisualization() const {
-    return this->config.get<bool>("general.visualization.enable");
+    return this->visualizationEnabled;
 }
 
 std::string Settings::getVisualizationPath() const{
-    return this->config.get<std::string>("general.visualization.path");
+    return this->visualizationPath;
 }
 
 bool Settings::getVisualizationFull() const {
-    return this->config.get<bool>("general.visualization.full");
+    return this->fullVisualizationEnabled;
 }
 
 bool Settings::getVisualizationPartial() const {
-    return this->config.get<bool>("general.visualization.partial");
+    return this->partialVisualization;
 }
 
 int Settings::getMasking() const {
-    return this->config.get<int>("side-channel.configuration.masking");
+    return this->scaMasking;
 }
 
 int Settings::getNumberOfFaults() const {
-    return this->config.get<int>("fault-injection.configuration.number");
+    return this->faultNumberOfFaults;
 }
 
 int Settings::getFaultVariate() const {
-    if(this->faultVariate == -1) return this->config.get<int>("fault-injection.configuration.variate");
     return this->faultVariate;
 }
 
 int Settings::getVerbose() const {
-    return this->config.get<int>("general.verbose");
+    return this->verbose;
 }
 
 std::string
 Settings::getDesignFilePath() const
 {
-    return this->config.get<std::string>("general.netlist.file");
+    return this->designFilePath;
 }
 
 std::string
 Settings::getLibraryFilePath() const
 {
-    return this->config.get<std::string>("general.library.file");
+    return this->libraryFilePath;
 }
 
 std::string
 Settings::getLibraryName() const
 {
-    return this->config.get<std::string>("general.library.name");
+    return this->libraryName;
 }
 
 std::string
 Settings::getSideChannelFilteringType() const
 {
-    return this->config.get<std::string>("general.filtering.sca.type");
+    return this->scaFilteringType;
 }
 
 std::string
 Settings::getSideChannelWhiteList() const
 {
-    return this->config.get<std::string>("general.filtering.sca.whitelist");
+    return this->scaWhiteList;
 }
 
 std::string
 Settings::getSideChannelBlackList() const
 {
-    return this->config.get<std::string>("general.filtering.sca.blacklist");
+    return this->scaBlackList;
 }
 
 std::string
 Settings::getFaultFilteringType() const
 {
-    return this->config.get<std::string>("general.filtering.fia.type");
+    return this->faultFilteringType;
 }
 
 std::string
 Settings::getFaultWhiteList() const
 {
-    return this->config.get<std::string>("general.filtering.fia.whitelist");
+    return this->faultWhiteList;
 }
 
 std::string
 Settings::getFaultBlackList() const
 {
-    return this->config.get<std::string>("general.filtering.fia.blacklist");
+    return this->faultBlackList;
 }
 
 std::string
 Settings::getAnnotationFilePath() const
 {
-    return this->config.get<std::string>("general.annotation.file");
+    return this->annotationFilePath;
 }
 
 std::string Settings::getFaultAnalysisStrategy() const {
-    return this->config.get<std::string>("fault-injection.analysis.strategy");
+    return this->faultAnalysisStrategy;
 }
 
 bool Settings::getAnnotation() const {
-    return this->config.get<bool>("general.annotation.apply");
+    return this->annotationsEnabled;
 }
 
+
+/**********************************************************************
+*                       Side-Channel Analysis
+***********************************************************************/
 bool Settings::getSideChannel() const {
-    return this->config.get<bool>("side-channel.enable");
+    return this->scaEnabled;
 }
 
 int Settings::getSideChannelOrder() const {
-    return this->config.get<int>("side-channel.configuration.order");
+    return this->scaOrder;
 }
 
 int Settings::getSideChannelVariate() const {
-    return this->config.get<int>("side-channel.configuration.variate");
+    return this->scaVariate;
 }
 
 bool Settings::getSideChannelInterrupt() const {
-    return this->config.get<bool>("side-channel.configuration.interrupt");
+    return this->scaInterruptEnabled;
 }
 
 bool Settings::getSideChannelModelGlitches() const {
-    return this->config.get<bool>("side-channel.model.glitches");
+    return this->scaModelGlitchesEnabled;
 }
 
 bool Settings::getSideChannelModelTransitions() const {
-    return this->config.get<bool>("side-channel.model.transitions");
+    return this->scaModelTransitionsEnabled;
 }
 
 bool Settings::getSideChannelModelCouplings() const {
-    return this->config.get<bool>("side-channel.model.couplings");
+    return this->scaModelCouplingsEnabled;
 }
 
 bool Settings::getSideChannelAnalysisUniformity() const {
-    return (this->config.get<bool>("side-channel.enable") && this->config.get<bool>("side-channel.analysis.uniformity"));
+    return this->scaUniformityEnabled && this->scaEnabled;
 }
 
 bool Settings::getSideChannelAnalysisProbing() const {
-    return (this->config.get<bool>("side-channel.enable") && this->config.get<bool>("side-channel.analysis.probing"));
+    return this->scaProbingEnabled && this->scaEnabled;
 }
 
 bool Settings::getSideChannelAnalysisNI() const {
-    return (this->config.get<bool>("side-channel.enable") && this->config.get<bool>("side-channel.analysis.p-ni"));
+    return this->scaNIEnabled && this->scaEnabled;
 }
 
 bool Settings::getSideChannelAnalysisSNI() const {
-    return (this->config.get<bool>("side-channel.enable") && this->config.get<bool>("side-channel.analysis.p-sni"));
+    return this->scaSNIEnabled && this->scaEnabled;
 }
 
 bool Settings::getSideChannelAnalysisPINI() const {
-    return (this->config.get<bool>("side-channel.enable") && this->config.get<bool>("side-channel.analysis.pini"));
+    return this->scaPINIEnabled && this->scaEnabled;
 }
+/**********************************************************************/
 
+
+
+/**********************************************************************
+*                           Fault Injection
+***********************************************************************/
 bool Settings::getFaultInjection() const {
-    return this->config.get<bool>("fault-injection.enable");
+    return this->faultInjectionEnabled;
 }
 
 bool Settings::getFaultInterrupt() const {
-    return this->config.get<bool>("fault-injection.configuration.interrupt");
+    return this->faultInterruptEnabled;
 }
 
 bool Settings::getReduceComplexity() const {
-    return this->config.get<bool>("fault-injection.analysis.reduced_complexity");
+    return this->faultReduceComplexityEnabled;
 }
 
 bool Settings::getFaultLogicLevelErrorFlag() const {
-    return this->config.get<bool>("fault-injection.analysis.logic-level-error-flag");
+    return this->faultLogicLevelErrorFlag;
 }
 
 bool Settings::getFaultFNI() const {
-    return (this->config.get<bool>("fault-injection.enable") && this->config.get<bool>("fault-injection.analysis.f-ni"));
+    return this->faultFNIEnabled && this->faultInjectionEnabled;
 }
 
 bool Settings::getFaultFSNI() const {
-    return (this->config.get<bool>("fault-injection.enable") && this->config.get<bool>("fault-injection.analysis.f-sni"));
+    return this->faultFSNIEnabled && this->faultInjectionEnabled;
 }
 
 bool Settings::getFaultFINI() const {
-    return (this->config.get<bool>("fault-injection.enable") && this->config.get<bool>("fault-injection.analysis.fini"));
+    return this->faultFINIEnabled && this->faultInjectionEnabled;
 }
+/**********************************************************************/
 
+
+
+/**********************************************************************
+*                           Combined Analysis
+***********************************************************************/
 bool Settings::getCombined() const {
-    return this->config.get<bool>("combined.enable");
+    return this->combinedEnabled;
 }
 
 bool Settings::getCombinedCNI() const {
-    return (this->config.get<bool>("combined.enable") && this->config.get<bool>("combined.analysis.c-ni"));
+    return this->cniEnabled && this->combinedEnabled;
 }
 
 bool Settings::getCombinedCSNI() const {
-    return (this->config.get<bool>("combined.enable") && this->config.get<bool>("combined.analysis.c-sni"));
+    return this->csniEnabled && this->combinedEnabled;
 }
 
 bool Settings::getCombinedICSNI() const {
-    return (this->config.get<bool>("combined.enable") && this->config.get<bool>("combined.analysis.ic-sni"));
-}
-
-bool Settings::getFaultComposability() const {
-    return (getFaultFNI() || getFaultFSNI() || getFaultFINI() || getCombinedCNI() || getCombinedCSNI() || getCombinedICSNI() || getCombinedCINI() || getCombinedICINI());
+    return this->icsniEnabled && this->combinedEnabled;
 }
 
 bool Settings::getCombinedCINI() const {
-    return (this->config.get<bool>("combined.enable") && this->config.get<bool>("combined.analysis.cini"));
+    return this->ciniEnabled && this->combinedEnabled;
 }
 
 bool Settings::getCombinedICINI() const {
-    return (this->config.get<bool>("combined.enable") && this->config.get<bool>("combined.analysis.icini"));
+    return this->iciniEnabled && this->combinedEnabled;
+}
+/**********************************************************************/
+
+
+
+bool Settings::getFaultComposability() const {
+    return this->faultComposability;
 }
 
 std::string Settings::getFaultMappingPath() const {
-    return this->config.get<std::string>("fault-injection.model.mapping");
+    return this->faultMappingPath;
 }
 
 std::string Settings::getFaultLocation() const {
-    return this->config.get<std::string>("fault-injection.model.location");
+    return this->faultLocation;
 }
 
-void Settings::validateSettings(){
+void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
     std::vector<std::string> boolean{"false", "true"};
     std::vector<int> zeroone{0,1};
     std::vector<int> verbose{VBASE, VINFO, VFULL, VDETAIL};
@@ -334,97 +355,136 @@ void Settings::validateSettings(){
     std::vector<int> cores;
     for(int i=0; i<=omp_get_max_threads(); ++i) cores.push_back(i);
 
-    // validate general settings
-    checkSettingRange("general.cores", cores);
-    checkSettingRange("general.verbose", verbose);
-    // TODO: memory
+    // -------------------- General Settings --------------------
+    // Determine current number of cores
+    this->cores = checkSettingRange<int, int>("general.cores", cores, config);
+    if (this->cores == 0){
+        this->cores = omp_get_max_threads();
+    }
+    this->verbose = checkSettingRange<int, int>("general.verbose", verbose, config);
+
+    // TODO: memory validation
+    this->memory                    = config.get<unsigned long>("general.memory");
 
     // validate netlist settings
-    checkSettingFileExists("general.netlist.file");
+    this->designFilePath = checkSettingFileExists("general.netlist.file", config);
 
     // validate library settings
-    checkSettingFileExists("general.library.file");
-    checkSettingRange("general.library.name", lib);
+    this->libraryFilePath = checkSettingFileExists("general.library.file", config);
+    this->libraryName = checkSettingRange<std::string, std::string>("general.library.name", lib, config);
 
     // validate filtering settings
-    checkSettingRange("general.filtering.sca.type", filter);
-    checkSettingFileExists("general.filtering.sca.whitelist");
-    checkSettingFileExists("general.filtering.sca.blacklist");
-    checkSettingRange("general.filtering.fia.type", filter);
-    checkSettingFileExists("general.filtering.fia.whitelist");
-    checkSettingFileExists("general.filtering.fia.blacklist");
+    this->scaFilteringType = checkSettingRange<std::string, std::string>("general.filtering.sca.type", filter, config);
+    this->scaWhiteList = checkSettingFileExists("general.filtering.sca.whitelist", config);
+    this->scaBlackList = checkSettingFileExists("general.filtering.sca.blacklist", config);
+    this->faultFilteringType = checkSettingRange<std::string, std::string>("general.filtering.fia.type", filter, config);
+    this->faultWhiteList = checkSettingFileExists("general.filtering.fia.whitelist", config);
+    this->faultBlackList = checkSettingFileExists("general.filtering.fia.blacklist", config);
 
     // validate annotation settings
-    checkSettingFileExists("general.annotation.file");
-    checkSettingRange("general.annotation.apply", boolean);
+    this->annotationFilePath = checkSettingFileExists("general.annotation.file", config);
+    this->annotationsEnabled        = checkSettingRange<bool,std::string>("general.annotation.apply", boolean, config);
 
     // validate cudd settings
-    checkSettingRange("general.cudd.reordering", boolean);
+    this->reorderingEnabled = checkSettingRange<bool, std::string>("general.cudd.reordering", boolean, config);
 
     // validate visualization settings
-    checkSettingRange("general.visualization.enable", boolean);
-    checkSettingPathExists("general.visualization.path");
-    checkSettingRange("general.visualization.full", boolean);
-    checkSettingRange("general.visualization.partial", boolean);
+    this->visualizationEnabled = checkSettingRange<bool, std::string>("general.visualization.enable", boolean, config);
+    this->visualizationPath = checkSettingPathExists("general.visualization.path", config);
+    this->fullVisualizationEnabled = checkSettingRange<bool, std::string>("general.visualization.full", boolean, config);
+    this->partialVisualization = checkSettingRange<bool, std::string>("general.visualization.partial", boolean, config);
+    // ---------------------------------------------------------
 
+
+
+    // -------------------------- SCA --------------------------
     // validate SCA settings
-    checkSettingRange("side-channel.enable", boolean);
-    checkSettingGreaterEqual("side-channel.configuration.order", 0);
-    checkSettingGreaterEqual("side-channel.configuration.variate", 0);
-    checkSettingRange("side-channel.configuration.masking", zeroone);
-    checkSettingRange("side-channel.model.glitches", boolean);
-    checkSettingRange("side-channel.model.transitions", boolean);
-    checkSettingRange("side-channel.model.couplings", boolean);
-    checkSettingRange("side-channel.analysis.uniformity", boolean);
-    checkSettingRange("side-channel.analysis.probing", boolean);
-    checkSettingRange("side-channel.analysis.p-ni", boolean);
-    checkSettingRange("side-channel.analysis.p-sni", boolean);
-    checkSettingRange("side-channel.analysis.pini", boolean);
+    this->scaEnabled = checkSettingRange<bool, std::string>("side-channel.enable", boolean, config);
 
+    this->scaOrder = checkSettingGreaterEqual("side-channel.configuration.order", 0, config);
+    this->scaVariate = checkSettingGreaterEqual("side-channel.configuration.variate", 0, config);
+    this->scaMasking = checkSettingRange<int, int>("side-channel.configuration.masking", zeroone, config);
+    this->scaInterruptEnabled = checkSettingRange<bool, std::string>("side-channel.configuration.interrupt", boolean, config);
+
+    this->scaModelGlitchesEnabled = checkSettingRange<bool, std::string>("side-channel.model.glitches", boolean, config);
+    this->scaModelTransitionsEnabled = checkSettingRange<bool, std::string>("side-channel.model.transitions", boolean, config);
+    this->scaModelCouplingsEnabled = checkSettingRange<bool, std::string>("side-channel.model.couplings", boolean, config);
+
+    this->scaUniformityEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.uniformity", boolean, config));
+    this->scaProbingEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.probing", boolean, config));
+    this->scaNIEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.p-ni", boolean, config));
+    this->scaSNIEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.p-sni", boolean, config));
+    this->scaPINIEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.pini", boolean, config));
+
+    // -------------------------- FIA --------------------------
     // validate FIA settings
-    checkSettingRange("fault-injection.enable", boolean);
-    checkSettingGreaterEqual("fault-injection.configuration.number", 0);
-    checkSettingGreaterEqual("fault-injection.configuration.variate", 1);
-    checkSettingRange("fault-injection.configuration.interrupt", boolean);
-    checkSettingFileExists("fault-injection.model.mapping");
-    checkSettingRange("fault-injection.model.location", location);
-    checkSettingRange("fault-injection.analysis.reduced_complexity", boolean);
-    checkSettingRange("fault-injection.analysis.strategy", fault_strategy);
-    checkSettingRange("fault-injection.analysis.logic-level-error-flag", boolean);
-    checkSettingRange("fault-injection.analysis.f-ni", boolean);
-    checkSettingRange("fault-injection.analysis.f-sni", boolean);
-    checkSettingRange("fault-injection.analysis.fini", boolean);
+    this->faultInjectionEnabled = checkSettingRange<bool, std::string>("fault-injection.enable", boolean, config);
 
+    this->faultNumberOfFaults = checkSettingGreaterEqual("fault-injection.configuration.number", 0, config);
+    this->faultVariate = checkSettingGreaterEqual("fault-injection.configuration.variate", 0, config);
+    this->faultInterruptEnabled = checkSettingRange<bool, std::string>("fault-injection.configuration.interrupt", boolean, config);
+
+    this->faultMappingPath = checkSettingFileExists("fault-injection.model.mapping", config);
+    this->faultLocation = checkSettingRange<std::string, std::string>("fault-injection.model.location", location, config);
+
+    this->faultReduceComplexityEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.reduced_complexity", boolean, config);
+    this->faultAnalysisStrategy = checkSettingRange<std::string, std::string>("fault-injection.analysis.strategy", fault_strategy, config);
+    this->faultLogicLevelErrorFlag = checkSettingRange<bool, std::string>("fault-injection.analysis.logic-level-error-flag", boolean, config);
+    this->faultFNIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.f-ni", boolean, config));
+    this->faultFSNIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.f-sni", boolean, config));
+    this->faultFINIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.fini", boolean, config));
+    // ---------------------------------------------------------
+
+    // ------------------ Combined Analysis---------------------
     // validate Combined settings
-    checkSettingRange("combined.enable", boolean);
-    checkSettingRange("combined.analysis.c-ni", boolean);
-    checkSettingRange("combined.analysis.c-sni", boolean);
-    checkSettingRange("combined.analysis.ic-sni", boolean);
-    checkSettingRange("combined.analysis.cini", boolean);
-    checkSettingRange("combined.analysis.icini", boolean);
+    this->combinedEnabled   = checkSettingRange<bool, std::string>("combined.enable", boolean, config);
+    this->cniEnabled        = checkSettingRange<bool, std::string>("combined.analysis.c-ni", boolean, config);
+    this->csniEnabled       = checkSettingRange<bool, std::string>("combined.analysis.c-sni", boolean, config);
+    this->icsniEnabled      = checkSettingRange<bool, std::string>("combined.analysis.ic-sni", boolean, config);
+    this->ciniEnabled       = checkSettingRange<bool, std::string>("combined.analysis.cini", boolean, config);
+    this->iciniEnabled      = checkSettingRange<bool, std::string>("combined.analysis.icini", boolean, config);
+    // ---------------------------------------------------------
 }
 
-template<typename T> void Settings::checkSettingRange(const std::string &setting, const std::vector<T> &validSettings){
-    if(std::find(validSettings.begin(), validSettings.end(), this->config.get<T>(setting)) == validSettings.end())
-        throw std::logic_error("[CONFIG] Invalid value for " + setting + "!"); 
+template<typename rT, typename iT>
+rT Settings::checkSettingRange(const std::string &setting, const std::vector<iT> &validSettings, boost::property_tree::ptree &config){
+    rT val = config.get<rT>(setting);
+    if(std::find(validSettings.begin(), validSettings.end(), config.get<iT>(setting)) == validSettings.end()){
+        throw std::logic_error("[CONFIG] Invalid value for " + setting + "!");
+    }
+    else{
+        return val;
+    }
 }
 
-void Settings::checkSettingFileExists(const std::string &setting) {
-    std::string path = this->config.get<std::string>(setting);
+std::string Settings::checkSettingFileExists(const std::string &setting, boost::property_tree::ptree &config) {
+    std::string path = config.get<std::string>(setting);
     std::ifstream f(path.c_str());
-    if(!f.good())
-        throw std::logic_error("[CONFIG] Invalid path for " + setting + "!"); 
+    if(!f.good()){
+        throw std::logic_error("[CONFIG] Invalid path for " + setting + "!");
+    }
+    else{
+        return path;
+    }
 }
 
-void Settings::checkSettingPathExists(const std::string &setting) {
-    // std::string path = this->config.get<std::string>(setting);
-    const std::filesystem::path path{this->config.get<std::string>(setting)};
-    if(!std::filesystem::exists(path))
-        throw std::logic_error("[CONFIG] Directory for " + setting + "does not exist!"); 
+std::string Settings::checkSettingPathExists(const std::string &setting, boost::property_tree::ptree &config) {
+    std::string path = config.get<std::string>(setting);
+    const std::filesystem::path p{path};
+    if(!std::filesystem::exists(p)){
+        throw std::logic_error("[CONFIG] Directory for " + setting + "does not exist!");
+    }
+    else{
+        return path;
+    }
 }
 
-void Settings::checkSettingGreaterEqual(const std::string &setting, const int &threshold){
-    int num = this->config.get<int>(setting);
-    if(num < threshold)
-        throw std::logic_error("[CONFIG] Invalid value for " + setting + "!"); 
+int Settings::checkSettingGreaterEqual(const std::string &setting, const int &threshold, boost::property_tree::ptree &config){
+    int num = config.get<int>(setting);
+    if(num < threshold){
+        throw std::logic_error("[CONFIG] Invalid value for " + setting + "!");
+    }
+    else{
+        return num;
+    }
 }

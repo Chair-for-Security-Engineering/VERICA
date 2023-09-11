@@ -32,7 +32,7 @@ int main (int argc, char * argv[]) {
 
     /* Create new evaluation environment */
     Environment *environment = new Environment(argc, argv);
-
+    environment->execute();
     /* Terminate evaluation and destroy environment object */
     delete environment;
 

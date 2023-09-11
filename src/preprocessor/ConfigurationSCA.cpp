@@ -40,6 +40,9 @@ ConfigurationSCA::execute(const Settings *settings, State *state) {
     // Compute shared inputs
     determine_shared_inputs(state);
 
+    // Compute shared outputs
+    determine_shared_outputs(state);
+
     if(settings->getSideChannel() || settings->getCombined()){
         // Disable auto dynamic reordering - does not work for side-channel verification
         for(auto man : state->m_managers) man.AutodynDisable();
@@ -50,13 +53,17 @@ ConfigurationSCA::execute(const Settings *settings, State *state) {
         // Compute probe combinations
         #pragma omp parallel for schedule(dynamic) num_threads(settings->getCores()) 
         for (int core = 0; core < settings->getCores(); core++)
-            update_probe_combinations(state, settings, state->m_netlist_model->module_under_test()->wires(), 0, core);
+            update_probe_combinations(state, settings, state->m_netlist_model->module_under_test()->wires(), 0, false, core);
     }
 }
 
 void
-ConfigurationSCA::update(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, const int thread_num){
-    update_probe_combinations(state, settings, modified, reduce_order, thread_num);
+ConfigurationSCA::update(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num){
+    update_probe_combinations(state, settings, modified, reduce_order, simulate_outputs, thread_num);
+}
+
+void
+ConfigurationSCA::finalize(const Settings *settings, State *state) {
 }
 
 void
@@ -71,6 +78,7 @@ ConfigurationSCA::report(std::string service, const Logger *logger, const Settin
         if(settings->getSideChannel() || settings->getCombined()){
             logger->log(service, this->m_name, ITEM + "Minimum number of shares: " + std::to_string(state->m_min_shared_inputs.size()));
             logger->log(service, this->m_name, "Determined " + std::to_string(m_positions.size()) + " probe positions.");
+            logger->log(service, this->m_name, "Determined " + std::to_string(state->m_probe_combinations[0].size()) + " probe combinations.");
         }
         if(settings->getCombinedCNI() || settings->getCombinedCSNI() || settings->getCombinedCINI()){
             logger->log(service, this->m_name, "Determined " + std::to_string(this->m_abort_signals.size()) + " combinations of abort signals.");
@@ -134,6 +142,40 @@ ConfigurationSCA::determine_shared_inputs(State *state)
 }
 
 void 
+ConfigurationSCA::determine_shared_outputs(State *state) {
+    /* Check error conditions */
+    if (state->m_managers.size() == 0) throw std::logic_error(this->m_name + ": Design is not elaborated!");
+    if (state->m_netlist_model->topmodule()->wires().size() == 0) throw std::logic_error(this->m_name + ": Detected empty top module!");
+
+    /* Collect shared inputs and shared variables */
+    for (auto p : state->m_netlist_model->topmodule()->output_pins()){        
+        if (p->port_type() == verica::Flag::None && p->share_index() != -1 && p->share_domain() != -1){
+            state->m_shared_outputs[p->share_index()].push_back(p);
+        }
+    }
+
+    /* Erase duplicated shared outputs */
+    for (auto output : state->m_shared_outputs){        
+        std::sort(state->m_shared_outputs[output.first].begin(), 
+                  state->m_shared_outputs[output.first].end(),
+                  [](const verica::Pin* a, const verica::Pin* b) { return a->share_domain() < b->share_domain(); }   
+        );
+        state->m_shared_outputs[output.first].erase(
+            std::unique(state->m_shared_outputs[output.first].begin(), state->m_shared_outputs[output.first].end(), 
+                [](const verica::Pin* w0, const verica::Pin* w1){return w0->share_domain() == w1->share_domain();}), 
+            state->m_shared_outputs[output.first].end()
+        );
+    }
+
+    /* Find smallest output sharing */
+    int minimal = (*state->m_shared_outputs.begin()).first;
+    for(auto m : state->m_shared_outputs)
+        minimal = (m.second.size() < state->m_shared_outputs[minimal].size()) ? m.first : minimal;
+
+    state->m_min_shared_outputs = state->m_shared_outputs[minimal];
+}
+
+void 
 ConfigurationSCA::determine_probe_positions(State *state, const Settings *settings){
  /* Check error conditions */
     if (state->m_netlist_model->num_wires() == 0) throw std::logic_error(this->m_name + ": Detected empty set of probe positions!");
@@ -177,6 +219,7 @@ ConfigurationSCA::determine_probe_positions(State *state, const Settings *settin
         }
     }
 
+
     /* Add abort signal to probe positions if combined analysis is enabled */
     if(settings->getCombinedCNI() || settings->getCombinedCSNI() || settings->getCombinedCINI()){
         // collect abort signals (error flags)
@@ -194,13 +237,32 @@ ConfigurationSCA::determine_probe_positions(State *state, const Settings *settin
         }
     }
 
+
+    /* Identify outputs with same share domain */
+    // First, identify share domains
+    std::set<int> domains;
+    for(auto p : state->m_netlist_model->module_under_test()->output_pins()){
+        if (p->port_type() == verica::Flag::None && p->share_index() != -1 && p->share_domain() != -1) domains.insert(p->share_domain());
+    }
+    
+    // Second, loop over all existing domains and collect corresponding wires
+    for(auto d : domains){
+        for(auto p : state->m_netlist_model->module_under_test()->output_pins()){
+            if (p->port_type() == verica::Flag::None && p->share_index() != -1 && p->share_domain() != -1){
+                if(d == p->share_domain()) m_outputs_same_domain[d].push_back(p->fan_in());
+            }
+        }  
+    }
+
+
+    /* Check for empty set */
     if (m_positions.size() == 0) throw std::logic_error(this->m_name + ": Detected empty set of probe positions!");
 
 
 }
 
 void
-ConfigurationSCA::update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, const int thread_num) {
+ConfigurationSCA::update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num) {
     /* Clear current set of probe combinations */
     state->m_probe_combinations[thread_num].clear();
 
@@ -208,9 +270,11 @@ ConfigurationSCA::update_probe_combinations(State *state, const Settings *settin
     int max_order = (settings->getSideChannelOrder() > 0) ? settings->getSideChannelOrder() : state->m_min_shared_inputs.size() - 1;
     max_order -= reduce_order;
 
+    /* Define container collecting already covered domains */
+    std::vector<std::set<int>> covered_domains;
+
     /* Generate all possible probe combinations for all orders */
-    for (int order = 0; order < max_order; order++)
-    {
+    for (int order = 0; order < max_order; order++) {
         /* Initialize bitmask (first combination) */
         std::vector<bool> bitmask(m_positions.size());
         std::fill(bitmask.begin(), bitmask.begin() + (order + 1), true);
@@ -255,13 +319,43 @@ ConfigurationSCA::update_probe_combinations(State *state, const Settings *settin
                 found |= (std::find(modified.begin(), modified.end(), probes[elem]) != modified.end());
             skip |= !found;
 
+            /* Add probe combination */
             if (!skip){
-                std::vector<const verica::Wire*> temp;
-                state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, temp));
+                std::vector<const verica::Wire*> virtual_probes;
+                state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, virtual_probes));
+
+                /* Simulate all outputs of the same domain for PINI, CINI, ICINI */
+                if(simulate_outputs){
+                    // collect output domains
+                    std::set<int> domains;
+                    for(auto probe : probes){
+                        for(auto p : probe->target_pins()) {
+                            if(p->parent_module() == state->m_netlist_model->module_under_test()) domains.insert(p->share_domain());
+                        }
+                    }
+
+                    if(std::find(covered_domains.begin(), covered_domains.end(), domains) == covered_domains.end()){
+                        // collect all wires belonging to collected domains
+                        std::vector<const verica::Wire*> wires;
+                        for(auto d : domains) wires.insert(wires.end(), m_outputs_same_domain[d].begin(), m_outputs_same_domain[d].end());
+
+                        // create combinations
+                        for(unsigned int comb=1; comb <= ((1 << wires.size())-1); comb++){
+                            std::vector<const verica::Wire*> new_comb;
+                            for(unsigned int bit=0; bit < wires.size(); bit++){
+                                if((comb >> bit) & 1) new_comb.push_back(wires[bit]);
+                            }
+                            state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, new_comb));
+                        }
+
+                        covered_domains.push_back(domains);
+                    }
+                }
             }
         }   
         while(std::prev_permutation(bitmask.begin(), bitmask.end()));
     }
+
 
     /* Add abort signals to updated probe combinations for combined analysis */
     if(settings->getCombinedCNI() || settings->getCombinedCSNI() || settings->getCombinedCINI()){

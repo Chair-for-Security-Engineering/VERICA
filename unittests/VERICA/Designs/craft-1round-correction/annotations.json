@@ -1,0 +1,46 @@
+{
+    "type":
+    {
+        "clock": ["clk"],
+        "refresh": [],
+        "control": ["rst"],
+        "error_flag": ["ErrorFlag"]
+    },
+    "primary_input_identifier":
+    {
+
+    },
+    "share_domain":
+    {
+        "input":
+        {
+
+        },
+        "output":
+        {
+
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+
+        },
+        "output":
+        {
+
+        }   
+    },
+    "fault_domain":
+    {
+        "input":
+        {
+
+        },
+        "output":
+        {
+
+        }
+    }
+}

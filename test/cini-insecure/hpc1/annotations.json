@@ -1,0 +1,73 @@
+{
+    "type":
+    {
+        "clock": ["clock_0", "clock_1", "clock_2", "clock_3", "clock_4"],
+        "refresh": ["p_rand_0", "p_rand_1", "p_rand_2", "p_rand_3", "p_rand_4", "p_rand_5", "p_rand_6", "p_rand_7", "p_rand_8", "p_rand_9", "p_rand_10", "p_rand_11"],
+        "control": ["reset_0", "reset_1", "reset_2", "reset_3", "reset_4", "reset"],
+        "error_flag": []
+    },
+    "primary_input_identifier":
+    {
+        "0": ["io_i0_s0_d0", "io_i0_s0_d1", "io_i0_s0_d2", "io_i0_s0_d3", "io_i0_s0_d4", "io_i0_s0_d5", "io_i0_s0_d6"],
+        "1": ["io_i0_s1_d0", "io_i0_s1_d1", "io_i0_s1_d2", "io_i0_s1_d3", "io_i0_s1_d4", "io_i0_s1_d5", "io_i0_s1_d6"],
+        "2": ["io_i0_s2_d0", "io_i0_s2_d1", "io_i0_s2_d2", "io_i0_s2_d3", "io_i0_s2_d4", "io_i0_s2_d5", "io_i0_s2_d6"],
+        "3": ["io_i0_s3_d0", "io_i0_s3_d1", "io_i0_s3_d2", "io_i0_s3_d3", "io_i0_s3_d4", "io_i0_s3_d5", "io_i0_s3_d6"],
+        "4": ["io_i1_s0_d0", "io_i1_s0_d1", "io_i1_s0_d2", "io_i1_s0_d3", "io_i1_s0_d4", "io_i1_s0_d5", "io_i1_s0_d6"],
+        "5": ["io_i1_s1_d0", "io_i1_s1_d1", "io_i1_s1_d2", "io_i1_s1_d3", "io_i1_s1_d4", "io_i1_s1_d5", "io_i1_s1_d6"],
+        "6": ["io_i1_s2_d0", "io_i1_s2_d1", "io_i1_s2_d2", "io_i1_s2_d3", "io_i1_s2_d4", "io_i1_s2_d5", "io_i1_s2_d6"],
+        "7": ["io_i1_s3_d0", "io_i1_s3_d1", "io_i1_s3_d2", "io_i1_s3_d3", "io_i1_s3_d4", "io_i1_s3_d5", "io_i1_s3_d6"]
+    },
+    "share_domain":
+    {
+        "input":
+        {
+            "0": ["io_i0_s0_d0", "io_i0_s0_d1", "io_i0_s0_d2", "io_i0_s0_d3", "io_i0_s0_d4", "io_i0_s0_d5", "io_i0_s0_d6", "io_i1_s0_d0", "io_i1_s0_d1", "io_i1_s0_d2", "io_i1_s0_d3", "io_i1_s0_d4", "io_i1_s0_d5", "io_i1_s0_d6"],
+            "1": ["io_i0_s1_d0", "io_i0_s1_d1", "io_i0_s1_d2", "io_i0_s1_d3", "io_i0_s1_d4", "io_i0_s1_d5", "io_i0_s1_d6", "io_i1_s1_d0", "io_i1_s1_d1", "io_i1_s1_d2", "io_i1_s1_d3", "io_i1_s1_d4", "io_i1_s1_d5", "io_i1_s1_d6"],
+            "2": ["io_i0_s2_d0", "io_i0_s2_d1", "io_i0_s2_d2", "io_i0_s2_d3", "io_i0_s2_d4", "io_i0_s2_d5", "io_i0_s2_d6", "io_i1_s2_d0", "io_i1_s2_d1", "io_i1_s2_d2", "io_i1_s2_d3", "io_i1_s2_d4", "io_i1_s2_d5", "io_i1_s2_d6"],
+            "3": ["io_i0_s3_d0", "io_i0_s3_d1", "io_i0_s3_d2", "io_i0_s3_d3", "io_i0_s3_d4", "io_i0_s3_d5", "io_i0_s3_d6", "io_i1_s3_d0", "io_i1_s3_d1", "io_i1_s3_d2", "io_i1_s3_d3", "io_i1_s3_d4", "io_i1_s3_d5", "io_i1_s3_d6"]            
+        },
+        "output":
+        {
+            "0": ["io_o0_s0_d0", "io_o0_s0_d1", "io_o0_s0_d2", "io_o0_s0_d3", "io_o0_s0_d4", "io_o0_s0_d5", "io_o0_s0_d6", "io_o1_s0_d0", "io_o1_s0_d1", "io_o1_s0_d2", "io_o1_s0_d3", "io_o1_s0_d4", "io_o1_s0_d5", "io_o1_s0_d6"],
+            "1": ["io_o0_s1_d0", "io_o0_s1_d1", "io_o0_s1_d2", "io_o0_s1_d3", "io_o0_s1_d4", "io_o0_s1_d5", "io_o0_s1_d6", "io_o1_s1_d0", "io_o1_s1_d1", "io_o1_s1_d2", "io_o1_s1_d3", "io_o1_s1_d4", "io_o1_s1_d5", "io_o1_s1_d6"],
+            "2": ["io_o0_s2_d0", "io_o0_s2_d1", "io_o0_s2_d2", "io_o0_s2_d3", "io_o0_s2_d4", "io_o0_s2_d5", "io_o0_s2_d6", "io_o1_s2_d0", "io_o1_s2_d1", "io_o1_s2_d2", "io_o1_s2_d3", "io_o1_s2_d4", "io_o1_s2_d5", "io_o1_s2_d6"],
+            "3": ["io_o0_s3_d0", "io_o0_s3_d1", "io_o0_s3_d2", "io_o0_s3_d3", "io_o0_s3_d4", "io_o0_s3_d5", "io_o0_s3_d6", "io_o1_s3_d0", "io_o1_s3_d1", "io_o1_s3_d2", "io_o1_s3_d3", "io_o1_s3_d4", "io_o1_s3_d5", "io_o1_s3_d6"]
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+            "0": ["io_i0_s0_d0", "io_i0_s0_d1", "io_i0_s0_d2", "io_i0_s0_d3", "io_i0_s0_d4", "io_i0_s0_d5", "io_i0_s0_d6", "io_i0_s1_d0", "io_i0_s1_d1", "io_i0_s1_d2", "io_i0_s1_d3", "io_i0_s1_d4", "io_i0_s1_d5", "io_i0_s1_d6", "io_i0_s2_d0", "io_i0_s2_d1", "io_i0_s2_d2", "io_i0_s2_d3", "io_i0_s2_d4", "io_i0_s2_d5", "io_i0_s2_d6", "io_i0_s3_d0", "io_i0_s3_d1", "io_i0_s3_d2", "io_i0_s3_d3", "io_i0_s3_d4", "io_i0_s3_d5", "io_i0_s3_d6"],
+            "1": ["io_i1_s0_d0", "io_i1_s0_d1", "io_i1_s0_d2", "io_i1_s0_d3", "io_i1_s0_d4", "io_i1_s0_d5", "io_i1_s0_d6", "io_i1_s1_d0", "io_i1_s1_d1", "io_i1_s1_d2", "io_i1_s1_d3", "io_i1_s1_d4", "io_i1_s1_d5", "io_i1_s1_d6", "io_i1_s2_d0", "io_i1_s2_d1", "io_i1_s2_d2", "io_i1_s2_d3", "io_i1_s2_d4", "io_i1_s2_d5", "io_i1_s2_d6", "io_i1_s3_d0", "io_i1_s3_d1", "io_i1_s3_d2", "io_i1_s3_d3", "io_i1_s3_d4", "io_i1_s3_d5", "io_i1_s3_d6"]
+        },
+        "output":
+        {
+            "0": ["io_o0_s0_d0", "io_o0_s0_d1", "io_o0_s0_d2", "io_o0_s0_d3", "io_o0_s0_d4", "io_o0_s0_d5", "io_o0_s0_d6", "io_o0_s1_d0", "io_o0_s1_d1", "io_o0_s1_d2", "io_o0_s1_d3", "io_o0_s1_d4", "io_o0_s1_d5", "io_o0_s1_d6", "io_o0_s2_d0", "io_o0_s2_d1", "io_o0_s2_d2", "io_o0_s2_d3", "io_o0_s2_d4", "io_o0_s2_d5", "io_o0_s2_d6", "io_o0_s3_d0", "io_o0_s3_d1", "io_o0_s3_d2", "io_o0_s3_d3", "io_o0_s3_d4", "io_o0_s3_d5", "io_o0_s3_d6"]
+        }
+        
+    },
+    "fault_domain":
+    {
+        "input":
+        {
+            "0": ["io_i0_s0_d0", "io_i0_s1_d0", "io_i0_s2_d0", "io_i0_s3_d0", "io_i1_s0_d0", "io_i1_s1_d0", "io_i1_s2_d0", "io_i1_s3_d0"],
+            "1": ["io_i0_s0_d1", "io_i0_s1_d1", "io_i0_s2_d1", "io_i0_s3_d1", "io_i1_s0_d1", "io_i1_s1_d1", "io_i1_s2_d1", "io_i1_s3_d1"],
+            "2": ["io_i0_s0_d2", "io_i0_s1_d2", "io_i0_s2_d2", "io_i0_s3_d2", "io_i1_s0_d2", "io_i1_s1_d2", "io_i1_s2_d2", "io_i1_s3_d2"],
+            "3": ["io_i0_s0_d3", "io_i0_s1_d3", "io_i0_s2_d3", "io_i0_s3_d3", "io_i1_s0_d3", "io_i1_s1_d3", "io_i1_s2_d3", "io_i1_s3_d3"],
+            "4": ["io_i0_s0_d4", "io_i0_s1_d4", "io_i0_s2_d4", "io_i0_s3_d4", "io_i1_s0_d4", "io_i1_s1_d4", "io_i1_s2_d4", "io_i1_s3_d4"],
+            "5": ["io_i0_s0_d5", "io_i0_s1_d5", "io_i0_s2_d5", "io_i0_s3_d5", "io_i1_s0_d5", "io_i1_s1_d5", "io_i1_s2_d5", "io_i1_s3_d5"],
+            "6": ["io_i0_s0_d6", "io_i0_s1_d6", "io_i0_s2_d6", "io_i0_s3_d6", "io_i1_s0_d6", "io_i1_s1_d6", "io_i1_s2_d6", "io_i1_s3_d6"]
+        },
+        "output":
+        {
+            "0": ["io_o0_s0_d0", "io_o0_s1_d0", "io_o0_s2_d0", "io_o0_s3_d0", "io_o1_s0_d0", "io_o1_s1_d0", "io_o1_s2_d0", "io_o1_s3_d0"],
+            "1": ["io_o0_s0_d1", "io_o0_s1_d1", "io_o0_s2_d1", "io_o0_s3_d1", "io_o1_s0_d1", "io_o1_s1_d1", "io_o1_s2_d1", "io_o1_s3_d1"],
+            "2": ["io_o0_s0_d2", "io_o0_s1_d2", "io_o0_s2_d2", "io_o0_s3_d2", "io_o1_s0_d2", "io_o1_s1_d2", "io_o1_s2_d2", "io_o1_s3_d2"],
+            "3": ["io_o0_s0_d3", "io_o0_s1_d3", "io_o0_s2_d3", "io_o0_s3_d3", "io_o1_s0_d3", "io_o1_s1_d3", "io_o1_s2_d3", "io_o1_s3_d3"],
+            "4": ["io_o0_s0_d4", "io_o0_s1_d4", "io_o0_s2_d4", "io_o0_s3_d4", "io_o1_s0_d4", "io_o1_s1_d4", "io_o1_s2_d4", "io_o1_s3_d4"],
+            "5": ["io_o0_s0_d5", "io_o0_s1_d5", "io_o0_s2_d5", "io_o0_s3_d5", "io_o1_s0_d5", "io_o1_s1_d5", "io_o1_s2_d5", "io_o1_s3_d5"],
+            "6": ["io_o0_s0_d6", "io_o0_s1_d6", "io_o0_s2_d6", "io_o0_s3_d6", "io_o1_s0_d6", "io_o1_s1_d6", "io_o1_s2_d6", "io_o1_s3_d6"]
+        }
+    }
+}

@@ -26,6 +26,7 @@
 
 #ifdef UNITTEST
 #include <boost/algorithm/string/predicate.hpp>
+#include <stdexcept>
 
 #include "unittest/TestEnvironment.hpp"
 
@@ -50,70 +51,24 @@
  */
 
 TestEnvironment::TestEnvironment(int argc, char * argv[]) :
-    execPhase{execPhases::COMPLETE},
-    m_logger{new Logger(100)},
-    m_state{new State()},
-    m_settings{new Settings(argc, argv)}
+    Environment(argc, argv), 
+    execPhase{execPhases::COMPLETE}             /* Enable full evaluation */
 {
-    /* Enable full evaluation */
-    //this->execPhase = execPhases::COMPLETE;
 
-    /* Registering new logger */
-    //this->m_logger = new Logger(100);
-
-    /* Registering new evaluation settings */
-    //this->m_settings = new Settings(argc, argv);
-
-    /* Registering new evaluation context */
-    //this->m_state = new State();
-
-    /* Initialize execution environment */
-    this->initialize();
+    //NOTE: Initialize phase is part of Environment
 
     /* Execute evaluation */
     this->execute();
 }
 
 TestEnvironment::TestEnvironment(int argc, char * argv[], TestEnvironment::execPhases execPhase) :
-    execPhase{execPhase},
-    m_logger{new Logger(100)},
-    m_state{new State()},
-    m_settings{new Settings(argc, argv)}
+    Environment(argc, argv),
+    execPhase{execPhase}                        /* Registering phase after which evaluation stops */
 {
-    /* Registering phase after which evaluation stops */
-    //this->execPhase = execPhase;
-
-    /* Registering new logger */
-    //this->m_logger = new Logger(100);
-
-    /* Registering new evaluation settings */
-    //this->m_settings = new Settings(argc, argv);
-
-    /* Registering new evaluation context */
-    //this->m_state = new State();
-
-    /* Initialize execution environment */
-    this->initialize();
+    //NOTE: Initialize phase is part of Environment
 
     /* Execute evaluation */
     this->execute();
-}
-
-/* 
- * =========================================================================================
- * Destructor
- * =========================================================================================
- */
-
-TestEnvironment::~TestEnvironment()
-{
-    delete this->m_analyzer;
-    delete this->m_injector;
-    delete this->m_preprocessor;
-    delete this->m_parser;
-    delete this->m_settings;
-    delete this->m_state;
-    delete this->m_logger;
 }
 
 /* 
@@ -121,22 +76,6 @@ TestEnvironment::~TestEnvironment()
  * Member functions
  * =========================================================================================
  */
-
-void
-TestEnvironment::initialize()
-{
-    /* Registering new parser instance */
-    this->m_parser = new Parser("PARSER", this->m_logger, this->m_settings, this->m_state);
-    
-    /* Registering new preprocessor instance */
-    this->m_preprocessor = new Preprocessor("PREPROCESSOR", this->m_logger, this->m_settings, this->m_state);
-
-    /* Registering new injector instance */
-    this->m_injector = new Injector("INJECTOR", this->m_logger, this->m_settings, this->m_state);
-        
-    /* Registering new analyzer instance */
-    this->m_analyzer = new Analyzer("ANALYZER", this->m_logger, this->m_settings, this->m_state);
-}
 
 void
 TestEnvironment::execute()
@@ -186,7 +125,7 @@ TestEnvironment::execute()
 
     if (this->execPhase == execPhases::MULTI_THREADING) { return; }
 
-ConfigurationModelPostprocessing configModelPostprocessing{"MODEL POSTPROCESSING"};
+    ConfigurationModelPostprocessing configModelPostprocessing{"MODEL POSTPROCESSING"};
     this->m_preprocessor->configure(&configModelPostprocessing);
     this->m_preprocessor->execute();
 
@@ -256,4 +195,94 @@ TestEnvironment::setPreprocessor(Preprocessor* preprocessor) {
     initialize();    
 }
 
+Analyzer*
+TestEnvironment::getAnalyzer() { return this->m_analyzer; }
+
+void
+TestEnvironment::setAnalyzer(Analyzer* analyzer) { 
+    this->m_analyzer = analyzer; 
+    initialize();    
+}
+
+const Composability 
+TestEnvironment::getType(){
+    /*
+     * =====================================================================================
+     * [PROBING] Statistical Independence Leakage VERification (SILVER)
+     * =====================================================================================
+     */
+    if (this->m_settings->getSideChannelAnalysisProbing()){
+        /* Create new probing verification strategy */
+        return Composability::NONE;
+    }
+
+
+    /*
+     * =====================================================================================
+     * [NON-INTERFERENCE] Statistical Independence Leakage VERification (SILVER)
+     * =====================================================================================
+     */
+    else if (this->m_settings->getSideChannelAnalysisNI()){
+        /* Create new composability verification strategy */
+        return Composability::NI;
+    }
+
+
+    /*
+     * =====================================================================================
+     * [STRONG NON-INTERFERENCE] Statistical Independence Leakage VERification (SILVER)
+     * =====================================================================================
+     */
+    else if (this->m_settings->getSideChannelAnalysisSNI()){
+        return Composability::SNI;
+    }
+
+
+    /*
+     * =====================================================================================
+     * [PROBE-ISOLATING NON-INTERFERENCE] Statistical Independence Leakage VERification (SILVER)
+     * =====================================================================================
+     */
+    else if (this->m_settings->getSideChannelAnalysisPINI()){
+        /* Create new composability verification strategy */
+        return Composability::PINI;
+    }
+
+
+    /*
+     * =====================================================================================
+     * [Combined Non-Interference]
+     * =====================================================================================
+     */
+    else if (this->m_settings->getCombinedCNI()){
+        return Composability::CNI;
+    }
+
+
+    /*
+     * =====================================================================================
+     * [Combined Strong Non-Interference]
+     * =====================================================================================
+     */
+    else if (this->m_settings->getCombinedCSNI()){
+        /* Create new composability verification strategy */
+        return Composability::CSNI;
+    }
+
+
+    /*
+     * =====================================================================================
+     * [Independent Combined Strong Non-Interference]
+     * =====================================================================================
+     */
+    else if (this->m_settings->getCombinedICSNI()){
+        /* Create new composability verification strategy */
+        return Composability::ICSNI;
+    }
+
+    else{
+        throw std::runtime_error("No valid strategie selected in settings");
+        return Composability::NONE;
+    }
+}
 #endif

@@ -1,0 +1,61 @@
+{
+    "type":
+    {
+        "clock": ["clock_0"],
+        "refresh": ["p_rand_0", "p_rand_1", "p_rand_2", "p_rand_3", "p_rand_4", "p_rand_5", "p_rand_6", "p_rand_7", "p_rand_8", "p_rand_9", "p_rand_10", "p_rand_11", "p_rand_12", "p_rand_13", "p_rand_14", "p_rand_15", "p_rand_16", "p_rand_17", "p_rand_18", "p_rand_19", "p_rand_20", "p_rand_21", "p_rand_22", "p_rand_23", "p_rand_24", "p_rand_25", "p_rand_26", "p_rand_27", "p_rand_28", "p_rand_29", "p_rand_30", "p_rand_31", "p_rand_32", "p_rand_33", "p_rand_34", "p_rand_35", "p_rand_36", "p_rand_37", "p_rand_38", "p_rand_39", "p_rand_40", "p_rand_41", "p_rand_42", "p_rand_43", "p_rand_44", "p_rand_45", "p_rand_46", "p_rand_47", "p_rand_48", "p_rand_49", "p_rand_50", "p_rand_51", "p_rand_52", "p_rand_53", "p_rand_54", "p_rand_55", "p_rand_56", "p_rand_57", "p_rand_58", "p_rand_59", "p_rand_60", "p_rand_61", "p_rand_62", "p_rand_63", "p_rand_64", "p_rand_65", "p_rand_66", "p_rand_67", "p_rand_68", "p_rand_69", "p_rand_70", "p_rand_71", "p_rand_72", "p_rand_73", "p_rand_74", "p_rand_75", "p_rand_76", "p_rand_77", "p_rand_78", "p_rand_79", "p_rand_80", "p_rand_81", "p_rand_82", "p_rand_83", "p_rand_84", "p_rand_85", "p_rand_86", "p_rand_87", "p_rand_88", "p_rand_89", "p_rand_90", "p_rand_91", "p_rand_92", "p_rand_93", "p_rand_94", "p_rand_95", "p_rand_96", "p_rand_97", "p_rand_98", "p_rand_99", "p_rand_100", "p_rand_101", "p_rand_102", "p_rand_103", "p_rand_104", "p_rand_105", "p_rand_106", "p_rand_107", "p_rand_108", "p_rand_109", "p_rand_110", "p_rand_111", "p_rand_112", "p_rand_113", "p_rand_114", "p_rand_115", "p_rand_116", "p_rand_117", "p_rand_118", "p_rand_119", "p_rand_120", "p_rand_121", "p_rand_122", "p_rand_123", "p_rand_124", "p_rand_125", "p_rand_126", "p_rand_127", "p_rand_128", "p_rand_129", "p_rand_130", "p_rand_131", "p_rand_132", "p_rand_133", "p_rand_134", "p_rand_135", "p_rand_136", "p_rand_137", "p_rand_138", "p_rand_139", "p_rand_140", "p_rand_141", "p_rand_142", "p_rand_143", "p_rand_144", "p_rand_145", "p_rand_146", "p_rand_147", "p_rand_148", "p_rand_149", "p_rand_150", "p_rand_151", "p_rand_152", "p_rand_153", "p_rand_154", "p_rand_155", "p_rand_156", "p_rand_157", "p_rand_158", "p_rand_159", "p_rand_160", "p_rand_161", "p_rand_162", "p_rand_163", "p_rand_164", "p_rand_165", "p_rand_166", "p_rand_167"],
+        "control": ["reset_0"],
+        "error_flag": []
+    },
+    "primary_input_identifier":
+    {
+
+    },
+    "share_domain":
+    {
+        "input":
+        {
+            "0": ["io_i0_s0", "io_i1_s0", "io_i2_s0", "io_i3_s0"],
+            "1": ["io_i0_s1", "io_i1_s1", "io_i2_s1", "io_i3_s1"],
+            "2": ["io_i0_s2", "io_i1_s2", "io_i2_s2", "io_i3_s2"],
+            "3": ["io_i0_s3", "io_i1_s3", "io_i2_s3", "io_i3_s3"],
+            "4": ["io_i0_s4", "io_i1_s4", "io_i2_s4", "io_i3_s4"],
+            "5": ["io_i0_s5", "io_i1_s5", "io_i2_s5", "io_i3_s5"],
+            "6": ["io_i0_s6", "io_i1_s6", "io_i2_s6", "io_i3_s6"]
+        },
+        "output":
+        {
+            "0": ["io_o0_s0", "io_o1_s0", "io_o2_s0", "io_o3_s0"],
+            "1": ["io_o0_s1", "io_o1_s1", "io_o2_s1", "io_o3_s1"],
+            "2": ["io_o0_s2", "io_o1_s2", "io_o2_s2", "io_o3_s2"],
+            "3": ["io_o0_s3", "io_o1_s3", "io_o2_s3", "io_o3_s3"],
+            "4": ["io_o0_s4", "io_o1_s4", "io_o2_s4", "io_o3_s4"],
+            "5": ["io_o0_s5", "io_o1_s5", "io_o2_s5", "io_o3_s5"],
+            "6": ["io_o0_s6", "io_o1_s6", "io_o2_s6", "io_o3_s6"]
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+            "0": ["io_i0_s0", "io_i0_s1", "io_i0_s2", "io_i0_s3", "io_i0_s4", "io_i0_s5", "io_i0_s6"],
+            "1": ["io_i1_s0", "io_i1_s1", "io_i1_s2", "io_i1_s3", "io_i1_s4", "io_i1_s5", "io_i1_s6"]
+        },
+        "output":
+        {
+            "0": ["io_o0_s0", "io_o0_s1", "io_o0_s2", "io_o0_s3", "io_o0_s4", "io_o0_s5", "io_o0_s6"],
+            "1": ["io_o1_s0", "io_o1_s1", "io_o1_s2", "io_o1_s3", "io_o1_s4", "io_o1_s5", "io_o1_s6"]
+        }
+        
+    },
+    "fault_domain":
+    {
+        "input":
+        {
+
+        },
+        "output":
+        {
+
+        }
+    }
+}

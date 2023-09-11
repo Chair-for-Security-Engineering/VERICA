@@ -40,8 +40,14 @@ class ConfigurationGraphvizDot : public Configuration
         /* Perform analysis for given context & configuration */
         void execute(const Settings *settings, State *state) override;
 
+        /* Finalize analysis for given context & configuration */
+        void finalize(const Settings *settings, State *state) override;
+
         /* Report analysis results for given context & configuration */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
+
+        /* Set new strategy name */
+        void set_strategy_name(std::string strategy_name) { m_strategy_name = strategy_name; };
 
     private:
 
@@ -60,14 +66,24 @@ class ConfigurationGraphvizDot : public Configuration
         bool export_flaws(State *state, const Settings *settings);     
 
         /**
-         * @brief Starts from a given wire and searches upwards to find the output of a gates or an input.
+         * @brief Starts from a given wire and searches upwards to find the output of a gate or an input.
          *
          * @param w Starting wire.
          * @param mut Module under test.
          * 
          * @return Returns the output pin of a gate or an input pin.
          */
-        const verica::Pin* get_next_pin(const verica::Wire* w, const verica::Module* mut);   
+        const verica::Pin* get_previous_pin(const verica::Wire* w, const verica::Module* mut);   
+
+        /**
+         * @brief Starts from a given wire and searches in the depth to find the input of a gate or an output.
+         *
+         * @param w Starting wire.
+         * @param mut Module under test.
+         * 
+         * @return Returns the input pin of a gate or an output pin of the MUT.
+         */
+        std::vector<const verica::Pin*> get_subsequent_pins(const verica::Wire* w, const verica::Module* mut);   
 
         /**
          * @brief Creates cluster of submodules and exports them to the dot-representation.
@@ -89,8 +105,9 @@ class ConfigurationGraphvizDot : public Configuration
          * @param n_input Set of input nodes.
          * @param gates Vector of gates that should be connected.
          * @param mut Module under test.
+         * @param color Highlighting edge.
          */
-        void add_edges(std::string &graph, std::set<std::string> &n_randomness, std::set<const verica::Pin*> &n_input, std::vector<const verica::Module*> &gates, const verica::Module* mut);
+        void add_edges(std::string &graph, std::set<std::string> &n_randomness, std::set<const verica::Pin*> &n_input, std::vector<const verica::Module*> &gates, const verica::Module* mut, std::string color="black");
 
         /**
          * @brief Highlights specific nodes in the graph in the given color.
@@ -105,6 +122,9 @@ class ConfigurationGraphvizDot : public Configuration
         /* Private variables */
         bool m_done_full = false;
         bool m_done_flaw = false;        
+
+        /* Strategy name - determined name of the output file */
+        std::string m_strategy_name = "";
 };
 
 #endif // __VERICA_ANALYZER_CONFIGURATION_GRAPHVIZ_DOT_HPP_

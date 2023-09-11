@@ -88,9 +88,7 @@ ConfigurationUniformity::execute(const Settings *settings, State *state)
 }
 
 void
-ConfigurationUniformity::finalize()
-{
-
+ConfigurationUniformity::finalize(const Settings *settings, State *state) {
 }
 
 void

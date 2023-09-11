@@ -1,0 +1,21 @@
+{
+    "netlist_name" : "hpc1d1",
+    "sca-analysis" : "p-sni_std",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 10,
+        "expected_m_failing_probes": [
+            [ { "uid": 23, "name": "io_i0_s0[0]" }, { "uid": 24, "name": "io_i0_s1[0]" } ],
+            [ { "uid": 25, "name": "p_rand_1[0]" }, { "uid": 1, "name": "io_o0_s1[0]" } ],
+            [ { "uid": 25, "name": "p_rand_1[0]" }, { "uid": 0, "name": "io_o0_s0[0]" } ],
+            [ { "uid": 15, "name": "n_hpc2_0_reg_pipeline_0[0]" }, { "uid": 1, "name": "io_o0_s1[0]" } ],
+            [ { "uid": 15, "name": "n_hpc2_0_reg_pipeline_0[0]" }, { "uid": 0, "name": "io_o0_s0[0]" } ],
+            [ { "uid": 11, "name": "n_hpc2_0_N4[0]" }, { "uid": 0, "name": "io_o0_s0[0]" } ],
+            [ { "uid": 12, "name": "n_hpc2_0_N3[0]" }, { "uid": 1, "name": "io_o0_s1[0]" } ],
+            [ { "uid": 5, "name": "n_hpc2_0_n5[0]" }, { "uid": 0, "name": "io_o0_s0[0]" } ],
+            [ { "uid": 2, "name": "n_hpc2_0_n8[0]" }, { "uid": 1, "name": "io_o0_s1[0]" } ],
+            [ { "uid": 1, "name": "io_o0_s1[0]" }, { "uid": 0, "name": "io_o0_s0[0]" } ]            
+        ]
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "netlist_name" : "dom2 dep incecure",
+    "sca-analysis" : "p-ni std",    
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 2,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 1,
+        "expected_m_failing_probes": [
+            [ { "uid": 47, "name": "port_a[0]" }, { "uid": 49, "name": "port_a[1]" }, { "uid": 50, "name": "port_a[2]" } ]          
+        ]
+    }
+} 

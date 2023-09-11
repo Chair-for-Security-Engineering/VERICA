@@ -58,7 +58,7 @@ namespace pt = boost::property_tree;
 
 /* Enable unittest frameworks to access private members marked as TESTABLE */
 #ifdef UNITTEST
-#   define TESTABLE protected :
+#   define TESTABLE public :
 #   define CONCRETE virtual
 #else
 #   define TESTABLE
@@ -219,5 +219,17 @@ template<typename T> void cartesian_product(std::vector<std::vector<T>> &buckets
     }
 
 }
+
+/* Computes the difference between the set_a and set_b. Returns the difference as a vector. */
+template<typename T> 
+std::vector<T> set_diff(std::set<T> &set_a, std::set<T> &set_b){
+    std::vector<T> difference(set_a.size() + set_a.size());
+    typename std::vector<T>::iterator it;
+    it=std::set_difference(set_a.begin(), set_a.end(), set_b.begin(), set_b.end(), difference.begin());
+    difference.resize(it-difference.begin());
+
+    return difference;
+}
+
 
 #endif // ___UTIL_HPP_

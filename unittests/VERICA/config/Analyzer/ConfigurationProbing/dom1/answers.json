@@ -1,0 +1,40 @@
+{
+    "netlist_name" : "dom1",
+    "sca-analysis" : "probing",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 29,
+        "expected_m_failing_probes": [
+            [ { "uid": 40, "name": "port_r[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 27, "name": "port_c[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 13, "name": "N1[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 13, "name": "N1[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 12, "name": "N0[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 12, "name": "N0[0]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 12, "name": "N0[0]" }, { "uid": 13, "name": "N1[0]" } ],
+            [ { "uid": 16, "name": "port_u_0[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 16, "name": "port_u_0[0]" }, { "uid": 13, "name": "N1[0]" } ],
+            [ { "uid": 16, "name": "port_u_0[0]" }, { "uid": 12, "name": "N0[0]" } ],
+            [ { "uid": 14, "name": "port_u_1[1]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 14, "name": "port_u_1[1]" }, { "uid": 13, "name": "N1[0]" } ],
+            [ { "uid": 14, "name": "port_u_1[1]" }, { "uid": 12, "name": "N0[0]" } ],
+            [ { "uid": 14, "name": "port_u_1[1]" }, { "uid": 16, "name": "port_u_0[0]" } ],
+            [ { "uid": 40, "name": "port_r[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 36, "name": "port_a[1]" }, { "uid": 37, "name": "port_a[0]" } ],
+            [ { "uid": 39, "name": "port_b[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 39, "name": "port_b[0]" }, { "uid": 12, "name": "N0[0]" } ],
+            [ { "uid": 39, "name": "port_b[0]" }, { "uid": 14, "name": "port_u_1[1]" } ],
+            [ { "uid": 38, "name": "port_b[1]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 38, "name": "port_b[1]" }, { "uid": 13, "name": "N1[0]" } ],
+            [ { "uid": 38, "name": "port_b[1]" }, { "uid": 16, "name": "port_u_0[0]" } ],
+            [ { "uid": 38, "name": "port_b[1]" }, { "uid": 39, "name": "port_b[0]" } ],
+            [ { "uid": 37, "name": "port_a[0]" }, { "uid": 26, "name": "port_c[1]" } ],
+            [ { "uid": 37, "name": "port_a[0]" }, { "uid": 13, "name": "N1[0]" } ],
+            [ { "uid": 37, "name": "port_a[0]" }, { "uid": 14, "name": "port_u_1[1]" } ],
+            [ { "uid": 36, "name": "port_a[1]" }, { "uid": 27, "name": "port_c[0]" } ],
+            [ { "uid": 36, "name": "port_a[1]" }, { "uid": 12, "name": "N0[0]" } ],
+            [ { "uid": 36, "name": "port_a[1]" }, { "uid": 16, "name": "port_u_0[0]" } ]
+        ]
+    }
+}

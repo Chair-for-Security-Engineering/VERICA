@@ -218,6 +218,10 @@ ConfigurationLibrary::execute(const Settings *settings, State *state)
 }
 
 void
+ConfigurationLibrary::finalize(const Settings *settings, State *state) {
+}
+
+void
 ConfigurationLibrary::report(std::string service, const Logger *logger, const Settings *settings, State *state) const
 {  
     /* Print logger header */

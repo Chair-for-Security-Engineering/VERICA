@@ -109,6 +109,10 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
 }
 
 void
+ConfigurationFIA::finalize(const Settings *settings, State *state) {
+}
+
+void
 ConfigurationFIA::report(std::string service, const Logger *logger, const Settings *settings, State *state) const {    
     logger->header("Configure FIA");
 

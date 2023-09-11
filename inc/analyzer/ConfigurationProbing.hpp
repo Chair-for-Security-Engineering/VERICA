@@ -52,12 +52,13 @@ class ConfigurationProbing : public Configuration
 
         /* Accessor function(s) */
         const bool& independent() const { return this->m_independent; }
+        
         const std::vector<std::vector<const verica::Wire*>>& failing_probes() const { return this->m_failing_probes; };
-        const std::vector<std::vector<const verica::Wire*>>& combined_failing_probes() const { return this->m_combined_leaking_probes; };
-        const std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>>& combined_leaking_faults() const { return this->m_combined_leaking_fault_injections; };
+        const std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> & leaking_combinations() const { return this->m_leaking_combinations; };
 
         /* Mutator function(s) */
         void current_probes(const std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>> current_probes) { this->m_current_probes = current_probes.first; };
+
 
     private:
         
@@ -66,9 +67,8 @@ class ConfigurationProbing : public Configuration
         std::vector<const verica::Wire*> m_current_probes;                  /**< Container for current probe combination */
         std::vector<std::vector<const verica::Wire*>> m_failing_probes;     /**< Container for failing probe combinations */
 
-        /* Container for failing probe combinations for combined analyses */ 
-        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> m_combined_leaking_fault_injections;
-        std::vector<std::vector<const verica::Wire*>> m_combined_leaking_probes;
+        /* Container for failing probe combinations under fault injections */ 
+        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations;  // contains combinations of probes and faults
 };
 
 #endif // __VERICA_ANALYZER_CONFIGURATION_PROBING_HPP_

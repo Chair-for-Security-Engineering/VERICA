@@ -34,7 +34,7 @@
 #include "context/FaultLibrary.hpp"
 
 // Used for SCA analysis
-enum Composability { NONE, NI, SNI, PINI, CNI, CSNI, ICSNI, CINI, ICINI };
+enum class Composability { NONE, NI, SNI, PINI, CNI, CSNI, ICSNI, CINI, ICINI };
 
 class State
 {
@@ -94,10 +94,10 @@ class State
         std::vector<double> m_ineffective;
         std::vector<double> m_detected;
         std::vector<double> m_scenarios;
-        std::vector<double> m_na_security;
-        std::vector<double> m_sna_security;
-        std::vector<double> m_fini_security;
-        std::vector<double> m_cini_security;
+        std::vector<double> m_na_security;      // do we need this? Can the same information be extracted from the vectors below?
+        std::vector<double> m_sna_security;     // do we need this? Can the same information be extracted from the vectors below?
+        std::vector<double> m_fini_security;    // do we need this? Can the same information be extracted from the vectors below?
+        std::vector<double> m_cini_security;    // do we need this? Can the same information be extracted from the vectors below?
 
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> m_current_fault_injections;
         std::vector<int> m_current_number_of_input_faults;
@@ -112,6 +112,33 @@ class State
         /* Fault/Probe Pair for Visualization */
         std::vector<const verica::Wire*> m_visualization_faults;
         std::vector<const verica::Wire*> m_visualization_probes;
+
+        
+        /* Reporting */
+        // store leaking probes of different strategies 
+        std::vector<std::vector<const verica::Wire*>> m_leaking_probes_sca;
+        std::vector<std::vector<const verica::Wire*>> m_leaking_probes_pni;
+        std::vector<std::vector<const verica::Wire*>> m_leaking_probes_psni;
+        std::vector<std::vector<const verica::Wire*>> m_leaking_probes_pini;
+
+        // store effective faults of different strategies
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_fia;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_fni;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_fsni;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_fini;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_cni;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_csni;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_icsni;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_cini;
+        std::vector<std::vector<const verica::Wire*>> m_effective_faults_icini;
+
+        // store leaking combinations of probes and faults
+        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_sca_fia;
+        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_cni;
+        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_csni;
+        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_icsni;
+        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_cini;
+        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_icini;
 };
 
 #endif // __VERICA_CONTEXT_STATE_HPP_

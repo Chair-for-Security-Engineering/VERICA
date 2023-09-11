@@ -1,0 +1,92 @@
+{
+    "general": {
+        "verbose": 2,
+        "cores": 1,
+        "memory": 4,
+        "netlist": {
+            "file": "unittests/VERICA/Designs/uma2/uma2.v",
+            "name": "",
+            "module": ""
+        },
+        "library": {
+            "file": "cell/nang45.txt",
+            "name": "NANG45"
+        },
+        "filtering": {
+            "sca": {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia": {
+                "type": "none",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "model/fia-blacklist"
+            }
+        },
+        "annotation": {
+            "file": "unittests/VERICA/Designs/uma2/annotations.json",
+            "apply": true
+        },
+        "cudd": {
+            "reordering": false
+        },
+        "visualization": {
+            "enable": false,
+            "path": "dot/",
+            "full": false,
+            "partial": false
+        }
+    },
+    "side-channel": {
+        "enable": true,
+        "configuration": {
+            "order": 2,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": false
+        },
+        "model": {
+            "glitches": false,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis": {
+            "uniformity": false,
+            "probing": true,
+            "p-ni": false,
+            "p-sni": false,
+            "pini": false
+        }
+    },
+    "fault-injection": {
+        "enable": false,
+        "configuration": {
+            "number": 0,
+            "variate": 1,
+            "interrupt": false
+        },
+        "model": {
+            "mapping": "model/setreset.txt",
+            "location": "cs"
+        },
+        "analysis": {
+            "reduced_complexity": false,
+            "strategy": "detection",
+            "logic-level-error-flag": false,
+            "f-ni": false,
+            "f-sni": false,
+            "fini": false
+        }
+    },
+    "combined": {
+        "enable": false,
+        "analysis": {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false,
+            "cini": false,
+            "icini": false
+        }
+    }
+}

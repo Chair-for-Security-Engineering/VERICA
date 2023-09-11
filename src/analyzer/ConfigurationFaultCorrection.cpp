@@ -29,14 +29,22 @@
 void 
 ConfigurationFaultCorrection::initialize(const Settings *settings, State *state){
     // resize vector to collect effective fault injections
-    m_effective_fault_injections.resize(settings->getCores());
+    m_effective_faults_fia.resize(settings->getCores());
+    m_effective_faults_fni.resize(settings->getCores());
+    m_effective_faults_fsni.resize(settings->getCores());
+    m_effective_faults_fini.resize(settings->getCores());
+    m_effective_faults_cni.resize(settings->getCores());
+    m_effective_faults_csni.resize(settings->getCores());
+    m_effective_faults_icsni.resize(settings->getCores());
+    m_effective_faults_cini.resize(settings->getCores());
+    m_effective_faults_icini.resize(settings->getCores());
 }
 
 void
 ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
     int core = omp_get_thread_num();
     unsigned int max_k = state->m_current_number_of_injected_faults;
-    bool secure = true;
+    // bool secure = true;
 
     // Check if random input is faulted
     std::map<const verica::Wire*, verica::fault::Fault> faulted_rand_inputs;
@@ -109,12 +117,13 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         state->m_effective[core] += 0;   // no effective fault was detected
     } else {
         state->m_effective[core] += 1;
+        m_effective_faults_fia[core].push_back(state->m_current_fault_injections[core].first);
     }
 
     state->m_detected[core] = 0;
     state->m_scenarios[core] += 1;
 
-    // CheckingFNI and FSNI security
+    // Checking FNI and FSNI security
     int input_faults = 0;
     std::vector<const verica::Pin*> input_fault_domain;
     for(auto f : state->m_current_fault_injections[core].first){
@@ -127,11 +136,24 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
     }
 
     if(settings->getFaultFNI() || settings->getCombinedCNI()){
-        if(cnt_faults > max_k) state->m_na_security[core] += 1;
+        if(cnt_faults > max_k) {
+            state->m_na_security[core] += 1;
+        
+            // store effective faults for reporting and visualization
+            if(settings->getFaultFNI()) m_effective_faults_fni[core].push_back(state->m_current_fault_injections[core].first);
+            if(settings->getCombinedCNI()) m_effective_faults_cni[core].push_back(state->m_current_fault_injections[core].first);
+        }
     }
 
     if(settings->getFaultFSNI()  || settings->getCombinedCSNI() || settings->getCombinedICSNI()){
-        if(cnt_faults > (max_k-input_faults)) state->m_sna_security[core] += 1;
+        if(cnt_faults > (max_k-input_faults)) {
+            state->m_sna_security[core] += 1;
+
+            // store effective faults for reporting and visualization
+            if(settings->getFaultFSNI()) m_effective_faults_fsni[core].push_back(state->m_current_fault_injections[core].first);
+            if(settings->getCombinedCSNI()) m_effective_faults_csni[core].push_back(state->m_current_fault_injections[core].first);
+            if(settings->getCombinedICSNI()) m_effective_faults_icsni[core].push_back(state->m_current_fault_injections[core].first);
+        }
     }
 
     // Checking FINI
@@ -150,7 +172,9 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         // if the cardinality of the remaining set is larger than the number of internal faults -> MUT is not FINI
         if(set_of_output_fault_domains.size() > k2) {
             state->m_fini_security[core] += 1;
-            secure &= false;
+
+            // store effective faults for reporting and visualization
+            m_effective_faults_fini[core].push_back(state->m_current_fault_injections[core].first);
         }
     }
 
@@ -164,6 +188,7 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         for(auto p : output_fault_domain) {
             set_of_output_shared_fault_domain.insert(std::make_pair(p->share_domain(), p->fault_domain()));
         }
+        std::set<std::pair<int, int>> set_of_output_shared_fault_domain_temp = set_of_output_shared_fault_domain; // debug
 
         // determine shared fault domains for the inputs (num_of_share*share_domain + fault_domain)
         std::set<std::pair<int, int>> set_of_input_shared_fault_domain;
@@ -172,19 +197,33 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         }
 
         // remove fault domains of the input from output fault domains
-        for(auto i : set_of_input_shared_fault_domain)
-            set_of_output_shared_fault_domain.erase(i);   
+        for(auto i : set_of_input_shared_fault_domain){
+            set_of_output_shared_fault_domain.erase(i);
+        }   
 
         // if the cardinality of the remaining set is larger than the number of internal faults -> MUT is not FINI
         if(set_of_output_shared_fault_domain.size() > k2) {
             state->m_cini_security[core] += 1; 
-            secure &= false;
+
+            // store effective faults for reporting and visualization
+            if(settings->getCombinedCINI()) m_effective_faults_cini[core].push_back(state->m_current_fault_injections[core].first);
+            if(settings->getCombinedICINI()) m_effective_faults_icini[core].push_back(state->m_current_fault_injections[core].first);
         }
     }
+}
 
-    if(!secure){
-        m_effective_fault_injections[core].push_back(state->m_current_fault_injections[core]);
-    }
+void
+ConfigurationFaultCorrection::finalize(const Settings *settings, State *state) {
+    // collect all effective faults of the different strategies and store them in the state 
+    for(auto f : m_effective_faults_fia) state->m_effective_faults_fia.insert(state->m_effective_faults_fia.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_fni) state->m_effective_faults_fni.insert(state->m_effective_faults_fni.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_fsni) state->m_effective_faults_fsni.insert(state->m_effective_faults_fsni.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_fini) state->m_effective_faults_fini.insert(state->m_effective_faults_fini.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_cni) state->m_effective_faults_cni.insert(state->m_effective_faults_cni.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_csni) state->m_effective_faults_csni.insert(state->m_effective_faults_csni.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_icsni) state->m_effective_faults_icsni.insert(state->m_effective_faults_icsni.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_cini) state->m_effective_faults_cini.insert(state->m_effective_faults_cini.end(), f.begin(), f.end());
+    for(auto f : m_effective_faults_icini) state->m_effective_faults_icini.insert(state->m_effective_faults_icini.end(), f.begin(), f.end());
 }
 
 void
@@ -196,14 +235,10 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
     // Fault Injection
     double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
     for(auto v : state->m_effective) effective += v;
-    // for(auto v : state->m_detected) detected += v;
     for(auto v : state->m_scenarios) scenarios += v; 
-    // ineffective = scenarios - effective - detected; 
 
     if(settings->getVerbose() > 0) {
         logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
-        // logger->log(service, this->m_name, "Ineffective faults: " + std::to_string(ineffective));
-        // logger->log(service, this->m_name, "Detected faults:    " + std::to_string(detected));
         logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
     }    
 
@@ -278,14 +313,5 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
         else
             logger->footer(service, this->m_name, FAILURE);
     }
-
-    /* Add results to state for visualization */
-    std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> effective_fault_injections;
-    for(auto fault : m_effective_fault_injections){
-        effective_fault_injections.insert(effective_fault_injections.end(), fault.begin(), fault.end());
-    }
-
-    if(!effective_fault_injections.empty())
-        state->m_visualization_faults = effective_fault_injections[0].first;
 }
 

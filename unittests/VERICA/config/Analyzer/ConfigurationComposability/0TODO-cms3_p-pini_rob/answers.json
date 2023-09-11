@@ -1,0 +1,18 @@
+{
+    "netlist_name" : "cms3",
+    "sca-analysis" : "p-pini rob",
+    "is_inf_theo_sec": "false",
+    "expected_side_channel_order": 2,
+    "expected_failing": {
+        "expected_m_failing_probes_size": ,
+        "expected_m_failing_probes": [
+            
+         ]
+    },
+    "expected_failing_find": {
+        "expected_m_failing_probes_size": ,
+        "expected_m_failing_probes": [
+        
+        ]
+    }
+}

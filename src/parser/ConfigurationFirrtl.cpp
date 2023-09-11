@@ -85,6 +85,9 @@ ConfigurationFirrtl::execute(const Settings *settings, State *state)
     grammar = nullptr;
 }
 
+void
+ConfigurationFirrtl::finalize(const Settings *settings, State *state) {
+}
 
 void
 ConfigurationFirrtl::report(std::string service, const Logger *logger, const Settings *settings, State *state) const

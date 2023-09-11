@@ -1,0 +1,41 @@
+{
+    "type":
+    {
+        "clock": ["clk"],
+        "refresh": ["port_r"],
+        "control": ["reset"],
+        "error_flag": []
+    },
+    "primary_input_identifier":
+    {
+        "0": []
+
+    },
+    "share_domain":
+    {
+        "input":
+        {
+            "0": ["port_a[0]", "port_b[0]"],
+            "1": ["port_a[1]", "port_b[1]"]
+        },
+        "output":
+        {
+            "0": ["port_c[0]"],
+            "1": ["port_c[1]"]
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+            "0": ["port_a"],
+            "1": ["port_b"]
+        },
+        "output":
+        {
+            "0": ["port_c"]
+        }
+        
+    }
+
+}

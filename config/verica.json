@@ -2,11 +2,11 @@
     "general":
     {
         "verbose": 2,
-        "cores": 2,
-        "memory": 2,
+        "cores": 8,
+        "memory": 0,
         "netlist":
         {
-            "file": "test/case-study-nina/and_snina_d1_k1.v",
+            "file": "test/cpc-gadgets/cini/cini_hpc1_d2_k1_opt.v",
             "name": "",
             "module": ""
         },
@@ -54,7 +54,7 @@
         "enable": false,
         "configuration":
         {
-            "order": 1,
+            "order": 2,
             "variate": 0,
             "masking": 0,
             "interrupt": false
@@ -106,9 +106,9 @@
         "analysis":
         {
             "c-ni": false,
-            "c-sni": true,
+            "c-sni": false,
             "ic-sni": false,
-            "cini": false,
+            "cini": true,
             "icini": false
         }
     }

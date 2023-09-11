@@ -1,0 +1,10 @@
+{
+    "netlist_name" : "dom3",
+    "sca-analysis" : "p_ni_std",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 3,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 1030,
+        "expected_m_failing_probes": []
+    }
+}

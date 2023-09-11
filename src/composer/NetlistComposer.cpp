@@ -134,6 +134,10 @@ return;
 }
 
 void
+NetlistComposer::finalize(const Settings *settings, State *state) {
+}
+
+void
 NetlistComposer::report(std::string service, const Logger *logger, const Settings *settings, State *state) const
 {
     (void)service; // We do not need a service object in this function. However, it must be given as paramter due to an overwriting. 

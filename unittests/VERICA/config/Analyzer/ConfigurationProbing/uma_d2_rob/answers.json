@@ -1,0 +1,10 @@
+{
+    "netlist_name" : "uma_d2",
+    "sca-analysis" : "probing rob",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 2,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 348,
+        "expected_m_failing_probes": [ ]
+    }
+}

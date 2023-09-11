@@ -73,6 +73,7 @@
         "analysis": {
             "reduced_complexity": false,
             "strategy": "detection",
+            "logic-level-error-flag": true,
             "f-ni": false,
             "f-sni": false,
             "fini": false

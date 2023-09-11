@@ -1,0 +1,115 @@
+{
+    "general":
+    {
+        "verbose": 2,
+        "cores": 20,
+        "memory": 8,
+        "netlist":
+        {
+            "file": "test/icini/hpc1-new/icini_d2_k1.v",
+            "name": "",
+            "module": ""
+        },
+        "library":
+        {
+            "file": "cell/nang45.txt",
+            "name": "NANG45"
+        },
+        "filtering":
+        {
+            "sca":
+            {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia":
+            {
+                "type": "none",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "model/fia-blacklist"
+            }
+        },
+
+        "annotation":
+        {
+            "file": "test/icini/hpc1-new/annotations.json",
+            "apply": true
+        },
+        "cudd":
+        {
+            "reordering": false
+        },
+        "visualization":
+        {
+            "enable": true,
+            "path": "dot/",
+            "full": true,
+            "partial": true
+        }
+    },
+
+    "side-channel":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "order": 2,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": false
+        },
+        "model":
+        {
+            "glitches": true,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis": 
+        {
+            "uniformity": false,
+            "probing": false,
+            "p-ni": false,
+            "p-sni": false,
+            "pini": false
+        }
+    },
+
+    "fault-injection":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "number": 1,
+            "variate": 0,
+            "interrupt": false
+        },
+        "model": 
+        {
+            "mapping": "model/setreset.txt",
+            "location": "cs"
+        },
+        "analysis":
+        {
+            "reduced_complexity": false,
+            "strategy": "correction",
+            "logic-level-error-flag": false,
+            "f-ni": false,
+            "f-sni": false,
+            "fini": false
+        }
+    },
+
+    "combined": 
+    {
+        "enable": true,
+        "analysis":
+        {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false,
+            "cini": false,
+            "icini": true
+        }
+    }
+}

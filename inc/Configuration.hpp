@@ -46,6 +46,7 @@ class Configuration
         /* Virtual function(s) */
         virtual void initialize(const Settings *settings, State *state) = 0;
         virtual void execute(const Settings *settings, State *state) = 0;
+        virtual void finalize(const Settings *settings, State *state) = 0;
         virtual void report(std::string service, const Logger *logger, const Settings *settings, State *state) const = 0;
 
         /* Accessor function(s) */

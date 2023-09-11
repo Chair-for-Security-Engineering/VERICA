@@ -1,0 +1,4 @@
+# This file is used to determine entities that should not be faulted
+# The parser searches for all strings that are given in this file in the annotations of the nl file.
+# In case it finds a match, the corresponding gate will be blacklisted.
+SD1_Xor_Sbox_Inst2

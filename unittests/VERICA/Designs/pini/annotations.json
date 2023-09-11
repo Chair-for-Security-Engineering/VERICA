@@ -1,0 +1,51 @@
+{
+    "type":
+    {
+        "clock": ["clk"],
+        "refresh": ["port_r"],
+        "control": ["reset"],
+        "error_flag": []
+    },
+    "primary_input_identifier":
+    {
+
+    },
+    "share_domain":
+    {
+        "input":
+        {
+            "0": ["port_a[0]", "port_b[0]"],
+            "1": ["port_a[1]", "port_b[1]"],
+            "2": ["port_a[2]", "port_b[2]"],
+            "3": ["port_a[3]", "port_b[3]"],
+            "4": ["port_a[4]", "port_b[4]"]
+        },
+        "output":
+        {
+            "0": ["port_c[0]"],
+            "1": ["port_c[1]"],
+            "2": ["port_c[2]"],
+            "3": ["port_c[3]"],
+            "4": ["port_c[4]"]
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+            "0": ["port_a"],
+            "1": ["port_b"]
+        },
+        "output":
+        {
+            "0": ["port_c"]
+        }
+        
+    },
+    "fault_domain":
+    {
+        "input": {},
+        "output":{}
+    }
+
+}

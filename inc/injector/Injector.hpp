@@ -44,18 +44,18 @@ class Injector : public Service
         /* Accessor function(s) */
         /**
         * @brief Indicates if the generation of permuted fault locations is completed for the given n.
-        * 
+        *
         * @return Returns true if generation is done.
         */
         const bool& permutation_done() const { return m_permutation_done; }
-        
+
         /**
         * @brief Returns the vector of permuted fault locations.
-        */        
+        */
         const std::vector<std::vector<const verica::Wire*>>& permuted_fault_locations() const { return m_permutedFaultLocations; }
 
 
-        /* Computations */ 
+        /* Computations */
         /**
         * @brief Extracts the next batch of permuted fault locations.
         * @param number_of_faults Number of faults that should be injected simultaneously in one logic stage.
@@ -63,13 +63,13 @@ class Injector : public Service
         void get_next_fault_locations(unsigned int number_of_faults);
 
         /**
-        * @brief Modifies the BDDs associated with the wires stored in permutation and updates all BDDs on the propagation path. 
+        * @brief Modifies the BDDs associated with the wires stored in permutation and updates all BDDs on the propagation path.
         * @param permutation Contains the permutation of fault locations that should be faulted.
         */
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> prepeare_fault_mappings_for_injection(std::vector<const verica::Wire*> &permutation);
 
         /**
-        * @brief Modifies the BDDs associated with the wires stored in permutation and updates all BDDs on the propagation path. 
+        * @brief Modifies the BDDs associated with the wires stored in permutation and updates all BDDs on the propagation path.
         * @param wires List of wires that should be faulted.
         * @param faultList List of valid fault mappings of target wires.
         * @param core Working thread.
@@ -77,7 +77,7 @@ class Injector : public Service
         void inject(std::vector<const verica::Wire*> &wires, std::vector<verica::fault::Fault> &faultList, int core);
 
         /**
-        * @brief This function is used to detect effective faults and interrupt the computation. A detailed report is returned to the user. 
+        * @brief This function is used to detect effective faults and interrupt the computation. A detailed report is returned to the user.
         * @param fault_mappings List of pair that contains the fault locations (wires) with the corresponding fault types.
         * @param thread_num Working thread.
         * @param position Current position in the fault_mappings list.

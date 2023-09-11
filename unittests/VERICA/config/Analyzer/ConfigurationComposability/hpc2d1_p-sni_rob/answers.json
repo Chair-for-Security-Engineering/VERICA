@@ -1,0 +1,44 @@
+{
+    "netlist_name" : "hpc2d1",
+    "sca-analysis" : "p-sni_rob",
+    "is_inf_theo_sec": "false",
+    "expected_side_channel_order": 0,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 26,
+        "expected_m_failing_probes": [
+            [ { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 0, "name": "io_o0_s0[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 32, "name": "io_i0_s0[0]" }, { "uid": 33, "name": "io_i0_s1[0]" }  ],
+            [ { "uid": 23, "name": "n_hpc2_0_N3[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 23, "name": "n_hpc2_0_N3[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 24, "name": "n_hpc2_0_N2[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 24, "name": "n_hpc2_0_N2[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 21, "name": "n_hpc2_0_N5[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 21, "name": "n_hpc2_0_N5[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 22, "name": "n_hpc2_0_N4[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 22, "name": "n_hpc2_0_N4[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 25, "name": "n_hpc2_0_N1[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 26, "name": "n_hpc2_0_N0[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 19, "name": "n_hpc2_0_N7[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 19, "name": "n_hpc2_0_N7[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 20, "name": "n_hpc2_0_N6[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 20, "name": "n_hpc2_0_N6[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 17, "name": "n_hpc2_0_n2[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 18, "name": "n_hpc2_0_n1[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 30, "name": "p_rand_0[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 30, "name": "p_rand_0[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 29, "name": "io_i1_s1[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 31, "name": "io_i1_s0[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ],
+            [ { "uid": 33, "name": "io_i0_s1[0]" }, { "uid": 0, "name": "io_o0_s0[0]" }  ],
+            [ { "uid": 32, "name": "io_i0_s0[0]" }, { "uid": 1, "name": "io_o0_s1[0]" }  ]   
+        ]
+    },
+    "expected_failing_find": {
+        "expected_m_failing_probes_size": 2,
+        "expected_m_failing_probes": [
+            [ { "uid": 0, "name": "io_o0_s0[0]" } ],
+            [ { "uid": 1, "name": "io_o0_s1[0]" } ]                      
+        ]
+    }
+}

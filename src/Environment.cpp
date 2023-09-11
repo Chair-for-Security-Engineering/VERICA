@@ -72,7 +72,12 @@ Environment::Environment(int argc, char * argv[]) :
     this->initialize();
 
     /* Execute evaluation */
-    this->execute();
+    //this->execute();  // This line causes errors in the specific Tests using TestEnvironment.
+                        // Since it is executed in Ctor it executes all steps and writes all computation to our State.
+                        // Therefore, everything is already set and the Execution of TestEnvironment with execute,
+                        // faces a not empty structure.
+                        // But the algorithms are designed for emmpty structurs --> failling!
+                        // move in main();
 }
 
 /*
@@ -205,9 +210,6 @@ Environment::execute()
         this->m_analyzer->configure(&uniformity);
         this->m_analyzer->execute();
 
-        /* Finalize uniformity strategy */
-        uniformity.finalize();
-
         /* Report uniformity results */
         this->m_analyzer->report();
     }
@@ -220,7 +222,7 @@ Environment::execute()
      */
     if (this->m_settings->getSideChannelAnalysisProbing()){
         /* Create new probing verification strategy */
-        ConfigurationProbing probing{"PROBING", NONE};
+        ConfigurationProbing probing{"PROBING", Composability::NONE};
         analyze_sca(probing, "PROBING");
     }
 
@@ -232,8 +234,8 @@ Environment::execute()
      */
     if (this->m_settings->getSideChannelAnalysisNI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_ni{"PNI", NI};
-        analyze_sca(composability_ni, "PNI", NI);
+        ConfigurationComposability composability_ni{"PNI", Composability::NI};
+        analyze_sca(composability_ni, "PNI", Composability::NI);
     }
 
 
@@ -244,8 +246,8 @@ Environment::execute()
      */
     if (this->m_settings->getSideChannelAnalysisSNI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_sni{"PSNI", SNI};
-        analyze_sca(composability_sni, "PSNI", SNI);
+        ConfigurationComposability composability_sni{"PSNI", Composability::SNI};
+        analyze_sca(composability_sni, "PSNI", Composability::SNI);
     }
 
 
@@ -256,8 +258,8 @@ Environment::execute()
      */
     if (this->m_settings->getSideChannelAnalysisPINI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_pini{"PINI", PINI};
-        analyze_sca(composability_pini, "PINI", PINI);
+        ConfigurationComposability composability_pini{"PINI", Composability::PINI};
+        analyze_sca(composability_pini, "PINI", Composability::PINI);
     }
 
 
@@ -268,8 +270,8 @@ Environment::execute()
      */
     if (this->m_settings->getCombinedCNI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_cni{"CNI", CNI};
-        analyze_sca(composability_cni, "CNI", CNI);
+        ConfigurationComposability composability_cni{"CNI", Composability::CNI};
+        analyze_sca(composability_cni, "CNI", Composability::CNI);
     }
 
 
@@ -280,8 +282,8 @@ Environment::execute()
      */
     if (this->m_settings->getCombinedCSNI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_csni{"CSNI", CSNI};
-        analyze_sca(composability_csni, "CSNI", CSNI);
+        ConfigurationComposability composability_csni{"CSNI", Composability::CSNI};
+        analyze_sca(composability_csni, "CSNI", Composability::CSNI);
     }
 
 
@@ -292,8 +294,8 @@ Environment::execute()
      */
     if (this->m_settings->getCombinedICSNI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_icsni{"ICSNI", ICSNI};
-        analyze_sca(composability_icsni, "ICSNI", ICSNI);
+        ConfigurationComposability composability_icsni{"ICSNI", Composability::ICSNI};
+        analyze_sca(composability_icsni, "ICSNI", Composability::ICSNI);
     }
 
 
@@ -305,8 +307,8 @@ Environment::execute()
      */
     if (this->m_settings->getCombinedCINI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_cini{"CINI", CINI};
-        analyze_sca(composability_cini, "CINI", CINI);
+        ConfigurationComposability composability_cini{"CINI", Composability::CINI};
+        analyze_sca(composability_cini, "CINI", Composability::CINI);
     }
 
 
@@ -317,8 +319,8 @@ Environment::execute()
      */
     if (this->m_settings->getCombinedICINI()){
         /* Create new composability verification strategy */
-        ConfigurationComposability composability_icini{"ICINI", ICINI};
-        analyze_sca(composability_icini, "ICINI", ICINI);
+        ConfigurationComposability composability_icini{"ICINI", Composability::ICINI};
+        analyze_sca(composability_icini, "ICINI", Composability::ICINI);
     }
 
 
@@ -347,70 +349,70 @@ Environment::execute()
         }
 
         /* New probing strategy */
-        ConfigurationProbing probing{"FIA+PROBING", NONE};
+        ConfigurationProbing probing{"FIA+PROBING", Composability::NONE};
         std::vector<ConfigurationProbing> probing_threads{};
 
         /* New NI strategy */
-        ConfigurationComposability composability_ni{"FIA+PNI", NI};
+        ConfigurationComposability composability_ni{"FIA+PNI", Composability::NI};
         std::vector<ConfigurationComposability> ni_threads{};
 
         /* New SNI strategy */
-        ConfigurationComposability composability_sni{"FIA+PSNI", SNI};
+        ConfigurationComposability composability_sni{"FIA+PSNI", Composability::SNI};
         std::vector<ConfigurationComposability> sni_threads{};
 
         /* New PINI strategy */
-        ConfigurationComposability composability_pini{"FIA+PINI", PINI};
+        ConfigurationComposability composability_pini{"FIA+PINI", Composability::PINI};
         std::vector<ConfigurationComposability> pini_threads{};
 
         /* New CNI strategy */
-        ConfigurationComposability composability_cni{"CNI", CNI};
+        ConfigurationComposability composability_cni{"CNI", Composability::CNI};
         std::vector<ConfigurationComposability> cni_threads{};
 
         /* New CSNI strategy */
-        ConfigurationComposability composability_csni{"CSNI", CSNI};
+        ConfigurationComposability composability_csni{"CSNI", Composability::CSNI};
         std::vector<ConfigurationComposability> csni_threads{};
 
         /* New ICSNI strategy */
-        ConfigurationComposability composability_icsni{"ICSNI", ICSNI};
+        ConfigurationComposability composability_icsni{"ICSNI", Composability::ICSNI};
         std::vector<ConfigurationComposability> icsni_threads{};
 
         /* New CINI strategy */
-        ConfigurationComposability composability_cini{"CINI", CINI};
+        ConfigurationComposability composability_cini{"CINI", Composability::CINI};
         std::vector<ConfigurationComposability> cini_threads{};
 
         /* New ICINI strategy */
-        ConfigurationComposability composability_icini{"ICINI", ICINI};
+        ConfigurationComposability composability_icini{"ICINI", Composability::ICINI};
         std::vector<ConfigurationComposability> icini_threads{};
 
         /* New multi-threading strategies */  
         for (int core = 0; core < this->m_settings->getCores(); core++){
-            ConfigurationProbing configProbing{"FIA+PROBING-CORE" + std::to_string(core), NONE};
+            ConfigurationProbing configProbing{"FIA+PROBING-CORE" + std::to_string(core), Composability::NONE};
             probing_threads.push_back(configProbing);
 
-            ConfigurationComposability configComposabilityNI{"FIA+NI-CORE" + std::to_string(core), NI};
+            ConfigurationComposability configComposabilityNI{"FIA+NI-CORE" + std::to_string(core), Composability::NI};
             ni_threads.push_back(configComposabilityNI);
 
-            ConfigurationComposability configComposabilitySNI{"FIA+SNI-CORE" + std::to_string(core), SNI};
+            ConfigurationComposability configComposabilitySNI{"FIA+SNI-CORE" + std::to_string(core), Composability::SNI};
             sni_threads.push_back(configComposabilitySNI);
 
-            ConfigurationComposability configComposabilityPINI{"FIA+PINI-CORE" + std::to_string(core), PINI};
+            ConfigurationComposability configComposabilityPINI{"FIA+PINI-CORE" + std::to_string(core), Composability::PINI};
             pini_threads.push_back(configComposabilityPINI);
 
 
-            ConfigurationComposability configComposabilityCNI{"CNI-CORE" + std::to_string(core), CNI};
+            ConfigurationComposability configComposabilityCNI{"CNI-CORE" + std::to_string(core), Composability::CNI};
             cni_threads.push_back(configComposabilityCNI);
 
-            ConfigurationComposability configComposabilitySCNI{"CSNI-CORE" + std::to_string(core), CSNI}; 
+            ConfigurationComposability configComposabilitySCNI{"CSNI-CORE" + std::to_string(core), Composability::CSNI}; 
             csni_threads.push_back(configComposabilitySCNI);
 
-            ConfigurationComposability configComposabilityISCNI{"ICSNI-CORE" + std::to_string(core), ICSNI};
+            ConfigurationComposability configComposabilityISCNI{"ICSNI-CORE" + std::to_string(core), Composability::ICSNI};
             icsni_threads.push_back(configComposabilityISCNI);
 
 
-            ConfigurationComposability configComposabilityCINI{"CINI-CORE" + std::to_string(core), CINI};
+            ConfigurationComposability configComposabilityCINI{"CINI-CORE" + std::to_string(core), Composability::CINI};
             cini_threads.push_back(configComposabilityCINI);
 
-            ConfigurationComposability configComposabilityICINI{"ICINI-CORE" + std::to_string(core), ICINI}; 
+            ConfigurationComposability configComposabilityICINI{"ICINI-CORE" + std::to_string(core), Composability::ICINI}; 
             icini_threads.push_back(configComposabilityICINI);
         }       
 
@@ -432,8 +434,7 @@ Environment::execute()
             composability_icini.initialize(this->m_settings, this->m_state);
 
             /* Reset multi-threading strategies */  
-            for (int core = 0; core < this->m_settings->getCores(); core++)
-            {
+            for (int core = 0; core < this->m_settings->getCores(); core++) {
                 probing_threads[core].initialize(this->m_settings, this->m_state);
                 ni_threads[core].initialize(this->m_settings, this->m_state);
                 sni_threads[core].initialize(this->m_settings, this->m_state);
@@ -482,21 +483,19 @@ Environment::execute()
                         this->m_analyzer->configure(fault_strategy.get());
                         this->m_analyzer->execute();
 
-                        // Update probe combinations
-                        if(m_settings->getSideChannelAnalysisProbing() || m_settings->getSideChannelAnalysisNI() || m_settings->getSideChannelAnalysisSNI() || m_settings->getSideChannelAnalysisPINI() || m_settings->getCombinedICSNI() || m_settings->getCombinedICINI()){
-                            if(idx_fault_pair == 0){
-                                std::vector<const verica::Wire*> modified;
-                                for (auto w : location)
-                                {
-                                    modified.push_back(w);
-                                    for (auto p : w->propagation_path())
-                                    {
-                                        modified.push_back(p);
-                                    }
+                        std::vector<const verica::Wire*> modified;
+                        if(idx_fault_pair == 0){
+                            for (auto w : location) {
+                                modified.push_back(w);
+                                for (auto p : w->propagation_path()) {
+                                    modified.push_back(p);
                                 }
-
-                                sca_preprocessor.update(this->m_state, this->m_settings, modified, 0, thread_num);
                             }
+                        }
+
+                        // Update probe combinations
+                        if(m_settings->getSideChannelAnalysisProbing() || m_settings->getSideChannelAnalysisNI() || m_settings->getSideChannelAnalysisSNI() || m_settings->getCombinedICSNI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, 0, false, thread_num);
                         }
 
                         // Analyze probing security
@@ -514,14 +513,19 @@ Environment::execute()
                             analyze_combined(sni_threads[thread_num], thread_num);
                         }
 
-                        // Analyze PINI security
-                        if (this->m_settings->getSideChannelAnalysisPINI() && this->m_settings->getFaultInjection()){
-                            analyze_combined(pini_threads[thread_num], thread_num);
-                        }
-
                         // Analyze ICSNI security
                         if (this->m_settings->getCombinedICSNI()){
                             analyze_combined(icsni_threads[thread_num], thread_num);
+                        }
+
+                        // Update probe combinations
+                        if(m_settings->getSideChannelAnalysisPINI() || m_settings->getCombinedICINI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, 0, true, thread_num);
+                        }
+
+                        // Analyze PINI security
+                        if (this->m_settings->getSideChannelAnalysisPINI() && this->m_settings->getFaultInjection()){
+                            analyze_combined(pini_threads[thread_num], thread_num);
                         }
 
                         // Analyze ICINI security
@@ -529,24 +533,18 @@ Environment::execute()
                             analyze_combined(icini_threads[thread_num], thread_num);
                         }
 
-                        // Update probe combinations
+
+                        // Update number of input faults
                         if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI() || this->m_settings->getCombinedCINI()){
                             std::vector<const verica::Pin*> input_pins = m_state->m_netlist_model->module_under_test()->input_pins();
                             for(auto w : target_fault_collection[idx_fault_pair].first) {
                                 if(std::find(input_pins.begin(), input_pins.end(), w->source_pin()) != input_pins.end() && w->source_pin()->port_type() != verica::Refresh) m_state->m_current_number_of_input_faults[thread_num]++;
                             }
+                        }
 
-                            if(idx_fault_pair == 0){
-                                std::vector<const verica::Wire*> modified;
-                                for (auto w : location){
-                                    modified.push_back(w);
-                                    for (auto p : w->propagation_path()){
-                                        modified.push_back(p);
-                                    }
-                                }
-
-                                sca_preprocessor.update(this->m_state, this->m_settings, modified, m_state->m_current_number_of_injected_faults, thread_num);
-                            }
+                        // Update probe combinations
+                        if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, m_state->m_current_number_of_injected_faults, false, thread_num);
                         }
 
 
@@ -560,6 +558,11 @@ Environment::execute()
                             analyze_combined(csni_threads[thread_num], thread_num);
                         }
 
+
+                        // Update probe combinations
+                        if(this->m_settings->getCombinedCINI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, m_state->m_current_number_of_injected_faults, true, thread_num);
+                        }
 
                         // Analyze CINI security
                         if (this->m_settings->getCombinedCINI()) {
@@ -672,6 +675,9 @@ Environment::execute()
 
             if(cancel_fia) goto exit;
         }
+
+        // Finalize injector
+        fault_strategy->finalize(m_settings, m_state);
     }
 
 exit:
@@ -681,8 +687,165 @@ exit:
         ConfigurationGraphvizDot visualizer{"GRAPHVIZ (DOT)"};
         this->m_visualizer->configure(&visualizer);
 
-        this->m_visualizer->execute();
-        this->m_visualizer->report();
+        // Visualize SCA
+        if(this->m_settings->getSideChannelAnalysisProbing()){
+            if(this->m_state->m_leaking_probes_sca.size() > 0) this->m_state->m_visualization_probes = this->m_state->m_leaking_probes_sca[0];
+            visualizer.set_strategy_name("sca");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+        }
+
+        // Visualize PNI
+        if(this->m_settings->getSideChannelAnalysisNI()){
+            if(this->m_state->m_leaking_probes_pni.size() > 0) this->m_state->m_visualization_probes = this->m_state->m_leaking_probes_pni[0];
+            visualizer.set_strategy_name("pni");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+        }
+
+        // Visualize PSNI
+        if(this->m_settings->getSideChannelAnalysisSNI()){
+            if(this->m_state->m_leaking_probes_psni.size() > 0) this->m_state->m_visualization_probes = this->m_state->m_leaking_probes_psni[0];
+            visualizer.set_strategy_name("psni");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+        }
+
+        // Visualize PINI
+        if(this->m_settings->getSideChannelAnalysisPINI()){
+            if(this->m_state->m_leaking_probes_pini.size() > 0) this->m_state->m_visualization_probes = this->m_state->m_leaking_probes_pini[0];
+            visualizer.set_strategy_name("pini");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+        }
+
+        // Visualize FIA
+        if(this->m_settings->getFaultInjection()){
+            if(this->m_state->m_effective_faults_fia.size() > 0) this->m_state->m_visualization_faults = this->m_state->m_effective_faults_fia[0];
+            visualizer.set_strategy_name("fia");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize FNI
+        if(this->m_settings->getFaultFNI()){
+            if(this->m_state->m_effective_faults_fni.size() > 0) this->m_state->m_visualization_faults = this->m_state->m_effective_faults_fni[0];
+            visualizer.set_strategy_name("fni");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize FSNI
+        if(this->m_settings->getFaultFSNI()){
+            if(this->m_state->m_effective_faults_fsni.size() > 0) this->m_state->m_visualization_faults = this->m_state->m_effective_faults_fsni[0];
+            visualizer.set_strategy_name("fsni");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize FINI
+        if(this->m_settings->getFaultFINI()){
+            if(this->m_state->m_effective_faults_fini.size() > 0) this->m_state->m_visualization_faults = this->m_state->m_effective_faults_fini[0];
+            visualizer.set_strategy_name("fini");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize Probing + FIA
+        if(this->m_settings->getSideChannelAnalysisProbing() && this->m_settings->getFaultInjection()){
+            if(this->m_state->m_leaking_combinations_sca_fia.size() > 0) {
+                this->m_state->m_visualization_probes = this->m_state->m_leaking_combinations_sca_fia[0].first;
+                this->m_state->m_visualization_faults = this->m_state->m_leaking_combinations_sca_fia[0].second;
+            }
+            visualizer.set_strategy_name("sca_fia");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize CNI
+        if(this->m_settings->getCombinedCNI()){
+            if(this->m_state->m_effective_faults_cni.size() > 0){
+                this->m_state->m_visualization_faults = this->m_state->m_effective_faults_cni[0];
+            } else if(this->m_state->m_leaking_combinations_cni.size() > 0) {
+                this->m_state->m_visualization_probes = this->m_state->m_leaking_combinations_cni[0].first;
+                this->m_state->m_visualization_faults = this->m_state->m_leaking_combinations_cni[0].second;
+            }
+            visualizer.set_strategy_name("cni");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize CSNI
+        if(this->m_settings->getCombinedCSNI()){
+            if(this->m_state->m_effective_faults_csni.size() > 0){
+                this->m_state->m_visualization_faults = this->m_state->m_effective_faults_csni[0];
+            } else if(this->m_state->m_leaking_combinations_csni.size() > 0) {
+                this->m_state->m_visualization_probes = this->m_state->m_leaking_combinations_csni[0].first;
+                this->m_state->m_visualization_faults = this->m_state->m_leaking_combinations_csni[0].second;
+            }
+            visualizer.set_strategy_name("csni");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize ICSNI
+        if(this->m_settings->getCombinedICSNI()){
+            if(this->m_state->m_effective_faults_icsni.size() > 0){
+                this->m_state->m_visualization_faults = this->m_state->m_effective_faults_icsni[0];
+            } else if(this->m_state->m_leaking_combinations_icsni.size() > 0) {
+                this->m_state->m_visualization_probes = this->m_state->m_leaking_combinations_icsni[0].first;
+                this->m_state->m_visualization_faults = this->m_state->m_leaking_combinations_icsni[0].second;
+            }
+            visualizer.set_strategy_name("icsni");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize CINI
+        if(this->m_settings->getCombinedCINI()){
+            if(this->m_state->m_effective_faults_cini.size() > 0){
+                this->m_state->m_visualization_faults = this->m_state->m_effective_faults_cini[0];
+            } else if(this->m_state->m_leaking_combinations_cini.size() > 0) {
+                this->m_state->m_visualization_probes = this->m_state->m_leaking_combinations_cini[0].first;
+                this->m_state->m_visualization_faults = this->m_state->m_leaking_combinations_cini[0].second;
+            }
+            visualizer.set_strategy_name("cini");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+            this->m_state->m_visualization_faults.clear();
+        }
+
+        // Visualize ICINI
+        if(this->m_settings->getCombinedICINI()){
+            if(this->m_state->m_effective_faults_icini.size() > 0){
+                this->m_state->m_visualization_faults = this->m_state->m_effective_faults_icini[0];
+            } else if(this->m_state->m_leaking_combinations_icini.size() > 0) {
+                this->m_state->m_visualization_probes = this->m_state->m_leaking_combinations_icini[0].first;
+                this->m_state->m_visualization_faults = this->m_state->m_leaking_combinations_icini[0].second;
+            }
+            visualizer.set_strategy_name("icini");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+            this->m_state->m_visualization_faults.clear();
+        }
     }
 
     // Finalize
@@ -796,23 +959,27 @@ template<typename T> void
 Environment::report_independent_combined(std::vector<T> strategies, std::string name){
     std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> combined_leaking_fault_injections;
     std::vector<std::vector<const verica::Wire*>> failing_probes;
-    for (int core = 0; core < this->m_settings->getCores(); core++){
-        combined_leaking_fault_injections.insert(combined_leaking_fault_injections.end(), strategies[core].combined_leaking_faults().begin(), strategies[core].combined_leaking_faults().end());
-        failing_probes.insert(failing_probes.end(), strategies[core].combined_failing_probes().begin(), strategies[core].combined_failing_probes().end());
-    }
+    // for (int core = 0; core < this->m_settings->getCores(); core++){
+    //     combined_leaking_fault_injections.insert(combined_leaking_fault_injections.end(), strategies[core].combined_leaking_faults().begin(), strategies[core].combined_leaking_faults().end());
+    //     failing_probes.insert(failing_probes.end(), strategies[core].combined_failing_probes().begin(), strategies[core].combined_failing_probes().end());
+    // }
+
+    // this->m_logger->header("COMBINED-ANALYZER (FAULT+PROBING)");
+    // // for(auto leaking_fault : combined_leaking_fault_injections){
+    // for(unsigned int idx=0; idx<combined_leaking_fault_injections.size(); ++idx){
+    //     /* report faulted nodes */
+    //     this->m_logger->log("ANALYZER", "FIA+" + name, "Faulted node(s): " + this->m_state->m_netlist_model->wire_vector_to_json_string(combined_leaking_fault_injections[idx].first));
+        
+    //     /* report fault mapping */ 
+    //     // this->m_logger->log("ANALYZER", "FIA+" + name, "Fault mapping: " + this->m_state->m_netlist_model->fault_state_to_json_string(combined_leaking_fault_injections[idx], this->m_state->m_cell_library)); 
+
+    //     /* report failing probes */
+    //     this->m_logger->log("ANALYZER", "FIA+" + name, "Failing probe(s): " + this->m_state->m_netlist_model->wire_vector_to_json_string(failing_probes[idx]));
+    //     this->m_logger->log("ANALYZER", "FIA+" + name, "");
+    // }
+    // this->m_logger->footer();
 
     this->m_logger->header("COMBINED-ANALYZER (FAULT+PROBING)");
-    // for(auto leaking_fault : combined_leaking_fault_injections){
-    for(unsigned int idx=0; idx<combined_leaking_fault_injections.size(); ++idx){
-        /* report faulted nodes */
-        this->m_logger->log("ANALYZER", "FIA+" + name, "Faulted node(s): " + this->m_state->m_netlist_model->wire_vector_to_json_string(combined_leaking_fault_injections[idx].first));
-        
-        /* report fault mapping */ 
-        this->m_logger->log("ANALYZER", "FIA+" + name, "Fault mapping: " + this->m_state->m_netlist_model->fault_state_to_json_string(combined_leaking_fault_injections[idx], this->m_state->m_cell_library)); 
-
-        /* report failing probes */
-        this->m_logger->log("ANALYZER", "FIA+" + name, "Failing probe(s): " + this->m_state->m_netlist_model->wire_vector_to_json_string(failing_probes[idx]));
-        this->m_logger->log("ANALYZER", "FIA+" + name, "");
-    }
+    this->m_logger->log("ANALYZER", "FIA+" + name, "Currently not supported!");
     this->m_logger->footer();
 }

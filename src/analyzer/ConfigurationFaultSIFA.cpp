@@ -135,6 +135,10 @@ ConfigurationFaultSIFA::execute(const Settings *settings, State *state)
 
 }
 
+void
+ConfigurationFaultSIFA::finalize(const Settings *settings, State *state) {
+}
+
 
 void
 ConfigurationFaultSIFA::report(std::string service, const Logger *logger, const Settings *settings, State *state) const

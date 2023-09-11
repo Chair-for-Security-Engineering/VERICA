@@ -1,0 +1,15 @@
+{
+    "netlist_name" : "dom3",
+    "sca-analysis" : "p-sni_rob",
+    "is_inf_theo_sec": "false",
+    "expected_side_channel_order": 0,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 5316,
+        "expected_m_failing_probes": []
+    },
+    "expected_failing_find": {
+        "expected_m_failing_probes_size": 1046,
+        "expected_m_failing_probes": []
+    }
+
+}

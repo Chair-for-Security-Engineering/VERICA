@@ -60,6 +60,10 @@ ConfigurationModelPostprocessing::execute(const Settings *settings, State *state
 }
 
 void
+ConfigurationModelPostprocessing::finalize(const Settings *settings, State *state) {
+}
+
+void
 ConfigurationModelPostprocessing::report(std::string service, const Logger *logger, const Settings *settings, State *state) const {   
     (void)settings; // We do not need a settings object in this function. However, it must be given as paramter due to an overwriting. 
     (void)state; // We do not need a state object in this function. However, it must be given as paramter due to an overwriting.  

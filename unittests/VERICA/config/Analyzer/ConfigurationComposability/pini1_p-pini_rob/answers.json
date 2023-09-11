@@ -1,0 +1,21 @@
+{
+    "netlist_name" : "pini1",
+    "sca-analysis" : "p-pini_rob",
+    "is_inf_theo_sec": "false",
+    "expected_side_channel_order": 0,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 3,
+        "expected_m_failing_probes": [
+            [ { "uid": 1, "name": "port_c[0]" } ],
+            [ { "uid": 0, "name": "port_c[1]" } ],
+            [ { "uid": 16, "name": "port_a[0]" }, { "uid": 18, "name": "port_a[1]" } ]
+        ]
+    },
+    "expected_failing_find":{
+        "expected_m_failing_probes_size": 2,
+        "expected_m_failing_probes" : [
+            [ { "uid": 0, "name": "port_c[1]" } ],
+            [ { "uid": 1, "name": "port_c[0]" } ]
+        ]
+    }
+}

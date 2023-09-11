@@ -1,0 +1,29 @@
+{
+    "netlist_name" : "dom2 dep incecure",
+    "sca-analysis" : "p-ni rob",    
+    "is_inf_theo_sec": "false",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 7,
+        "expected_m_failing_probes": [
+            [ { "uid": 37, "name": "insecure_dom_mul_partial_products[5]" }, { "uid": 2, "name": "port_c[0]" } ],
+            [ { "uid": 34, "name": "insecure_dom_mul_partial_products[2]" }, { "uid": 1, "name": "port_c[1]" } ],
+            [ { "uid": 39, "name": "insecure_dom_mul_partial_products[7]" }, { "uid": 2, "name": "port_c[0]" } ],
+            [ { "uid": 33, "name": "insecure_dom_mul_partial_products[1]" }, { "uid": 0, "name": "port_c[2]" } ],
+            [ { "uid": 38, "name": "insecure_dom_mul_partial_products[6]" }, { "uid": 1, "name": "port_c[1]" } ],
+            [ { "uid": 35, "name": "insecure_dom_mul_partial_products[3]" }, { "uid": 0, "name": "port_c[2]" } ],
+            [ { "uid": 47, "name": "port_a[0]" }, { "uid": 49, "name": "port_a[1]" }, { "uid": 50, "name": "port_a[2]" } ]                        
+        ]
+    },
+    "expected_failing_find": {
+        "expected_m_failing_probes_size": 6,
+        "expected_m_failing_probes": [
+            [ { "uid": 37, "name": "insecure_dom_mul_partial_products[5]" }, { "uid": 2, "name": "port_c[0]" } ],
+            [ { "uid": 34, "name": "insecure_dom_mul_partial_products[2]" }, { "uid": 1, "name": "port_c[1]" } ],
+            [ { "uid": 39, "name": "insecure_dom_mul_partial_products[7]" }, { "uid": 2, "name": "port_c[0]" } ],
+            [ { "uid": 33, "name": "insecure_dom_mul_partial_products[1]" }, { "uid": 0, "name": "port_c[2]" } ],
+            [ { "uid": 38, "name": "insecure_dom_mul_partial_products[6]" }, { "uid": 1, "name": "port_c[1]" } ],
+            [ { "uid": 35, "name": "insecure_dom_mul_partial_products[3]" }, { "uid": 0, "name": "port_c[2]" } ]            
+        ]
+    }
+} 

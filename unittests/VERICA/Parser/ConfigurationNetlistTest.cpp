@@ -53,7 +53,6 @@ void trivialNetlistParserTest() {                  // Trivial netlist MUST NOT t
     std::string conf_str(CONFIG_ARG_PARAM + trivialNetlistConfig);
     char* CONFIG_ARG = &conf_str[0]; 
     char* argv[2] = {UNITTEST_EXEC, CONFIG_ARG};
-    //testEnv = new TestEnvironment(argc, argv, TestEnvironment::execPhases::CELLLIB);
     TestEnvironment testEnv{argc, argv, TestEnvironment::execPhases::CELLLIB};
     BOOST_REQUIRE_NO_THROW(testEnv.getParser()->configure(&confNL));
     BOOST_REQUIRE_NO_THROW(testEnv.getParser()->execute());

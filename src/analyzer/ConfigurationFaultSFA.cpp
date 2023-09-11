@@ -60,6 +60,9 @@ ConfigurationFaultSFA::execute(const Settings *settings, State *state)
     }
 }
 
+void
+ConfigurationFaultSFA::finalize(const Settings *settings, State *state) {
+}
 
 void
 ConfigurationFaultSFA::report(std::string service, const Logger *logger, const Settings *settings, State *state) const

@@ -125,13 +125,9 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
             }
         }    
 
-        if(!this->m_independent) {
-            this->m_combined_leaking_probes.push_back(this->m_current_probes);
-
-            // add leaking fault injections
-            if(settings->getFaultInjection() || settings->getCombined()){
-                this->m_combined_leaking_fault_injections.push_back(state->m_current_fault_injections[threadNum]);
-            }
+        /* Store leaking combinations of probes and faults */
+        if(!this->m_independent && (settings->getFaultInjection() || settings->getCombined())) {
+            this->m_leaking_combinations.push_back(std::make_pair(this->m_current_probes, state->m_current_fault_injections[threadNum].first));
         }
     }
 }
@@ -140,6 +136,10 @@ void
 ConfigurationProbing::finalize(const Settings *settings, State *state) {
     /* Sort failing probe combinations by size (small to large) */
     std::sort(this->m_failing_probes.begin(), this->m_failing_probes.end(), [](const std::vector<const verica::Wire*> & a, const std::vector<const verica::Wire*> & b){ return a.size() < b.size(); });
+
+    /* Add verification results to state */
+    state->m_leaking_probes_sca = m_failing_probes;
+    state->m_leaking_combinations_sca_fia = m_leaking_combinations;
 }
 
 void
@@ -199,7 +199,6 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
         } else {
             logger->log(service, this->m_name, ITEM + "first : - ");
         }
-        
     }
 
     /* Print final result to footer */
@@ -210,25 +209,14 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
     } else {
         logger->footer(service, this->m_name, FAILURE);
     }
-
-    /* Add results to state for visualization */
-    if(!m_combined_leaking_fault_injections.empty())
-        state->m_visualization_faults = m_combined_leaking_fault_injections[0].first;
-    if(!m_failing_probes.empty())
-        state->m_visualization_probes = m_failing_probes[0];
-
 }
 
 void
-ConfigurationProbing::insert(const ConfigurationProbing* configuration)
-{
+ConfigurationProbing::insert(const ConfigurationProbing* configuration) {
     for (auto combination : configuration->failing_probes())
         if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
-            this->m_failing_probes.push_back(combination);
+            this->m_failing_probes.push_back(combination);  
 
-    for (auto combination : configuration->combined_failing_probes())
-        this->m_combined_leaking_probes.push_back(combination);
-
-    for (auto combination : configuration->combined_leaking_faults())
-        this->m_combined_leaking_fault_injections.push_back(combination);   
+    for(auto combination : configuration->leaking_combinations())
+        this->m_leaking_combinations.push_back(combination);
 }

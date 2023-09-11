@@ -57,8 +57,7 @@ class Environment
         /* Execute verification process */
         void execute();
 
-    private:
-
+    private: TESTABLE
         /* Member Functions */
         /** 
          * This function performs a multithreaded side-channel analysis of type T. It supports probing analysis (type=NONE)
@@ -72,7 +71,7 @@ class Environment
          * 
          */   
         template<typename T> void 
-        analyze_sca(T &strategy, std::string name, Composability type=NONE);
+        analyze_sca(T &strategy, std::string name, Composability type=Composability::NONE);
 
         /** 
          * This function performs a multithreaded side-channel analysis in the combined settings (i.e., with injected faults) of type T. 
@@ -111,6 +110,7 @@ class Environment
          */   
         template<typename T> void 
         report_independent_combined(std::vector<T> strategies, std::string name);
+
 
         /* Logger */
         Logger *m_logger;

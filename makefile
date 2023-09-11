@@ -21,23 +21,37 @@ BUILD_DIR		:= ./build
 # COMPILER/LINKER OPTIONS
 CC					:= gcc
 C_RELEASE_FLAGS		:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -std=c11 -g
+C_PROFILE_FLAGS		:= -m64 -fopenmp -march=native -O3 -fno-omit-frame-pointer -std=c11 -g
+C_COVERAGE_FLAGS	:= -m64 -fprofile-arcs -ftest-coverage -fPIC -fopenmp -march=native -O0 -fno-omit-frame-pointer -std=c11 -g
 C_DEBUG_FLAGS		:= -Wall -Wextra -pedantic -m64 -fopenmp -march=native -g3 -Og -fsanitize=address -std=c11
-C_TEST_FLAGS		:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c11 -D UNITTEST
+C_TEST_FLAGS		:= -m64 -fopenmp -march=native -O0 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c11 -D UNITTEST
+C_FULLTEST_FLAGS	:= -m64 -fopenmp -march=native -O0 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c11 -D UNITTEST -D FULLTEST
+C_MERGETEST_FLAGS	:= -m64 -fopenmp -march=native -O0 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c11 -D UNITTEST -D MERGETEST
 
 CXX					:= g++
 CXX_RELEASE_FLAGS	:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -std=c++17 -g
+CXX_PROFILE_FLAGS	:= -m64 -fopenmp -march=native -O3 -fno-omit-frame-pointer -std=c++17 -g
+CXX_COVERAGE_FLAGS	:= -m64 -fprofile-arcs -ftest-coverage -fopenmp -march=native -O0 -fno-omit-frame-pointer -std=c++17 -g
 CXX_DEBUG_FLAGS		:= -Wall -Wextra -pedantic -m64 -fopenmp -march=native -g3 -Og -fsanitize=address -std=c++17
-CXX_TEST_FLAGS		:= -m64 -fopenmp -march=native -O3 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c++17 -D UNITTEST
+CXX_TEST_FLAGS		:= -m64 -fopenmp -march=native -O0 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c++17 -D UNITTEST
+CXX_FULLTEST_FLAGS	:= -m64 -fopenmp -march=native -O0 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c++17 -D UNITTEST -D FULLTEST
+CXX_MERGETEST_FLAGS	:= -m64 -fopenmp -march=native -O0 -fomit-frame-pointer -fprofile-arcs -ftest-coverage -std=c++17 -D UNITTEST -D MERGETEST
 
 LD_RELEASE_FLAGS	:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR)
+LD_PROFILE_FLAGS	:=  $(LD_RELEASE_FLAGS)
+LD_COVERAGE_FLAGS	:=  $(LD_RELEASE_FLAGS) -fprofile-arcs -ftest-coverage
 LD_DEBUG_FLAGS		:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR) -fsanitize=address
 LD_TEST_FLAGS		:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR) -D UNITTEST
+LD_FULLTEST_FLAGS	:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR) -D UNITTEST -D FULLTEST
+LD_MERGETEST_FLAGS	:= -m64 -fopenmp -Wl,-rpath=$(LIBRARY_DIR) -D UNITTEST -D MERGETEST
 
 # EXTERNAL INCLUDES
-INCLUDES			:= -I $(INCLUDE_DIR) -I "./inc/cudd"
+INCLUDES			:= -I $(INCLUDE_DIR) -I "/home/gitlab-runner/boost" -I "./inc/cudd"
 
 # LIBRARIES
 LIB_RELEASE			:= -lcudd -lboost_program_options
+LIB_PROFILE			:= $(LIB_RELEASE)
+LIB_COVERAGE		:= $(LIB_RELEASE)
 LIB_DEBUG			:= $(LIB_RELEASE)
 LIB_TEST			:= $(LIB_RELEASE) -lboost_unit_test_framework
 
@@ -51,7 +65,7 @@ VERBOSITY			:= 1
 ## CORE																										##
 ##############################################################################################################
 
-.PHONY: all build check clean compile debug test release
+.PHONY: all build check clean compile debug test fulltest mergetest release profile coverage
 
 # store make invocation time
 START_TIME := $(shell date +%s%3N)
@@ -87,7 +101,30 @@ ifeq ($(DEBUG),2)
 	LD_FLAGS 	= $(LD_TEST_FLAGS)
 	LIBRARIES	= $(LIB_TEST)
 endif
-
+ifeq ($(DEBUG),3)
+	C_FLAGS 	= $(C_FULLTEST_FLAGS)
+	CXX_FLAGS 	= $(CXX_FULLTEST_FLAGS)
+	LD_FLAGS 	= $(LD_FULLTEST_FLAGS)
+	LIBRARIES	= $(LIB_TEST)
+endif
+ifeq ($(DEBUG),4)
+	C_FLAGS 	= $(C_MERGETEST_FLAGS)
+	CXX_FLAGS 	= $(CXX_MERGETEST_FLAGS)
+	LD_FLAGS 	= $(LD_MERGETEST_FLAGS)
+	LIBRARIES	= $(LIB_TEST)
+endif
+ifeq ($(DEBUG),5)
+	C_FLAGS 	= $(C_PROFILE_FLAGS)
+	CXX_FLAGS 	= $(CXX_PROFILE_FLAGS)
+	LD_FLAGS 	= $(LD_PROFILE_FLAGS)
+	LIBRARIES	= $(LIB_PROFILE)
+endif
+ifeq ($(DEBUG),6)
+	C_FLAGS 	= $(C_COVERAGE_FLAGS)
+	CXX_FLAGS 	= $(CXX_COVERAGE_FLAGS)
+	LD_FLAGS 	= $(LD_COVERAGE_FLAGS)
+	LIBRARIES	= $(LIB_COVERAGE)
+endif
 
 # list all .c and .cpp source files
 C_SOURCES	:= $(shell find $(SOURCE_DIR) -name '*.c' | sort -k 1nr | cut -f2-)
@@ -96,7 +133,25 @@ CXX_SOURCES	:= $(shell find $(SOURCE_DIR) -name '*.cpp' | sort -k 1nr | cut -f2-
 # create object file names in the obj directory
 OBJECTS := $(patsubst $(SOURCE_DIR)/%,$(OBJECT_DIR)/%, $(C_SOURCES:.c=.o)) $(patsubst $(SOURCE_DIR)/%,$(OBJECT_DIR)/%, $(CXX_SOURCES:.cpp=.o))
 
-ifeq ($(DEBUG),2)
+ifeq ($(DEBUG),2) #(normal TEST)
+# list all .c and .cpp test source files
+C_SOURCES	= $(shell find $(TEST_DIR) -name '*.c' | sort -k 1nr | cut -f2-)
+CXX_SOURCES	= $(shell find $(TEST_DIR) -name '*.cpp' | sort -k 1nr | cut -f2-)
+
+# create test object file names in the obj directory
+OBJECTS += $(patsubst $(TEST_DIR)/%,$(OBJECT_DIR)/%, $(C_SOURCES:.c=.o)) $(patsubst $(TEST_DIR)/%,$(OBJECT_DIR)/%, $(CXX_SOURCES:.cpp=.o))
+endif
+
+ifeq ($(DEBUG),3) #(FULLTEST)
+# list all .c and .cpp test source files
+C_SOURCES	= $(shell find $(TEST_DIR) -name '*.c' | sort -k 1nr | cut -f2-)
+CXX_SOURCES	= $(shell find $(TEST_DIR) -name '*.cpp' | sort -k 1nr | cut -f2-)
+
+# create test object file names in the obj directory
+OBJECTS += $(patsubst $(TEST_DIR)/%,$(OBJECT_DIR)/%, $(C_SOURCES:.c=.o)) $(patsubst $(TEST_DIR)/%,$(OBJECT_DIR)/%, $(CXX_SOURCES:.cpp=.o))
+endif
+
+ifeq ($(DEBUG),4) #(MERGETEST)
 # list all .c and .cpp test source files
 C_SOURCES	= $(shell find $(TEST_DIR) -name '*.c' | sort -k 1nr | cut -f2-)
 CXX_SOURCES	= $(shell find $(TEST_DIR) -name '*.cpp' | sort -k 1nr | cut -f2-)
@@ -122,6 +177,18 @@ clean:
 	@echo  Removing build artifacts...
 	-@rm -rvf $(BUILD_DIR)/*
 	-@rm -rvf $(BINARY_DIR)/*
+
+coverage:
+	@+make compile DEBUG=6 TARGET_DIR=$(BINARY_DIR)/coverage OBJECT_DIR=$(BUILD_DIR)/coverage
+
+profile:
+	@+make compile DEBUG=5 TARGET_DIR=$(BINARY_DIR)/profile OBJECT_DIR=$(BUILD_DIR)/profile
+
+mergetest:
+	@+make compile DEBUG=4 TARGET_DIR=$(BINARY_DIR)/mergetest OBJECT_DIR=$(BUILD_DIR)/mergetest
+
+fulltest:
+	@+make compile DEBUG=3 TARGET_DIR=$(BINARY_DIR)/fulltest OBJECT_DIR=$(BUILD_DIR)/fulltest
 
 test:
 	@+make compile DEBUG=2 TARGET_DIR=$(BINARY_DIR)/test OBJECT_DIR=$(BUILD_DIR)/test
@@ -158,32 +225,72 @@ endif
 ifeq ($(DEBUG), 2)
 	@echo '____ BUILDING (TEST) ____'
 endif
+ifeq ($(DEBUG), 3)
+	@echo '____ BUILDING (FULLTEST) ____'
+endif
+ifeq ($(DEBUG), 4)
+	@echo '____ BUILDING (MERGETEST) ____'
+endif
+ifeq ($(DEBUG), 5)
+	@echo '____ BUILDING (PROFILE) ____'
+endif
+ifeq ($(DEBUG), 6)
+	@echo '____ BUILDING (COVERAGE) ____'
+endif
 	@mkdir -p $(TARGET_DIR)
 	@mkdir -p $(OBJECT_DIR)
 
 # compile .c files
 $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c
 	@mkdir -p '$(dir $@)'
-	$(SUPPRESS)$(CC) $(DEPENDENCYFLAGS) $(C_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES) 
+	$(SUPPRESS)$(CC) $(DEPENDENCYFLAGS) $(C_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
 	@touch $@
 
 # compile .cpp files
 $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 	@mkdir -p '$(dir $@)'
-	$(SUPPRESS)$(CXX) $(DEPENDENCYFLAGS) $(CXX_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES) 
+	$(SUPPRESS)$(CXX) $(DEPENDENCYFLAGS) $(CXX_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
 	@touch $@
 
-ifeq ($(DEBUG), 2)
+ifeq ($(DEBUG), 2) #(normal TEST)
 # compile test .c files
 $(OBJECT_DIR)/%.o: $(TEST_DIR)/%.c
 	@mkdir -p '$(dir $@)'
-	$(SUPPRESS)$(CC) $(DEPENDENCYFLAGS) $(C_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES) 
+	$(SUPPRESS)$(CC) $(DEPENDENCYFLAGS) $(C_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
 	@touch $@
 
 # compile test .cpp files
 $(OBJECT_DIR)/%.o: $(TEST_DIR)/%.cpp
 	@mkdir -p '$(dir $@)'
-	$(SUPPRESS)$(CXX) $(DEPENDENCYFLAGS) $(CXX_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES) 
+	$(SUPPRESS)$(CXX) $(DEPENDENCYFLAGS) $(CXX_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
+	@touch $@
+endif
+
+ifeq ($(DEBUG), 3) #(FULLTEST)
+# compile test .c files
+$(OBJECT_DIR)/%.o: $(TEST_DIR)/%.c
+	@mkdir -p '$(dir $@)'
+	$(SUPPRESS)$(CC) $(DEPENDENCYFLAGS) $(C_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
+	@touch $@
+
+# compile test .cpp files
+$(OBJECT_DIR)/%.o: $(TEST_DIR)/%.cpp
+	@mkdir -p '$(dir $@)'
+	$(SUPPRESS)$(CXX) $(DEPENDENCYFLAGS) $(CXX_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
+	@touch $@
+endif
+
+ifeq ($(DEBUG), 4) #(MERGETEST)
+# compile test .c files
+$(OBJECT_DIR)/%.o: $(TEST_DIR)/%.c
+	@mkdir -p '$(dir $@)'
+	$(SUPPRESS)$(CC) $(DEPENDENCYFLAGS) $(C_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
+	@touch $@
+
+# compile test .cpp files
+$(OBJECT_DIR)/%.o: $(TEST_DIR)/%.cpp
+	@mkdir -p '$(dir $@)'
+	$(SUPPRESS)$(CXX) $(DEPENDENCYFLAGS) $(CXX_FLAGS) $(INCLUDES) -o $@ -c $< -L$(LIBRARY_DIR) $(LIBRARIES)
 	@touch $@
 endif
 

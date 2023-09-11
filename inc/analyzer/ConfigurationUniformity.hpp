@@ -42,7 +42,7 @@ class ConfigurationUniformity : public Configuration
         void execute(const Settings *settings, State *state) override;
 
         /* Finalize analysis for given context & configuration */
-        void finalize();
+        void finalize(const Settings *settings, State *state) override;
 
         /* Report analysis results for given context & configuration */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;

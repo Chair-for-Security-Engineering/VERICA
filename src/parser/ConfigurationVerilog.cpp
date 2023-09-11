@@ -95,6 +95,10 @@ ConfigurationVerilog::execute(const Settings *settings, State *state)
 }   
 
 void
+ConfigurationVerilog::finalize(const Settings *settings, State *state) {
+}
+
+void
 ConfigurationVerilog::report(std::string service, const Logger *logger, const Settings *settings, State *state) const
 {
     logger->header("DESIGN UNDER TEST");
