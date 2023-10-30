@@ -27,6 +27,7 @@
 #ifndef __VERICA_ENVIRONMENT_HPP_
 #define __VERICA_ENVIRONMENT_HPP_
 
+#include "analyzer/ConfigurationCombinable.hpp"
 #include "context/Logger.hpp"
 #include "context/Settings.hpp"
 #include "context/State.hpp"
@@ -34,17 +35,19 @@
 #include "parser/Parser.hpp"
 
 #include "preprocessor/Preprocessor.hpp"
+#include "preprocessor/ConfigurationSCA.hpp"
 
 #include "injector/Injector.hpp"
 
 #include "analyzer/Analyzer.hpp"
 
 #include "visualization/Visualizer.hpp"
+#include <vector>
+
 
 class Environment
 {
     public:
-
         /* Constructor(s) */
         Environment(int argc, char * argv[]);
 
@@ -59,57 +62,107 @@ class Environment
 
     private: TESTABLE
         /* Member Functions */
-        /** 
-         * This function performs a multithreaded side-channel analysis of type T. It supports probing analysis (type=NONE)
-         * and all implemented composability notions. 
-         * 
+
+        void finalize();
+        void visualize();
+        /**
+         * This function performs a multithreaded fault-injection analysis of type T.
+         * TODO: It supports ...
+         *
+         * @brief Performs a multithreaded fault-injection analysis of type T.
+         * TODO:
+         * @param T The fault injection analysis strategy that should be applied to the DUT.
+         * @param name Name of the strategy (e.g., FAULT-DETECTION, FAULT-CORRECTION, FAULT-SFA, FAULT-SIFA)
+         *
+         */
+        template<typename T> void
+        analyze_fia(std::string name);
+
+        /**
+         * This function performs a multithreaded side-channel analysis of type T.
+         * It supports probing analysis (type=NONE) and all implemented composability notions.
+         *
          * @brief Performs a multithreaded side-channel analysis of type T.
          *
          * @param strategy The side-channel strategy that should be applied to the DUT.
          * @param name Name of the strategy (e.g., PROBING, NI, SNI, ...).
          * @param type Type of the composability strategy that should be applied.
-         * 
-         */   
-        template<typename T> void 
-        analyze_sca(T &strategy, std::string name, Composability type=Composability::NONE);
+         *
+         */
+        template<typename T> void
+        analyze_sca(ConfigurationSCA &sca_preprocessor,
+                    T &strategy, 
+                    std::string name, 
+                    Composability type=Composability::NONE);
 
-        /** 
-         * This function performs a multithreaded side-channel analysis in the combined settings (i.e., with injected faults) of type T. 
-         * It supports probing analysis (type=NONE) and all implemented composability notions. 
-         * 
+        void report_combined(std::vector<std::unique_ptr<ConfigurationCombinable>> &sca_configurations,
+                                  std::vector<std::vector<std::unique_ptr<ConfigurationCombinable>>> &sca_configurations_multithreading);
+
+
+        void gen_configuration(const Composability comp, const std::string &strategy,
+                                std::vector<std::unique_ptr<ConfigurationCombinable>> &sca_configurations);
+
+        void gen_multithreading_configurations(
+            const Composability comp,
+            const std::string &strategy,
+            std::vector<std::vector<std::unique_ptr<ConfigurationCombinable>>> &sca_configurations_multithreading);
+
+        void generate_choosen_fia_configuration(
+            std::unique_ptr<Configuration> &fault_strategy
+        );
+
+        void generate_choosen_sca_configurations(
+            std::vector<std::unique_ptr<ConfigurationCombinable>> &sca_configurations,
+            std::vector<std::vector<std::unique_ptr<ConfigurationCombinable>>> &sca_configurations_multithreading
+        );
+
+        void initialize_sca_configurations(
+            std::vector<std::unique_ptr<ConfigurationCombinable>> &sca_configurations,
+            std::vector<std::vector<std::unique_ptr<ConfigurationCombinable>>> &sca_configurations_multithreading);
+
+        void analyze_combined(ConfigurationSCA &sca_preprocessor,
+                              std::unique_ptr<Configuration> &fault_strategy,
+                              std::vector<std::unique_ptr<ConfigurationCombinable>> &sca_configurations,
+                              std::vector<std::vector<std::unique_ptr<ConfigurationCombinable>>> &sca_configurations_multithreading);
+
+        /**
+         * This function performs a multithreaded side-channel analysis in the combined settings (i.e., with injected faults) of type T.
+         * It supports probing analysis (type=NONE) and all implemented composability notions.
+         *
          * @brief Performs a multithreaded side-channel analysis of type T in a combined setting.
          *
          * @param strategy The side-channel strategy that should be applied to the DUT.
          * @param thread_num Number of the working thread.
-         * 
-         */   
-        template<typename T> void 
-        analyze_combined(T &strategy, int thread_num);
+         *
+         */
+        template<typename T> void
+        analyze_sca_combined(T &strategy, int thread_num);
 
-        /** 
-         * Reports the side-channel analysis results in a combined setting, i.e., with injected faults. 
-         * 
+        /**
+         * Reports the side-channel analysis results in a combined setting, i.e., with injected faults.
+         *
          * @brief Reports SCA analysis results in a combined setting.
          *
          * @param strategy The side-channel strategy that should bne applied to the DUT.
          * @param strategies Vector to the applied SCA strategies (used for multithreading).
-         * 
-         */   
-        template<typename T> void 
-        report_combined(T &strategy, std::vector<T> strategies);
+         *
+         */
+        void
+        report_sca_combined(std::unique_ptr<ConfigurationCombinable> &strategy,
+                            std::vector<std::unique_ptr<ConfigurationCombinable>> &strategies);
 
-        /** 
-         * Reports a detailed analysis report of an combined analysis of FIA and SCA without 
-         * considering reciprocal effects. 
-         * 
+        /**
+         * Reports a detailed analysis report of an combined analysis of FIA and SCA without
+         * considering reciprocal effects.
+         *
          * @brief Detailed analysis report of combined analysis without considering reciprocal effects.
          *
          * @param strategies Vector to the applied SCA strategies (used for multithreading).
          * @param name Is used for reporting (e.g., PROB, NI, SNI, ...).
-         * 
-         */   
-        template<typename T> void 
-        report_independent_combined(std::vector<T> strategies, std::string name);
+         *
+         */
+        void
+        report_independent_combined(std::vector<std::unique_ptr<ConfigurationCombinable>> &strategies, std::string name);
 
 
         /* Logger */

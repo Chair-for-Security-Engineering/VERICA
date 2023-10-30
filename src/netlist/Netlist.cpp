@@ -327,6 +327,14 @@ void verica::Netlist::ignore_fia_module(int uid, bool ignore) {
     }
 }
 
+void verica::Netlist::set_fia_probability_module(int uid, double probability){
+    m_modules[uid]->m_fia_probability = probability;
+}
+
+void verica::Netlist::set_fia_probability_wire(int uid, double probability){
+    m_wires[uid]->m_fia_probability = probability;
+}
+
 std::vector<const verica::Module*> verica::Netlist::get_gates(uint uid){
     std::vector<const verica::Module*> gates;
     for(auto m : m_modules[uid]->children()){
@@ -585,6 +593,10 @@ void verica::Netlist::set_pin_fault_domain(int uid, int fault_domain) {
     m_pins[uid]->m_fault_domain = fault_domain;
 }
 
+void verica::Netlist::set_pin_secret_index(int uid, int secret_index) {
+    m_pins[uid]->m_secret_index = secret_index;
+}
+
 void verica::Netlist::set_pin_type(Pin *p, Flag type) {
     p->m_port_type = type;
 }
@@ -785,7 +797,7 @@ void verica::Netlist::info() {
                 std::cout << " - Flag: Clock" << std::endl;
             } else if (p->m_port_type == Refresh){
                 std::cout << " - Flag: Refresh" << std::endl;
-            }
+            } 
             if (p->m_share_domain != -1){
                 std::cout << "\t\t\tIndex: " << p->m_share_index << " - Share: " << p->m_share_domain << std::endl;
             }
@@ -801,7 +813,7 @@ void verica::Netlist::info() {
                 std::cout << " - Flag: Clock" << std::endl;
             } else if (p->m_port_type == Refresh){
                 std::cout << " - Flag: Refresh" << std::endl;
-            }
+            } 
             if (p->m_share_domain != -1){
                 std::cout << "\t\t\tIndex: " << p->m_share_index << " - Share: " << p->m_share_domain << std::endl;
             }

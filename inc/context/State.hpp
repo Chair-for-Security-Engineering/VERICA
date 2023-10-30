@@ -73,8 +73,8 @@ class State
 
         /* Fault related members */
         std::map<int, std::vector<verica::fault::Fault>> m_faultMap;
-        std::vector<const verica::Wire*> m_faultLocations; 
-        std::vector<const verica::Wire*> m_faultLocationsReduced; 
+        std::vector<const verica::Wire*> m_faultLocations;
+        std::vector<const verica::Wire*> m_faultLocationsReduced;
 
         /* Detection-based */
         std::vector<const verica::Wire*> m_error_flags;
@@ -113,9 +113,9 @@ class State
         std::vector<const verica::Wire*> m_visualization_faults;
         std::vector<const verica::Wire*> m_visualization_probes;
 
-        
+
         /* Reporting */
-        // store leaking probes of different strategies 
+        // store leaking probes of different strategies
         std::vector<std::vector<const verica::Wire*>> m_leaking_probes_sca;
         std::vector<std::vector<const verica::Wire*>> m_leaking_probes_pni;
         std::vector<std::vector<const verica::Wire*>> m_leaking_probes_psni;
@@ -139,6 +139,11 @@ class State
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_icsni;
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_cini;
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_icini;
+
+    #ifdef UNITTEST
+        // store maximal number of failing probes over all runs
+        std::vector<std::vector<const verica::Wire*>> m_failing_probes;
+    #endif
 };
 
 #endif // __VERICA_CONTEXT_STATE_HPP_

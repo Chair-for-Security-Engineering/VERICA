@@ -105,6 +105,7 @@ namespace verica
             /* Accessor function(s) */
             const bool& sca_ignore() const { return m_sca_ignore; }
             const bool& fia_ignore() const { return m_fia_ignore; }
+            const double& fia_probability() const {return m_fia_probability; }
             const Pin* source_pin() const { return m_source_pin; }
             //const std::vector<const Pin*> target_pins() const { return m_target_pins; }
             const std::vector<const Pin*> target_pins() const { return m_target_pins; }
@@ -206,6 +207,7 @@ namespace verica
             bool m_sca_ignore = false;
             bool m_fia_ignore = false;
             std::vector<int> m_faulty_gate_identifier;
+            double m_fia_probability = 0.0;                     /**< Probability that a fault occurs in this gate (currently any fault) */
 
             /* BDDs */
             std::vector<BDD> m_golden_functions;                /**<  */

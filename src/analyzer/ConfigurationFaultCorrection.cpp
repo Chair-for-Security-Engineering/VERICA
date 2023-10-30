@@ -26,7 +26,7 @@
 
 #include "analyzer/ConfigurationFaultCorrection.hpp"
 
-void 
+void
 ConfigurationFaultCorrection::initialize(const Settings *settings, State *state){
     // resize vector to collect effective fault injections
     m_effective_faults_fia.resize(settings->getCores());
@@ -49,7 +49,7 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
     // Check if random input is faulted
     std::map<const verica::Wire*, verica::fault::Fault> faulted_rand_inputs;
     for(unsigned int i=0; i<state->m_current_fault_injections[core].first.size(); ++i){
-        if(state->m_current_fault_injections[core].first[i]->source_pin()->port_type() == verica::Refresh) 
+        if(state->m_current_fault_injections[core].first[i]->source_pin()->port_type() == verica::Refresh)
             faulted_rand_inputs[state->m_current_fault_injections[core].first[i]] = state->m_current_fault_injections[core].second[i];
     }
 
@@ -88,7 +88,7 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
                         break;
                     case verica::fault::Fault::RESET:
                         new_node = state->m_managers[core].bddZero();
-                        break;                    
+                        break;
                     case verica::fault::Fault::NOTA:
                         new_node = !fault_pair.first->golden_functions(core);
                         break;
@@ -117,6 +117,9 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         state->m_effective[core] += 0;   // no effective fault was detected
     } else {
         state->m_effective[core] += 1;
+        // TODO: print wire and compare with fiver output
+        // TODO: adapt fiver to use same configs as verica (blacklist, netlist, ... )
+        // TODO: Start with detection!
         m_effective_faults_fia[core].push_back(state->m_current_fault_injections[core].first);
     }
 
@@ -138,7 +141,7 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
     if(settings->getFaultFNI() || settings->getCombinedCNI()){
         if(cnt_faults > max_k) {
             state->m_na_security[core] += 1;
-        
+
             // store effective faults for reporting and visualization
             if(settings->getFaultFNI()) m_effective_faults_fni[core].push_back(state->m_current_fault_injections[core].first);
             if(settings->getCombinedCNI()) m_effective_faults_cni[core].push_back(state->m_current_fault_injections[core].first);
@@ -162,12 +165,12 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         int k2 = max_k - input_faults;
 
         // remove fault domains of the input from output fault domains
-        std::set<int> set_of_output_fault_domains; 
-        std::set<int> set_of_input_fault_domains; 
+        std::set<int> set_of_output_fault_domains;
+        std::set<int> set_of_input_fault_domains;
         for(auto p : output_fault_domain) set_of_output_fault_domains.insert(p->fault_domain());
         for(auto p : input_fault_domain) set_of_input_fault_domains.insert(p->fault_domain());
         for(auto i : set_of_input_fault_domains)
-            set_of_output_fault_domains.erase(i);        
+            set_of_output_fault_domains.erase(i);
 
         // if the cardinality of the remaining set is larger than the number of internal faults -> MUT is not FINI
         if(set_of_output_fault_domains.size() > k2) {
@@ -181,7 +184,7 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
     // Checking CINI and ICINI
     if(settings->getCombinedCINI() || settings->getCombinedICINI()){
         // determine number of internal faults (number of injected faults - number of input faults)
-        int k2 = max_k - input_faults;  
+        int k2 = max_k - input_faults;
 
         // determine shared fault domains for the outputs (num_of_share*share_domain + fault_domain)
         std::set<std::pair<int, int>> set_of_output_shared_fault_domain;
@@ -199,11 +202,11 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         // remove fault domains of the input from output fault domains
         for(auto i : set_of_input_shared_fault_domain){
             set_of_output_shared_fault_domain.erase(i);
-        }   
+        }
 
         // if the cardinality of the remaining set is larger than the number of internal faults -> MUT is not FINI
         if(set_of_output_shared_fault_domain.size() > k2) {
-            state->m_cini_security[core] += 1; 
+            state->m_cini_security[core] += 1;
 
             // store effective faults for reporting and visualization
             if(settings->getCombinedCINI()) m_effective_faults_cini[core].push_back(state->m_current_fault_injections[core].first);
@@ -214,7 +217,7 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
 
 void
 ConfigurationFaultCorrection::finalize(const Settings *settings, State *state) {
-    // collect all effective faults of the different strategies and store them in the state 
+    // collect all effective faults of the different strategies and store them in the state
     for(auto f : m_effective_faults_fia) state->m_effective_faults_fia.insert(state->m_effective_faults_fia.end(), f.begin(), f.end());
     for(auto f : m_effective_faults_fni) state->m_effective_faults_fni.insert(state->m_effective_faults_fni.end(), f.begin(), f.end());
     for(auto f : m_effective_faults_fsni) state->m_effective_faults_fsni.insert(state->m_effective_faults_fsni.end(), f.begin(), f.end());
@@ -228,19 +231,19 @@ ConfigurationFaultCorrection::finalize(const Settings *settings, State *state) {
 
 void
 ConfigurationFaultCorrection::report(std::string service, const Logger *logger, const Settings *settings, State *state) const
-{    
+{
     /* Print header */
     logger->header("ANALYSIS REPORT");
 
     // Fault Injection
     double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
     for(auto v : state->m_effective) effective += v;
-    for(auto v : state->m_scenarios) scenarios += v; 
+    for(auto v : state->m_scenarios) scenarios += v;
 
     if(settings->getVerbose() > 0) {
         logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
         logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
-    }    
+    }
 
     /* Print footer */
     if (!effective)
@@ -261,7 +264,7 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
         if(settings->getVerbose() > 0){
             logger->log(service, this->m_name, "Evaluation results for FNI verification.");
             logger->log(service, this->m_name, std::to_string(secure) + " fault injections violate the FNI properties.");
-        }    
+        }
 
         /* Print footer */
         if (secure == 0)
@@ -283,7 +286,7 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
         if(settings->getVerbose() > 0){
             logger->log(service, this->m_name, "Evaluation results for FSNI verification.");
             logger->log(service, this->m_name, std::to_string(secure) + "  fault injections violate the FSNI properties.");
-        }    
+        }
 
         /* Print footer */
         if (secure == 0)
@@ -305,7 +308,7 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
         if(settings->getVerbose() > 0){
             logger->log(service, this->m_name, "Evaluation results for FINI verification.");
             logger->log(service, this->m_name, std::to_string(secure) + "  fault injections violate the FINI properties.");
-        }    
+        }
 
         /* Print footer */
         if (secure == 0)

@@ -1,0 +1,14 @@
+{
+    "netlist_name" : "CRAFT_1bitCorrection_3bitRedSize",
+    "fia-strategy" : "fault-correction",
+    "success": {
+        "max_fault_events_secure" : 1,
+        "entries_m_effective" : 0,
+        "entries_m_scenarios" : 2788
+    },
+    "failure" : {
+        "min_fault_events_insecure" : 2,
+        "entries_m_effective" : 107028,
+        "entries_m_scenarios" : 2743866
+    }
+}

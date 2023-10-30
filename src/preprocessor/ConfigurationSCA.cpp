@@ -49,17 +49,12 @@ ConfigurationSCA::execute(const Settings *settings, State *state) {
 
         // Determine all possible probe positions
         determine_probe_positions(state, settings);
-
-        // Compute probe combinations
-        #pragma omp parallel for schedule(dynamic) num_threads(settings->getCores()) 
-        for (int core = 0; core < settings->getCores(); core++)
-            update_probe_combinations(state, settings, state->m_netlist_model->module_under_test()->wires(), 0, false, core);
     }
 }
 
 void
-ConfigurationSCA::update(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num){
-    update_probe_combinations(state, settings, modified, reduce_order, simulate_outputs, thread_num);
+ConfigurationSCA::update(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int order, bool simulate_outputs, const int thread_num){
+    update_probe_combinations(state, settings, modified, order, simulate_outputs, thread_num);
 }
 
 void
@@ -262,13 +257,9 @@ ConfigurationSCA::determine_probe_positions(State *state, const Settings *settin
 }
 
 void
-ConfigurationSCA::update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num) {
+ConfigurationSCA::update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int max_order, bool simulate_outputs, const int thread_num) {
     /* Clear current set of probe combinations */
     state->m_probe_combinations[thread_num].clear();
-
-    /* Define order of security */
-    int max_order = (settings->getSideChannelOrder() > 0) ? settings->getSideChannelOrder() : state->m_min_shared_inputs.size() - 1;
-    max_order -= reduce_order;
 
     /* Define container collecting already covered domains */
     std::vector<std::set<int>> covered_domains;

@@ -1,3 +1,49 @@
 # This file is used to determine entities that should whitelisted.
 # All gates with matching annotations will be included.
-result_0_reg_0_ 
+#I0_U1 1
+#I1_U1 1
+#I2_U1 1
+#I3_U1 1
+#I4_U1 1
+#I5_U1 1
+#I6_U1 1
+#I7_U1 1
+#io_i0 1
+#io_i3 1
+#
+#K0_U1 1
+#K1_U1 1
+#
+#share_0_0_U1 1
+#shareAnd_0_U7 1
+#
+#Sbox_andOptimized_buf_I0_U1 1
+#Sbox_andOptimized_buf_I1_U1 1
+#Sbox_andOptimized_buf_I2_U1 1
+#Sbox_andOptimized_buf_I3_U1 1
+#Sbox_andOptimized_buf_1_I0_U1 1
+#Sbox_andOptimized_buf_1_I1_U1 1
+#Sbox_andOptimized_buf_1_I2_U1 1
+#Sbox_andOptimized_buf_1_I3_U1 1
+#Sbox_andOptimized_buf_2_I0_U1 1
+#Sbox_andOptimized_buf_2_I1_U1 1
+#Sbox_andOptimized_buf_3_I0_U1 1
+#Sbox_andOptimized_buf_3_I1_U1 1
+#SININA
+#gadget_cor_m_0_1_reg_0_ 1
+#gadget_result_1_reg_0_ 0.5
+# gadget_cor_maj_12_U3 1
+# gadget_mul_xor2_7_U3 0.5
+# share_a_U1 1
+#mul_u_1_1_reg_0_
+#
+#Chi3 Toffoli
+#f_0
+t0_c_reg_reg_0 1
+#f_1
+t0_b_reg_reg_1 1
+#f_2
+t0_a_reg_reg_1_ 1
+#f_3
+U18 1
+

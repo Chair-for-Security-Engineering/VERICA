@@ -138,6 +138,10 @@ void
 ConfigurationFiltering::apply_filter(const Settings *settings, State *state, const bool blacklist_filter, const bool strategy){   
     std::string line, list_path;
     std::vector<std::string> tokens, filter;
+    std::vector<double> fia_probability;
+    double prob;
+    char *end;
+
 
     /* Determine list path */
     if (blacklist_filter){
@@ -164,7 +168,20 @@ ConfigurationFiltering::apply_filter(const Settings *settings, State *state, con
         /* Create blacklist-filter for gates based on gate names */
         if (tokens[0].at(0) != '#')
         {
-            filter.insert(filter.end(), tokens.begin(), tokens.end());
+            /* Get probability of faulty gate if given */
+            const char* prob_c = tokens.back().c_str();
+            prob = std::strtod(prob_c, &end);
+            if(end == prob_c){
+                /* Set probability to 1 if non was given */
+                prob = 1;
+            }else{
+                /* Consume probability if it was given */
+                tokens.back().erase();
+            }
+            /* Append probability to list */
+            fia_probability.insert(fia_probability.end(), prob); 
+
+            filter.insert(filter.end(), tokens.begin(), tokens.end());              
         }
     }
 
@@ -183,14 +200,34 @@ ConfigurationFiltering::apply_filter(const Settings *settings, State *state, con
     else
         state->m_netlist_model->ignore_sca_module(state->m_netlist_model->topmodule()->uid(), !blacklist_filter);
 
+    unsigned int i = 0;
     for (auto& module : state->m_netlist_model->modules()) {
+        i=0;
         for (auto name : filter) {
             if(module.second->name().find(name) != std::string::npos) {
-                if(strategy)
+                if(strategy){
                     state->m_netlist_model->ignore_fia_module(module.second->uid(), blacklist_filter);
-                else
+                    state->m_netlist_model->set_fia_probability_module(module.second->uid(), fia_probability[i]);
+                }else
                     state->m_netlist_model->ignore_sca_module(module.second->uid(), blacklist_filter);
             }
+            i++;
+        }
+    }
+
+    for(auto& p : state->m_netlist_model->module_under_test()->input_pins()){
+        i = 0;
+        for(auto name : filter){
+            if(p->fan_out() != nullptr){
+                if(p->fan_out()->name().find(name) != std::string::npos){
+                    if(strategy){
+                        state->m_netlist_model->ignore_fia_wire(p->fan_out()->uid(), blacklist_filter);
+                        state->m_netlist_model->set_fia_probability_wire(p->fan_out()->uid(), fia_probability[i]);
+                    }else
+                        state->m_netlist_model->ignore_sca_wire(p->fan_out()->uid(), blacklist_filter);
+                }
+            }
+            i++;
         }
     }
 

@@ -1,0 +1,10 @@
+and and
+nand nand
+or or
+nor nor
+not not
+xor xor
+xnor xnor
+reg buf
+in buf
+buf buf

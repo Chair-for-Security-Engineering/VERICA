@@ -27,13 +27,13 @@
 #ifndef __VERICA_ANALYZER_CONFIGURATION_PROBING_HPP_
 #define __VERICA_ANALYZER_CONFIGURATION_PROBING_HPP_
 
-#include "Configuration.hpp"
+#include "analyzer/ConfigurationCombinable.hpp"
 
-class ConfigurationProbing : public Configuration
+class ConfigurationProbing : public ConfigurationCombinable
 {
     public:
-    
-        ConfigurationProbing(std::string name, const Composability type) : Configuration(name) { };
+
+        ConfigurationProbing(std::string name, const Composability type);
 
         /* Initialize analysis for given context & configuration */
         void initialize(const Settings *settings, State *state) override;
@@ -42,33 +42,24 @@ class ConfigurationProbing : public Configuration
         void execute(const Settings *settings, State *state) override;
 
         /* Finalize analysis for given context & configuration */
-        void finalize(const Settings *settings, State *state);
+        void finalize(const Settings *settings, State *state) override;
 
         /* Report analysis results for given context & configuration */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
 
-        /* Insert failing probes of external configuration into this configuration*/
-        void insert(const ConfigurationProbing* configuration);
-
         /* Accessor function(s) */
         const bool& independent() const { return this->m_independent; }
-        
-        const std::vector<std::vector<const verica::Wire*>>& failing_probes() const { return this->m_failing_probes; };
-        const std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> & leaking_combinations() const { return this->m_leaking_combinations; };
 
         /* Mutator function(s) */
         void current_probes(const std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>> current_probes) { this->m_current_probes = current_probes.first; };
 
+        Composability getType() const override;
 
     private:
-        
+
         unsigned int m_max_order;                                           /**< Maximum security order for current design */
         bool m_independent;                                                 /**< Statistical independence for current probe combination */
         std::vector<const verica::Wire*> m_current_probes;                  /**< Container for current probe combination */
-        std::vector<std::vector<const verica::Wire*>> m_failing_probes;     /**< Container for failing probe combinations */
-
-        /* Container for failing probe combinations under fault injections */ 
-        std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations;  // contains combinations of probes and faults
 };
 
 #endif // __VERICA_ANALYZER_CONFIGURATION_PROBING_HPP_

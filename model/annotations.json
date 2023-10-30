@@ -40,8 +40,29 @@
         "output":
         {
             "0": ["port_c_0", "port_c_1", "port_c_2"]
+        }   
+    },
+    "fault_domain":
+    {
+        "input":
+        {
+            "0": ["port_a_0[0]", "port_a_1[0]", "port_a_2[0]", "port_b_0[0]", "port_b_1[0]", "port_b_2[0]"],
+            "1": ["port_a_0[1]", "port_a_1[1]", "port_a_2[1]", "port_b_0[1]", "port_b_1[1]", "port_b_2[1]"],
+            "2": ["port_a_0[2]", "port_a_1[2]", "port_a_2[2]", "port_b_0[2]", "port_b_1[2]", "port_b_2[2]"]
+        },
+        "output":
+        {
+            "0": ["port_c_0[0]", "port_c_1[0]", "port_c_2[0]"],
+            "1": ["port_c_0[1]", "port_c_1[1]", "port_c_2[1]"],
+            "2": ["port_c_0[2]", "port_c_1[2]", "port_c_2[2]"]
+        }
+    },
+    "secret_index":
+    {
+        "input": 
+        {
+
         }
         
     }
-
 }

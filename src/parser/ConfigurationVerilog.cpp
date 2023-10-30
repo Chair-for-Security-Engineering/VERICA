@@ -113,7 +113,7 @@ ConfigurationVerilog::report(std::string service, const Logger *logger, const Se
 
     /* Count unconnected pins*/
     uint32_t cnt_pins = 0;
-    for(auto& p : state->m_netlist_model->pins()){        
+    for(auto& p : state->m_netlist_model->pins()){   
         if(p.second->fan_in() == nullptr && p.second->fan_out() == nullptr) cnt_pins++;
     }
 

@@ -76,6 +76,9 @@ ConfigurationAnnotation::execute(const Settings *settings, State *state) {
 
         /* Parse and set fault domain for outputs */
         parse_and_set_fault_domain(state, name_to_wire, false);
+
+        /* Parse and set secret index for inputs */
+        parse_and_set_secret_index(state, name_to_wire, true);
     }
 }
 
@@ -170,6 +173,16 @@ ConfigurationAnnotation::report(std::string service, const Logger *logger, const
                 for(auto s : m_fault_domain_wires_not_found)
                     logger->log(service, this->m_name, ITEM + s); 
         }
+
+        // Secret Index
+        logger->log(service, this->m_name, Logger::reporting_number(m_num_of_annotated_secret_index_wires, "wire was", "wires were") + " tagged with a secret index.");
+        if(m_secret_index_wires_not_found.size() != 0 && settings->getVerbose() > 1){
+            logger->log(service, this->m_name, "WARNING: " + Logger::reporting_number(m_secret_index_wires_not_found.size(), "wire", "wires") + " could not be identified in the MUT.");    
+            if(settings->getVerbose() > 2){
+                for(auto s : m_secret_index_wires_not_found)
+                    logger->log(service, this->m_name, ITEM + s); 
+            }
+        } 
     } else {
         logger->log(service, this->m_name, "Annotation parsing disabled.");
     }
@@ -370,6 +383,40 @@ ConfigurationAnnotation::parse_and_set_fault_domain(State *state, std::map<std::
                 } else {
                     for(auto p : w->target_pins())
                         state->m_netlist_model->set_pin_fault_domain(p->uid(), domain_pair.first);
+                }
+            }        
+        }
+    }
+}
+
+void
+ConfigurationAnnotation::parse_and_set_secret_index(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input){    
+    /* Get for each variable the corresponding ports */
+    std::map<int, std::vector<std::string>> inputs;
+    std::string path = "secret_index";
+    path += for_input ? ".input" : ".output";
+    for(auto index : m_annotations.get_child(path)){
+        std::vector<std::string> temp;
+        for(auto elem : index.second){
+            temp.push_back(elem.second.get_value<std::string>());
+        }
+        inputs[std::stoi(index.first.data())] = temp;        
+    }
+
+    /* Set the secret index */ 
+    for(auto index_pair : inputs){
+        for(auto s : index_pair.second){   
+            // parse string
+            std::vector<std::string> wire_names = parse_wire(s);
+            std::vector<const verica::Wire*> wire_ids = create_list_of_vlog_wires(name_to_wire, wire_names, m_secret_index_wires_not_found);
+            m_num_of_annotated_secret_index_wires += wire_ids.size();
+
+            for(auto w : wire_ids){
+                if(for_input){
+                    state->m_netlist_model->set_pin_secret_index(w->source_pin()->uid(), index_pair.first);
+                } else {
+                    for(auto p : w->target_pins())
+                        state->m_netlist_model->set_pin_secret_index(p->uid(), index_pair.first);
                 }
             }        
         }

@@ -46,6 +46,13 @@
     {
         "input": {},
         "output":{}
+    },
+    "secret_index":
+    {
+        "input": 
+        {
+
+        }
     }
 
 }

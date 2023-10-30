@@ -39,7 +39,7 @@ namespace verica
     class Module; 
 
     /** Pin type enumeration (annotations) */
-    enum Flag { None, Clock, Control, Refresh, ErrorFlag };
+    enum Flag { None, Clock, Control, Refresh, ErrorFlag, Secret };
 
     /**
      * Pin class, modeling an input or output pin of a module inside a gate-level netlist.
@@ -112,6 +112,16 @@ namespace verica
              * @returns The fault domain of the pin.
              */
             const int& fault_domain() const { return m_fault_domain; }
+
+            /** 
+             * Each input and output pin can be associated with a secret index.
+             * Pins with the same secret index belong to the same secret input.
+             * 
+             * @brief Accessor function for pin share index.
+             *
+             * @returns The share index of the pin.
+             */
+            const int& secret_index() const { return m_secret_index; }
 
             /** 
              * Each pin is either an input or an output pin of the parent module.
@@ -239,6 +249,9 @@ namespace verica
             /* Constant input */
             bool m_const_input = false;
             int m_const_value = -1;
+
+            /* Secret */
+            int m_secret_index = -1;        /**< Index indicating to which secret a pin belongs too */
 
             /* Expression */
             std::string m_out_expression;   /**< Boolean expression of an output pin (Expression) */    

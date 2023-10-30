@@ -35,63 +35,77 @@
 #include "analyzer/ConfigurationComposability.hpp"
 #include "unittest/TestConfigurationFailingProbes.hpp"
 #include "unittest/TestConfigurations.hpp"
+#include "unittest/TestEnvironmentSCA.hpp"
 
-using namespace ComposabilityTestConfigurations; // allows to use variables defined in TestConfigurations
+// HINT: allows to use variables defined in TestConfigurations
+using namespace ComposabilityTestConfigurations;
 namespace bdata = boost::unit_test::data;
 
 /***************** AUXILIARY CLASS DEFINITIONS *****************/
-class TestConfigurationComposability : public TestConfigurationFailingProbes{
+class TestConfigurationComposability : public TestEnvironmentSCA<ConfigurationComposability>{
     public:
-        TestConfigurationComposability() : TestConfigurationFailingProbes(){}
+        TestConfigurationComposability() : TestEnvironmentSCA(){
+    }
 };
+
 /***************************************************************/
 
 /**************************** TESTS *****************************/
+
+// ===================================================================================
+// SCA TESTS
+// ===================================================================================
 BOOST_DATA_TEST_CASE_F(
     TestConfigurationComposability,
-	Composability_Search_Test,
-	bdata::make(generate_unittest_dataset(testBaseDir, tests, "find")) ^ bdata::make(generate_unittest_dataset(testBaseDir, tests,"answers")),
-	conf,
-	answ){
-    const std::string test_name{"COMPOSABILITY_SEARCH_TEST"};
+    ComposabilitySideChannelSearchTest,
+    bdata::make(test_utils::generate_unittest_dataset(sideChannelTestBaseDir, testsSCA, "find")) ^
+    bdata::make(test_utils::generate_unittest_dataset(sideChannelTestBaseDir, testsSCA,"answers")),
+    conf, answ){
 
-    if(!is_file_accessable(conf)){
+    const std::string test_name{"COMPOSABILITY_SIDECHANNEL_SEARCH_TEST"};
+
+    if(!test_utils::is_file_accessable(conf)){
         BOOST_TEST_MESSAGE(conf + " does not exist!\n" + test_name + " is not executed!");
     }
     else{
-       checkProbeTestSearch<ConfigurationComposability>(test_name, conf, answ);
+		execute(conf, test_name); // NOTE: from TestEnvironmentSCA exposed by fixture
+		unittest::failingProbes::checkProbeTestSearch(configuration.get(), answ);
     }
 }
 
 BOOST_DATA_TEST_CASE_F(
     TestConfigurationComposability,
-	Composability_Failure_Test,
-	bdata::make(generate_unittest_dataset(testBaseDir, tests, "fail")) ^ bdata::make(generate_unittest_dataset(testBaseDir, tests, "answers")),
-	conf,
-	answ){
-    const std::string test_name{"COMPOSABILITY_FAILURE_TEST"};
+    ComposabilitySideChannelFailureTest,
+    bdata::make(test_utils::generate_unittest_dataset(sideChannelTestBaseDir, testsSCA, "fail")) ^
+    bdata::make(test_utils::generate_unittest_dataset(sideChannelTestBaseDir, testsSCA, "answers")),
+    conf, answ){
+
+    const std::string test_name{"COMPOSABILITY_SIDECHANNEL_FAILURE_TEST"};
     const std::string json_expected_failing{"expected_failing"};
 
-    if(!is_file_accessable(conf)){
+    if(!test_utils::is_file_accessable(conf)){
         BOOST_TEST_MESSAGE(conf + " does not exist!\n" + test_name + " is not executed!");
     }
     else{
-	    checkProbeTestFailure<ConfigurationComposability>(test_name, json_expected_failing, conf, answ);
+		execute(conf, test_name); // NOTE: from TestEnvironmentSCA exposed by fixture
+		unittest::failingProbes::checkProbeTestFailure(configuration.get(), json_expected_failing, answ);
     }
 }
 
 BOOST_DATA_TEST_CASE_F(
     TestConfigurationComposability,
-	Composability_Success_Test,
-	bdata::make(generate_unittest_dataset(testBaseDir, tests, "pass")),
-	conf){
-    const std::string test_name{"COMPOSABILITY_SUCCESS_TEST"};
+    ComposabilitySideChannelSuccessTest,
+    bdata::make(test_utils::generate_unittest_dataset(sideChannelTestBaseDir, testsSCA, "pass")),
+    conf){
 
-    if(!is_file_accessable(conf)){
+    const std::string test_name{"COMPOSABILITY_SIDECHANNEL_SUCCESS_TEST"};
+
+    if(!test_utils::is_file_accessable(conf)){
         BOOST_TEST_MESSAGE(conf + " does not exist!\n" + test_name + " is not executed!\n If side channel order is zero, this is desired!");
     }
     else{
-	   checkProbeTestSuccess<ConfigurationComposability>(test_name, conf);
+		execute(conf, test_name);// NOTE: from TestEnvironmentSCA exposed by fixture
+		unittest::failingProbes::checkProbeTestSuccess(configuration.get());
     }
 }
 /****************************************************************/

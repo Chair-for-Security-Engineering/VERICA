@@ -47,7 +47,10 @@ class ConfigurationSCA : public Configuration
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
 
         /* Update */
-        void update (State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num);
+        void update (State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int order, bool simulate_outputs, const int thread_num);
+
+        /* Get probe positions */
+        std::vector<const verica::Wire*> &get_probe_positions() {return m_positions; };
 
     private: TESTABLE
 
@@ -79,7 +82,7 @@ class ConfigurationSCA : public Configuration
         * @param reduce_order Reduces the order (i.e., number of probes per probe combination). This is required for combined analysis, e.g., C-NI.
         * @param simulate_outputs If true, all outputs with the same share domain are simulated if a probe is placed on one of the corresponding output shares. 
         */ 
-        void update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int reduce_order, bool simulate_outputs, const int thread_num);
+        void update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int max_order, bool simulate_outputs, const int thread_num);
 
 
         /* Holds all possible probe positions */

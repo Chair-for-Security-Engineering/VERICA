@@ -36,6 +36,13 @@
             "0": ["port_c"]
         }
         
+    },
+    "secret_index":
+    {
+        "input": 
+        {
+
+        }
     }
 
 }

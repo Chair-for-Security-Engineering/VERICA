@@ -53,7 +53,7 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
         fault_determine_propagation_paths(state->m_netlist_model);
 
         // If fault composability checks are enabled (e.g., FNI, FSNI or some combined checks), input wires need to be added to the valid fault locations
-        if(settings->getFaultComposability()){
+        if(settings->getFaultComposability() || settings->getFaultVulnerabilityEnable()){
             for(auto p : state->m_netlist_model->module_under_test()->input_pins()){
                 if(!p->fan_out()->fia_ignore()) state->m_faultLocations.push_back(p->fan_out());
             }

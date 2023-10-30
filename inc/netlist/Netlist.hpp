@@ -96,6 +96,8 @@ namespace verica
 
             void ignore_sca_module(int uid, bool ignore);           // TODO: Split into include_module(Module *module) and exclude_module(Module *module)?
             void ignore_fia_module(int uid, bool ignore);
+            void set_fia_probability_module(int uid, double probability);
+            void set_fia_probability_wire(int uid, double probability);
 
             std::vector<const verica::Module*> get_gates(uint uid);
 
@@ -151,6 +153,7 @@ namespace verica
             void set_pin_share_domain(int uid, int share_domain);
             void set_pin_share_index(int uid, int share_index);
             void set_pin_fault_domain(int uid, int fault_domain);
+            void set_pin_secret_index(int uid, int secret_index);
             void set_pin_type(Pin *p, Flag port_type);
             void set_pin_type(int uid, Flag port_type);
             void set_pin_gate_identifier(int uid, int gate_identifier);

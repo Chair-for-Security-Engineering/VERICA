@@ -94,6 +94,13 @@ class ConfigurationAnnotation : public Configuration
         void parse_and_set_fault_domain(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input);
 
         /**
+         * @brief Parses and sets the share index.
+         * @param settings Pointer to the settings.
+         * @param state Pointer to the state.
+        */
+        void parse_and_set_secret_index(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input);
+
+        /**
          * @brief Gets the parsed list from the annotation.json file and searches for the corresponding wires in the netlist. A vector of the found wires is returned.
          * @param state Pointer to the state.
          * @param name_to_wire A map between the wire names and the wires.
@@ -135,7 +142,10 @@ class ConfigurationAnnotation : public Configuration
         std::vector<std::string> m_share_index_wires_not_found;
 
         int m_num_of_annotated_fault_domain_wires = 0;
-        std::vector<std::string> m_fault_domain_wires_not_found;        
+        std::vector<std::string> m_fault_domain_wires_not_found;   
+
+        int m_num_of_annotated_secret_index_wires = 0;
+        std::vector<std::string> m_secret_index_wires_not_found;     
 };
 
 #endif // __VERICA_PREPROCESSOR_CONFIGURATION_ANNOTATION_HPP_

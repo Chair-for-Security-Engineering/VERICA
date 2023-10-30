@@ -151,6 +151,56 @@ int Cudd_Manager::bdd_statindependence(BDD &dd1, BDD &dd2) {
     return bdd_statindependence(dd1.getNode(),dd2.getNode());
 }
 
+int Cudd_Manager::bdd_sat_recursive(
+            DdNode *node, 
+            unsigned level, 
+            int *list_idx, 
+            bool *list_val, 
+            std::vector<std::vector<std::pair<int, bool>>> &sat_assign
+){
+    DdNode *N, *Nv, *Nnv;
+    int i,v;
+    unsigned int index, num_assignments;
+    num_assignments = 0;
+    N = Cudd_Regular(node);
+    DdNode *zero = Cudd_ReadLogicZero(mgr);
+    //Add a new satisfying assignment if we reach a "true" endpoint
+    if(cuddIsConstant(N)){
+        if(node != zero){
+            sat_assign.push_back(std::vector<std::pair<int, bool>>(level));
+            for(i=0; i<level; i++){
+                sat_assign.back()[i].first = list_idx[i];
+                sat_assign.back()[i].second = list_val[i];
+            }
+            return 1;
+        }
+    }else{
+        //Traverse through both children
+        Nv = cuddT(N);
+        Nnv = cuddE(N);
+        if(Cudd_IsComplement(node)){
+            Nv  = Cudd_Not(Nv);
+	        Nnv = Cudd_Not(Nnv);
+        }
+        //index = N->index;
+        list_idx[level] = N->index;
+        list_val[level] = false;
+        num_assignments += Cudd_Manager::bdd_sat_recursive(Nnv, level+1, list_idx, list_val, sat_assign);
+        list_val[level] = true;
+        num_assignments += Cudd_Manager::bdd_sat_recursive(Nv, level+1, list_idx, list_val, sat_assign);
+    }
+    return num_assignments;
+}
+
+int Cudd_Manager::bdd_sat(BDD &dd, std::vector<std::vector<std::pair<int, bool>>> &sat_assign){
+
+    int list_idx[mgr->size];
+    bool list_val[mgr->size];
+    DdNode *node = dd.getNode();
+
+    return Cudd_Manager::bdd_sat_recursive(node, 0, list_idx, list_val, sat_assign);
+}
+
 DdNode* Cudd_Manager::bdd_carry(DdNode *dd1, DdNode *dd2, DdNode *carry_in) {
 
     DdNode *zero = Cudd_ReadLogicZero(mgr);

@@ -1,0 +1,98 @@
+{
+    "general": {
+        "verbose": 3,
+        "cores": 8,
+        "memory": 8,
+        "netlist": {
+            "file": "unittests/VERICA/Designs/craft-1round/craft-1round-1bit.v",
+            "name": "",
+            "module": ""
+        },
+        "library": {
+            "file": "cell/nang45.txt",
+            "name": "NANG45"
+        },
+        "filtering": {
+            "sca": {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia": {
+                "type": "black",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "unittests/VERICA/model/fia/craft/detection/craft-1round-1bit_blacklist.txt"
+            }
+        },
+        "annotation": {
+            "file": "unittests/VERICA/Designs/craft-1round/annotations.json",
+            "apply": true
+        },
+        "cudd": {
+            "reordering": false
+        },
+        "visualization": {
+            "enable": true,
+            "path": "dot/",
+            "full": true,
+            "partial": true
+        }
+    },
+    "side-channel": {
+        "enable": false,
+        "configuration": {
+            "order": 2,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": false
+        },
+        "model": {
+            "glitches": true,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis": {
+            "uniformity": false,
+            "probing": true,
+            "p-ni": false,
+            "p-sni": false,
+            "pini": false
+        }
+    },
+    "fault-injection": {
+        "enable": true,
+        "configuration": {
+            "number": 2,
+            "variate": 1,
+            "interrupt": false
+        },
+        "model": {
+            "mapping": "unittests/VERICA/model/fia/bitflip.txt",
+            "location": "cs"
+        },
+        "analysis": {
+            "reduced_complexity": false,
+            "strategy": "detection",
+            "logic-level-error-flag": true,
+            "f-ni": false,
+            "f-sni": false,
+            "fini": false
+        },
+        "vulnerability": {
+            "enable": false,
+            "unshare_outputs": false,
+            "estimator": false,
+            "runs": 100
+        }
+    },
+    "combined": {
+        "enable": false,
+        "analysis": {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false,
+            "cini": false,
+            "icini": false
+        }
+    }
+}

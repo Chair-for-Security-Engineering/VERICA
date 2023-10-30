@@ -1,0 +1,3 @@
+# This file is used to determine entities that should blacklisted.
+# All gates with matching annotations will be excluded.
+U6 U7

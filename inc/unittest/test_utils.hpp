@@ -27,17 +27,20 @@
 
 #include <string>
 #include <vector>
+#include <unittest/TestEnvironment.hpp>
 
-/** 
+
+namespace test_utils{
+/**
  * Checks if a file at given path is accessable
  *
  * @param conf Path to the file which should be checked
  *
  * @returns true, if file is accessable, false otherwise.
  */
-bool is_file_accessable(std::string conf);
+bool is_file_accessable(const std::string &conf);
 
-/** 
+/**
  * Generates a Vector which contains pathes to files which are used for unittests.
  *
  * @param testBaseDir is the path to a directory which contains all configs to test a component of verica
@@ -46,6 +49,12 @@ bool is_file_accessable(std::string conf);
  *
  * @returns a vector of pathes, which are a concatination of the previous parameters.
  */
-std::vector<std::string> generate_unittest_dataset(std::string testBaseDir, const std::vector<std::string> tests, std::string filter);
+std::vector<std::string> generate_unittest_dataset(const std::string &testBaseDir,
+                                                   const std::vector<std::string> &tests,
+                                                   const std::string &filter);
 
+TestEnvironment generate_test_environment(const std::string &conf);
+
+std::unique_ptr<TestEnvironment> generateTestEnvironmentOnHeap(const std::string &conf);
+}
 #endif

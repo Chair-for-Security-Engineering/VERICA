@@ -28,6 +28,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <stdexcept>
 
+#include "Environment.hpp"
 #include "unittest/TestEnvironment.hpp"
 
 #include "parser/ConfigurationLibrary.hpp"
@@ -44,18 +45,18 @@
 
 #include "composer/NetlistComposer.hpp"
 
-/* 
+/*
  * =========================================================================================
  * Constructor(s)
  * =========================================================================================
  */
-
 TestEnvironment::TestEnvironment(int argc, char * argv[]) :
-    Environment(argc, argv), 
-    execPhase{execPhases::COMPLETE}             /* Enable full evaluation */
+    Environment(argc, argv),
+    execPhase{execPhases::COMPLETE},             /* Enable full evaluation */
+    sca_preprocessor{"SCA"}
 {
 
-    //NOTE: Initialize phase is part of Environment
+    // NOTE: Initialize phase is part of Environment
 
     /* Execute evaluation */
     this->execute();
@@ -63,15 +64,16 @@ TestEnvironment::TestEnvironment(int argc, char * argv[]) :
 
 TestEnvironment::TestEnvironment(int argc, char * argv[], TestEnvironment::execPhases execPhase) :
     Environment(argc, argv),
-    execPhase{execPhase}                        /* Registering phase after which evaluation stops */
+    execPhase{execPhase},                        /* Registering phase after which evaluation stops */
+    sca_preprocessor{"SCA"}
 {
-    //NOTE: Initialize phase is part of Environment
+    // NOTE: Initialize phase is part of Environment
 
     /* Execute evaluation */
     this->execute();
 }
 
-/* 
+/*
  * =========================================================================================
  * Member functions
  * =========================================================================================
@@ -100,9 +102,6 @@ TestEnvironment::execute()
         this->m_parser->configure(&configNetlist);
         this->m_parser->execute();
     }
-    
-    // NetlistComposer* nc = new NetlistComposer("COMPOSER");
-    // nc->execute(this->m_settings, this->m_state);
 
     if (this->execPhase == execPhases::PARSER) { return; }
 
@@ -110,7 +109,7 @@ TestEnvironment::execute()
     ConfigurationAnnotation configAnnotation{"ANNOTATION"};
     this->m_preprocessor->configure(&configAnnotation);
     this->m_preprocessor->execute();
-    
+
     if (this->execPhase == execPhases::ANNOTATION) { return; }
 
     ConfigurationFiltering configFiltering{"FILTERING"};
@@ -143,29 +142,32 @@ TestEnvironment::execute()
 
     if (this->execPhase == execPhases::FIA) { return; }
 
-    ConfigurationSCA sca_preprocessor{"SCA"};
-    this->m_preprocessor->configure(&sca_preprocessor);
+    // ConfigurationSCA sca_preprocessor{"SCA"};
+    this->m_preprocessor->configure(&this->sca_preprocessor);
     this->m_preprocessor->execute();
 
     if (this->execPhase == execPhases::SCA || this->execPhase == execPhases::COMPLETE) { return; }
 }
 
+ConfigurationSCA&
+TestEnvironment::getScaPreprocessor() {return this->sca_preprocessor; }
+
 Logger*
 TestEnvironment::getLogger() { return this->m_logger; }
 
 void
-TestEnvironment::setLogger(Logger* logger) { 
+TestEnvironment::setLogger(Logger* logger) {
     this->m_logger = logger;
-    initialize(); 
-} 
+    initialize();
+}
 
 Settings*
 TestEnvironment::getSettings() { return this->m_settings; }
 
 void
-TestEnvironment::setSettings(Settings* settings) { 
-    this->m_settings = settings; 
-    initialize();    
+TestEnvironment::setSettings(Settings* settings) {
+    this->m_settings = settings;
+    initialize();
 }
 
 State*
@@ -181,31 +183,32 @@ Parser*
 TestEnvironment::getParser() { return this->m_parser; }
 
 void
-TestEnvironment::setParser(Parser* parser) { 
-    this->m_parser = parser; 
-    initialize();    
+TestEnvironment::setParser(Parser* parser) {
+    this->m_parser = parser;
+    initialize();
 }
 
 Preprocessor*
 TestEnvironment::getPreprocessor() { return this->m_preprocessor; }
 
 void
-TestEnvironment::setPreprocessor(Preprocessor* preprocessor) { 
-    this->m_preprocessor = preprocessor; 
-    initialize();    
+TestEnvironment::setPreprocessor(Preprocessor* preprocessor) {
+    this->m_preprocessor = preprocessor;
+    initialize();
 }
 
 Analyzer*
 TestEnvironment::getAnalyzer() { return this->m_analyzer; }
 
 void
-TestEnvironment::setAnalyzer(Analyzer* analyzer) { 
-    this->m_analyzer = analyzer; 
-    initialize();    
+TestEnvironment::setAnalyzer(Analyzer* analyzer) {
+    this->m_analyzer = analyzer;
+    initialize();
 }
 
-const Composability 
+const Composability
 TestEnvironment::getType(){
+    // NOTE: This function assumes that only one Type is selected per execution
     /*
      * =====================================================================================
      * [PROBING] Statistical Independence Leakage VERification (SILVER)
@@ -269,6 +272,15 @@ TestEnvironment::getType(){
         return Composability::CSNI;
     }
 
+    /*
+     * =====================================================================================
+     * [Combined-Isolation Non-Interference]
+     * =====================================================================================
+     */
+    else if (this->m_settings->getCombinedCINI()){
+        /* Create new composability verification strategy */
+        return Composability::CINI;
+    }
 
     /*
      * =====================================================================================

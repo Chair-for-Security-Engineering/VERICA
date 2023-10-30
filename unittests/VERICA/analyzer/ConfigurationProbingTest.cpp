@@ -35,14 +35,15 @@
 #include "analyzer/ConfigurationProbing.hpp"
 #include "unittest/TestConfigurationFailingProbes.hpp"
 #include "unittest/TestConfigurations.hpp"
+#include "unittest/TestEnvironmentSCA.hpp"
 
 using namespace ProbingTestConfigurations; // allows to use variables defined in TestConfigurations
 namespace bdata = boost::unit_test::data;
 
 /***************** AUXILIARY CLASS DEFINITIONS *****************/
-class TestConfigurationProbing : public TestConfigurationFailingProbes{
+class TestConfigurationProbing : public TestEnvironmentSCA<ConfigurationProbing>{
     public:
-        TestConfigurationProbing() : TestConfigurationFailingProbes(){}
+        TestConfigurationProbing() : TestEnvironmentSCA(){}
 };
 /***************************************************************/
 
@@ -50,48 +51,51 @@ class TestConfigurationProbing : public TestConfigurationFailingProbes{
 BOOST_DATA_TEST_CASE_F(
     TestConfigurationProbing,
 	Probing_Search_Test,
-	bdata::make(generate_unittest_dataset(testBaseDir, tests, "find")) ^ bdata::make(generate_unittest_dataset(testBaseDir, tests,"answers")),
+	bdata::make(test_utils::generate_unittest_dataset(testBaseDir, tests, "find")) ^ bdata::make(test_utils::generate_unittest_dataset(testBaseDir, tests,"answers")),
 	conf,
 	answ){
     const std::string test_name{"PROBING_SEARCH_TEST"};
 
-    if(!is_file_accessable(conf)){ 
+    if(!test_utils::is_file_accessable(conf)){
         BOOST_TEST_MESSAGE(conf + " does not exist!\n" + test_name + " is not executed!");
     }
     else{
-        checkProbeTestSearch<ConfigurationProbing>(test_name, conf, answ);
+	execute(conf, test_name);// NOTE: from TestEnvironmentSCA exposed by fixture
+	unittest::failingProbes::checkProbeTestSearch(configuration.get(), answ);
     }
 }
 
 BOOST_DATA_TEST_CASE_F(
     TestConfigurationProbing,
 	Probing_Failure_Test,
-	bdata::make(generate_unittest_dataset(testBaseDir, tests, "fail")) ^ bdata::make(generate_unittest_dataset(testBaseDir, tests, "answers")),
+	bdata::make(test_utils::generate_unittest_dataset(testBaseDir, tests, "fail")) ^ bdata::make(test_utils::generate_unittest_dataset(testBaseDir, tests, "answers")),
 	conf,
 	answ){
     const std::string test_name{"PROBING_FAILURE_TEST"};
     const std::string json_expected_failing{"expected_failing"};
 
-    if(!is_file_accessable(conf)){
+    if(!test_utils::is_file_accessable(conf)){
         BOOST_TEST_MESSAGE(conf + " does not exist!\n" + test_name + " is not executed!");
     }
     else{
-	    checkProbeTestFailure<ConfigurationProbing>(test_name, json_expected_failing, conf, answ);
+	execute(conf, test_name);// NOTE: from TestEnvironmentSCA exposed by fixture
+	unittest::failingProbes::checkProbeTestFailure(configuration.get(), json_expected_failing, answ);
     }
 }
 
 BOOST_DATA_TEST_CASE_F(
     TestConfigurationProbing,
 	Probing_Success_Test,
-	bdata::make(generate_unittest_dataset(testBaseDir, tests, "pass")),
+	bdata::make(test_utils::generate_unittest_dataset(testBaseDir, tests, "pass")),
 	conf){
     const std::string test_name{"PROBING_SUCCESS_TEST"};
 
-    if(!is_file_accessable(conf)){
+    if(!test_utils::is_file_accessable(conf)){
         BOOST_TEST_MESSAGE(conf + " does not exist!\n" + test_name + " is not executed!\n If side channel order is zero, this is desired!");
     }
     else{
-	   checkProbeTestSuccess<ConfigurationProbing>(test_name, conf);
+	execute(conf, test_name);// NOTE: from TestEnvironmentSCA exposed by fixture
+	unittest::failingProbes::checkProbeTestSuccess(configuration.get());
     }
 }
 #endif

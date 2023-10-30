@@ -2,7 +2,7 @@
     "general":
     {
         "verbose": 2,
-        "cores": 4,
+        "cores": 2,
         "memory": 2,
         "netlist":
         {
@@ -30,6 +30,7 @@
                 "blacklist": "model/fia-blacklist"
             }
         },
+
         "annotation":
         {
             "file": "test/case-study-nina/annotations.json",
@@ -71,6 +72,13 @@
             "p-ni": false,
             "p-sni": false,
             "pini": false
+        },
+        "vulnerability":
+        {
+            "enable" : false,
+            "unshare_outputs" : true,
+            "estimator" : false,
+            "runs" : 10000
         }
     },
 
@@ -91,10 +99,18 @@
         "analysis":
         {
             "reduced_complexity": false,
-            "strategy": "detection",
+            "strategy": "correction",
+            "logic-level-error-flag": true,
             "f-ni": false,
             "f-sni": false,
             "fini": false
+        },       
+        "vulnerability":
+        {
+            "enable" : false,
+            "unshare_outputs" : true,
+            "estimator" : false,
+            "runs" : 10000
         }
     },
 

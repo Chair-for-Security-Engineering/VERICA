@@ -8,3 +8,4 @@ xor set
 xnor set
 reg set
 in set
+buf set

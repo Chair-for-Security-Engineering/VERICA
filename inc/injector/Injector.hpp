@@ -94,6 +94,8 @@ class Injector : public Service
 
         void adapt_permuted_fault_locations_for_sna();
 
+        void add_fault_select(std::map<const verica::Wire*, std::vector<BDD>> &fault_select, int core);
+
     private:
         friend class TestInjector;
 
@@ -103,6 +105,7 @@ class Injector : public Service
         void fault_injection_incremental(std::vector<const verica::Wire*> &nodes, std::vector<verica::fault::Fault> &faultList, int core);
         void fault_node(const verica::Wire* wire, verica::fault::Fault fault, int core);
         void elaborate_node(const verica::Wire* wire, int core);
+        BDD fault_function(const verica::Wire* wire, verica::fault::Fault fault, int core);
 
         /* State for computing permuted fault locations */
         std::vector<std::vector<const verica::Wire*>> m_permutedFaultLocations;         // permuted fault locations used to inject faults

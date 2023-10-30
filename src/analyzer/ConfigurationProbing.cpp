@@ -25,6 +25,9 @@
  */
 
 #include "analyzer/ConfigurationProbing.hpp"
+#include "context/State.hpp"
+
+ConfigurationProbing::ConfigurationProbing(std::string name, const Composability type) : ConfigurationCombinable(name) {}
 
 void
 ConfigurationProbing::initialize(const Settings *settings, State *state)
@@ -56,16 +59,16 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
 
     /* Skip probing (not all shares contributing)? */
     this->m_independent = true;
-    for (unsigned int si = 0; si < state->m_shared_inputs.size() && this->m_independent; si++) 
+    for (unsigned int si = 0; si < state->m_shared_inputs.size() && this->m_independent; si++)
     {
         unsigned int count = 0;
 
-        for (unsigned int sd = 0; sd < state->m_shared_inputs[si].size(); sd++) 
+        for (unsigned int sd = 0; sd < state->m_shared_inputs[si].size(); sd++)
         {
             count += (std::find(shares.begin(), shares.end(), state->m_shared_inputs[si][sd]->primary_input_identifier()) != shares.end());
         }
 
-        this->m_independent &= (count != state->m_shared_inputs[si].size()); 
+        this->m_independent &= (count != state->m_shared_inputs[si].size());
     }
 
     if (!this->m_independent)
@@ -74,7 +77,7 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
         std::vector<const verica::Wire*> extended_probes;
 
         /* Construct glitch-extended probes */
-        if (settings->getSideChannelModelGlitches()) 
+        if (settings->getSideChannelModelGlitches())
         {
             // collect all syncronization points
             std::set<const verica::Wire*> registers;
@@ -96,7 +99,7 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
 
             if (extended_probes.size() > 63) throw std::logic_error("PROBING: More than 63 extended probes detected (overflow)!");
         }
-        else 
+        else
         {
             extended_probes = this->m_current_probes;
         }
@@ -109,8 +112,8 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
         this->m_independent = true;
 
         /* Check combinations & secrets for statistical independence */
-        for (uint64_t comb = 1; comb < (uint64_t)(1 << extended_probes.size()) && this->m_independent; comb++) 
-        { 
+        for (uint64_t comb = 1; comb < (uint64_t)(1 << extended_probes.size()) && this->m_independent; comb++)
+        {
             /* Generate probe observation */
             BDD observation = state->m_managers[threadNum].bddOne();
             for (unsigned int elem = 0; elem < extended_probes.size(); elem++){
@@ -123,7 +126,7 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
             if (!this->m_independent){
                 this->m_failing_probes.push_back(this->m_current_probes);
             }
-        }    
+        }
 
         /* Store leaking combinations of probes and faults */
         if(!this->m_independent && (settings->getFaultInjection() || settings->getCombined())) {
@@ -149,7 +152,7 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
     logger->header("ANALYSIS REPORT");
 
     /* Print probing model information */
-    if (settings->getVerbose() >= VINFO) 
+    if (settings->getVerbose() >= VINFO)
     {
         std::string message;
 
@@ -158,12 +161,12 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
         message = ITEM + "glitches    : ";
         message += (settings->getSideChannelModelGlitches() ? "yes" : "no");
         logger->log(service, this->m_name, message);
-        
+
         message = ITEM + "transitions : ";
         /**! @todo: message += (settings->getSideChannelModelTransitions() ? "yes" : "no"); */
         message += (settings->getSideChannelModelTransitions() ? "currently not supported" : "no");
         logger->log(service, this->m_name, message);
-        
+
         message = ITEM + "couplings   : ";
         /**! @todo: message += (settings->getSideChannelModelCouplings() ? "yes" : "no"); */
         message += (settings->getSideChannelModelCouplings() ? "currently not supported" : "no");
@@ -171,12 +174,12 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
     }
 
 
-    if (settings->getVerbose() >= VBASE) 
+    if (settings->getVerbose() >= VBASE)
     {
         /* Print verification parameters */
         logger->log(service, this->m_name, "verification:");
         logger->log(service, this->m_name, ITEM + "assuming : d \u2264 " + std::to_string(this->m_max_order));
-        
+
         /* Print verification results */
         if (this->m_failing_probes.size() != 0) {
             logger->log(service, this->m_name, ITEM + "verified : d \u2264 " + std::to_string(this->m_failing_probes[0].size() - 1));
@@ -203,7 +206,7 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
 
     /* Print final result to footer */
     if (this->m_failing_probes.size() == 0) {
-        logger->footer(service, this->m_name, SUCCESS); 
+        logger->footer(service, this->m_name, SUCCESS);
     } else if (this->m_failing_probes[0].size() > this->m_max_order) {
         logger->footer(service, this->m_name, SUCCESS);
     } else {
@@ -211,12 +214,17 @@ ConfigurationProbing::report(std::string service, const Logger *logger, const Se
     }
 }
 
-void
-ConfigurationProbing::insert(const ConfigurationProbing* configuration) {
-    for (auto combination : configuration->failing_probes())
-        if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
-            this->m_failing_probes.push_back(combination);  
 
-    for(auto combination : configuration->leaking_combinations())
-        this->m_leaking_combinations.push_back(combination);
+Composability ConfigurationProbing::getType() const {
+    return Composability::NONE;
 }
+
+// void
+// ConfigurationProbing::insert(const ConfigurationProbing* configuration) {
+//     for (auto combination : configuration->failing_probes())
+//         if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
+//             this->m_failing_probes.push_back(combination);
+//
+//     for(auto combination : configuration->leaking_combinations())
+//         this->m_leaking_combinations.push_back(combination);
+// }

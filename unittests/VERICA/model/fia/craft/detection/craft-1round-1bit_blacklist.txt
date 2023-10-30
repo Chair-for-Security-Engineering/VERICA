@@ -1,0 +1,5 @@
+# This file is used to determine entities that should blacklisted.
+# All gates with matching annotations will be excluded.
+Check1_CheckInst Red_ToCheckInst
+# U6 U7
+# SD1_Xor_Sbox_Inst2 SD1_SB_inst2 SD1_Xor_Sbox_Inst3

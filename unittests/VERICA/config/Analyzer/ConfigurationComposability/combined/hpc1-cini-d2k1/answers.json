@@ -1,0 +1,21 @@
+{
+    "netlist_name" : "cini_d2_k1.v",
+    "analysis" : "cini",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 0,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 9,
+        "expected_m_failing_probes": [
+            [ { "uid": 8, "name": "io_o0_s2_d2[0]" } ],
+            [ { "uid": 3, "name": "io_o0_s1_d0[0]" } ],
+             [ { "uid": 0, "name": "io_o0_s0_d0[0]" } ],
+             [ { "uid": 1, "name": "io_o0_s0_d1[0]" } ],
+             [ { "uid": 5, "name": "io_o0_s1_d2[0]" } ],
+             [ { "uid": 4, "name": "io_o0_s1_d1[0]" } ],
+             [ { "uid": 7, "name": "io_o0_s2_d1[0]" } ],
+             [ { "uid": 2, "name": "io_o0_s0_d2[0]" } ],
+             [ { "uid": 6, "name": "io_o0_s2_d0[0]" } ]
+        ],
+        "expected_m_cini_security": 0
+    }
+}

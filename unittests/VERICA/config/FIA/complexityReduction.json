@@ -77,6 +77,12 @@
             "f-ni": true,
             "f-sni": true,
             "fini": false
+        },
+        "vulnerability": {
+            "enable": false,
+            "unshare_outputs": false,
+            "estimator": false,
+            "runs": 100
         }
     },
     "combined": {

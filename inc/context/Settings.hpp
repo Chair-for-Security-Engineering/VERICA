@@ -111,6 +111,11 @@ class Settings
         bool getFaultFSNI() const;
         bool getFaultFINI() const;
 
+        bool getFaultVulnerabilityEnable() const;
+        bool getFaultVulnerabilityUnshareOutputs() const;
+        bool getFaultVulnerabilityEstimator() const;
+        int getFaultVulnerabilityEstimatorRuns() const;
+
 
         /* Combined */
         bool getCombined() const;
@@ -192,6 +197,10 @@ class Settings
         std::string faultAnalysisStrategy = "";
         std::string faultMappingPath = "";
         std::string faultLocation = "";
+        bool faultVulnerabilityEnabled = false;
+        bool faultVulnerabilityUnshareOutputs = false;
+        bool faultVulnerabilityEstimator = false;
+        int faultVulnerabilityEstimatorRuns = 0;
 
 
 

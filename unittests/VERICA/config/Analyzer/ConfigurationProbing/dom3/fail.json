@@ -1,8 +1,8 @@
 {
     "general": {
         "verbose": 0,
-        "cores": 1,
-        "memory": 4,
+        "cores": 8,
+        "memory": 8,
         "netlist": {
             "file": "unittests/VERICA/Designs/dom/dom3.v",
             "name": "",
@@ -77,6 +77,12 @@
             "f-ni": false,
             "f-sni": false,
             "fini": false
+        },
+        "vulnerability": {
+            "enable": false,
+            "unshare_outputs": false,
+            "estimator": false,
+            "runs": 100
         }
     },
     "combined": {

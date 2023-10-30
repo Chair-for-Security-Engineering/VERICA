@@ -43,6 +43,8 @@ class TestEnvironment : public Environment
         /* Controlled evaluation execution */
         void execute();
 
+        ConfigurationSCA& getScaPreprocessor();
+
         /* Make TestEnvironment logger accessible from outside */
         Logger* getLogger();
         void setLogger(Logger*);
@@ -50,7 +52,7 @@ class TestEnvironment : public Environment
         /* Make TestEnvironment settings accessible from outside */
         Settings* getSettings();
         void setSettings(Settings*);
-        
+
         /* Make TestEnvironment state accessible from outside */
         State* getState();
         void setState(State*);
@@ -73,6 +75,8 @@ class TestEnvironment : public Environment
     private:
         /* Selected initialization phase */
         execPhases execPhase;
+
+        ConfigurationSCA sca_preprocessor;
 };
 
 #endif // __VERICA_TEST_ENVIRONMENT_HPP_

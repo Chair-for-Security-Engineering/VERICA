@@ -1,0 +1,12 @@
+{
+    "netlist_name" : "cini_hpc1_d1_k3_opt",
+    "analysis" : "cini",
+    "is_inf_theo_sec": "true",
+    "expected_side_channel_order": 1,
+    "expected_failing": {
+        "expected_m_failing_probes_size": 42,
+        "expected_m_failing_probes": [
+        ],
+        "expected_m_cini_security":
+    }
+}

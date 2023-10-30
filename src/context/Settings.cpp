@@ -30,6 +30,7 @@
 #include <boost/property_tree/ptree_fwd.hpp>
 #include <iostream>
 #include <filesystem>
+#include <omp.h>
 
 /*
  * =========================================================================================
@@ -295,8 +296,23 @@ bool Settings::getFaultFSNI() const {
 bool Settings::getFaultFINI() const {
     return this->faultFINIEnabled && this->faultInjectionEnabled;
 }
-/**********************************************************************/
 
+bool Settings::getFaultVulnerabilityEnable() const {
+    return (this->faultInjectionEnabled && this->faultVulnerabilityEnabled);
+}
+
+bool Settings::getFaultVulnerabilityUnshareOutputs() const {
+    return (this->faultVulnerabilityEnabled && this->faultVulnerabilityUnshareOutputs);
+}
+
+bool Settings::getFaultVulnerabilityEstimator() const {
+    return  (this->faultVulnerabilityEnabled && this->faultVulnerabilityEstimator);
+}
+
+int Settings::getFaultVulnerabilityEstimatorRuns() const {
+    return this->faultVulnerabilityEstimatorRuns;
+}
+/**********************************************************************/
 
 
 /**********************************************************************
@@ -353,7 +369,15 @@ void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
 
     // validate cores
     std::vector<int> cores;
-    for(int i=0; i<=omp_get_max_threads(); ++i) cores.push_back(i);
+
+    // NOTE:
+    // this line leads to problems, since omp_get_max_threads returns not all the time the number of threads of the system,
+    // but returns the number of threads last used.
+    // Thus, after setting the number of cores which should be used to x,
+    // it is not possible to use a higher number x+1.
+    // Since only x is returned by omp_get_max_threads and we check against the returned value.
+    // for(int i=0; i<=omp_get_max_threads(); ++i) cores.push_back(i);
+    for(int i=0; i<=omp_get_num_procs(); ++i) cores.push_back(i);
 
     // -------------------- General Settings --------------------
     // Determine current number of cores
@@ -433,6 +457,11 @@ void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
     this->faultFNIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.f-ni", boolean, config));
     this->faultFSNIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.f-sni", boolean, config));
     this->faultFINIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.fini", boolean, config));
+
+    this->faultVulnerabilityEnabled         = checkSettingRange<bool, std::string>("fault-injection.vulnerability.enable", boolean, config);
+    this->faultVulnerabilityUnshareOutputs  = checkSettingRange<bool, std::string>("fault-injection.vulnerability.unshare_outputs", boolean, config);
+    this->faultVulnerabilityEstimator       = checkSettingRange<bool, std::string>("fault-injection.vulnerability.estimator", boolean, config);
+    this->faultVulnerabilityEstimatorRuns   = checkSettingGreaterEqual("fault-injection.vulnerability.runs", 0, config);
     // ---------------------------------------------------------
 
     // ------------------ Combined Analysis---------------------

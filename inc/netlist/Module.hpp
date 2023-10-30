@@ -76,6 +76,7 @@ namespace verica
             const bool& gate() const { return m_is_gate; }
             const bool& sca_ignore() const { return m_sca_ignore; }
             const bool& fia_ignore() const { return m_fia_ignore; }
+            const double& fia_probability() const {return m_fia_probability; }
             const bool& is_sequential() const { return m_is_sequential; }
             void sort_wires();
             void remove_pin(int uid);            
@@ -110,6 +111,7 @@ namespace verica
             bool m_is_gate = false;
             bool m_sca_ignore = false;
             bool m_fia_ignore = false;
+            double m_fia_probability = 0.0;                     /**< Probability that a fault occurs in this gate (currently any fault) */
             bool m_is_sequential = false;
 
             /* Cell template */

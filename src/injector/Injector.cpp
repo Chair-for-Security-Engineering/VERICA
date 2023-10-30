@@ -322,7 +322,7 @@ void Injector::restore_faulty_models(std::vector<const verica::Wire*> &locations
         }
     }
 
-    // reset temporary veriable
+    // reset temporary variable
     this->m_state->m_current_fault_injections[thread_num].first.clear();
     this->m_state->m_current_fault_injections[thread_num].second.clear();
 }
@@ -339,6 +339,14 @@ void Injector::fault_injection_incremental(std::vector<const verica::Wire*> &nod
 void Injector::fault_node(const verica::Wire* wire, verica::fault::Fault fault, int core){
     // Operand gates
     std::vector<const verica::Wire*> operands;
+
+    // Target wire is a primary input (incl. randomness)
+    // Make sure to reset primary inputs to BDD variables to ensure correct functionality in case 
+    // a reset/set fault is followed by a bitflip. Otherwise the bitflip would be injected into
+    // a bddOne() or bddZero() variable which is not the behavior we expect.
+    if(wire->primary_input_identifier() != -1){
+        this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), this->m_state->m_managers[core].bddVar(wire->primary_input_identifier()), core);
+    }
 
     // Read operand function(s) from source nodes(s)
     if(wire->source_pin()->parent_module()->gate()){
@@ -442,4 +450,83 @@ void Injector::elaborate_node(const verica::Wire* wire, int core){
                 throw std::logic_error("[INJECTOR] Gate identifier " + std::to_string(wire->source_pin()->gate_identifier()) + " is not supported!");
         }
     }
+}
+
+BDD Injector::fault_function(const verica::Wire* wire, verica::fault::Fault fault, int core){
+    // Operand gates
+    std::vector<const verica::Wire*> operands;
+    BDD faulty_function;
+
+    if(wire->faulty_gate_identifier(core) == 10){
+        operands.push_back(wire);
+    }else{
+        // Read operand function(s) from source nodes(s)
+        for(auto p : wire->source_pin()->parent_module()->input_pins()) operands.push_back(p->fan_in());
+    }
+
+    // Generate faulty function for gate
+    switch (fault){
+        case verica::fault::SET:
+            faulty_function = this->m_state->m_managers[core].bddOne();
+            break;
+        case verica::fault::RESET:
+            faulty_function = this->m_state->m_managers[core].bddZero();
+            break;
+        case verica::fault::AND:
+            faulty_function = operands[0]->faulty_functions(core) & operands[1]->faulty_functions(core);
+            break;
+        case verica::fault::NAND:
+            faulty_function = !(operands[0]->faulty_functions(core) & operands[1]->faulty_functions(core));
+            break;
+        case verica::fault::OR:
+            faulty_function = operands[0]->faulty_functions(core) | operands[1]->faulty_functions(core);
+            break;
+        case verica::fault::NOR:
+            faulty_function = !(operands[0]->faulty_functions(core) | operands[1]->faulty_functions(core));
+            break;
+        case verica::fault::XOR:
+            faulty_function = operands[0]->faulty_functions(core) ^ operands[1]->faulty_functions(core);
+            break;
+        case verica::fault::XNOR:
+            faulty_function = !(operands[0]->faulty_functions(core) ^ operands[1]->faulty_functions(core));
+            break;
+        case verica::fault::NOTA:
+            faulty_function = !(operands[0]->faulty_functions(core));
+            break;
+        case verica::fault::A:
+            faulty_function = operands[0]->faulty_functions(core);
+            break;
+        default:
+            throw std::logic_error("[INJECTOR] Invalid fault type detected during fault injection!");
+            break;
+    } 
+    return faulty_function;
+}
+
+void Injector::add_fault_select(std::map<const verica::Wire*, std::vector<BDD>> &fault_select, int core){
+    Cudd_Manager mgr = this->m_state->m_managers[core];
+    int idx = mgr.ReadSize();
+    auto f = this->m_state->m_faultLocations[0];
+    // std::cout << f->name() << "\n";
+    for(auto fault_location: this->m_state->m_faultLocations){
+        // std::cout << fault_location->name() << "\n";
+        fault_select[fault_location] = std::vector<BDD>();
+        for(auto fault_type: this->m_state->m_faultMap[fault_location->source_pin()->gate_identifier()]){
+            // std::cout << " " << verica::fault::fault2string(fault_type) << "\n";
+            fault_select[fault_location].push_back(mgr.bddVar(idx++));
+            BDD faulty_function = this->fault_function(fault_location, fault_type, core);
+            BDD previous_function = fault_location->faulty_functions(core);
+            /* Create a MUX between previous and faulty function and store it as the faulty function of the wire */
+            /* Currently one select signal and MUX for every fault type is created. Can be optimized! */
+            this->m_state->m_netlist_model->set_bdd_faulty_function(
+                        fault_location->uid(), 
+                        (previous_function & !fault_select[fault_location].back()) | (faulty_function & fault_select[fault_location].back()), 
+                        core);
+        }
+        // std::cout << "\n";
+        for(int n=fault_location->propagation_path().size()-1; n >=0; --n){  
+            elaborate_node(fault_location->propagation_path()[n], core);
+        }
+    }
+
 }

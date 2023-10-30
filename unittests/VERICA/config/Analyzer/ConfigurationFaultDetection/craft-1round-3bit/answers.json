@@ -1,0 +1,15 @@
+{
+    "netlist_name" : "craft-1round-3bit",
+    "fia-strategy" : "fault-detection",
+    "success": {
+        "max_fault_events_secure" : 2,
+        "entries_m_effective" : 0,
+        "entries_m_scenarios" : 536121
+    },
+    "failure" : {
+        "min_fault_events_insecure" : 3,
+        "entries_m_effective" : 45846,
+        "entries_m_scenarios" : 144780741,
+        "comment": "this result was only computed by fiver! no double check!"
+    }
+}

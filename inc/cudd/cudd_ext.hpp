@@ -34,6 +34,18 @@ class Cudd_Manager : public Cudd {
         DdNode* bdd_carry(DdNode *dd1, DdNode *dd2, DdNode *carry_in);
         DdNode* bdd_sum(DdNode *dd1, DdNode *dd2, DdNode *carry_in);
 
+        /**
+         * @brief Computes the set of satisfying assignments for a given BDD.
+         * 
+         * @param node root node of the BDD
+         * @param level current level of analysis 
+         * @param list_idx list of indices that got a value assigned in current analysis
+         * @param list_val list of values that got assigned in current analysis
+         * @param sat_assign (ret) list of valid assignments, each element is a tuple (index, value)
+         * @return number of satisfying assignments
+         */
+        int bdd_sat_recursive(DdNode *node, unsigned level, int *list_idx, bool *list_val, std::vector<std::vector<std::pair<int, bool>>> &sat_assign);
+
     public:
         Cudd_Manager();
         /**
@@ -86,6 +98,15 @@ class Cudd_Manager : public Cudd {
          * @return BDD* 
          */
         BDD* bdd_add(BDD &dd1, BDD &dd2, BDD &carry_in);
+
+        /**
+         * @brief Computes the set of satisfying assignments for a given BDD.
+         * 
+         * @param dd root node of the BDD
+         * @param sat_assign (ret) list of valid assignments, each element is a tuple (index, value)
+         * @return number of satisfying assignments
+         */
+        int bdd_sat(BDD &dd, std::vector<std::vector<std::pair<int, bool>>> &sat_assign);
 };
 
 /**
