@@ -1,7 +1,7 @@
 # VERICA - Verification of Combined Attacks
 
 
-This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*](https://eprint.iacr.org/2022/484.pdf). Additionally, we extended the functionalities of VERICA with respect to combined composability notions in [*CINI MINIS: Domain Isolation for Fault and Combined Security*](https://eprint.iacr.org/2022/1131.pdf) which we revisited in [*Combined Private Circuits - Combined Security Refurbished*](https://eprint.iacr.org/2023/1341.pdf) due to some flaws in the gadgets and verification strategy.
+This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*](https://eprint.iacr.org/2022/484.pdf). Additionally, we extended the functionalities of VERICA with respect to combined composability notions in [*CINI MINIS: Domain Isolation for Fault and Combined Security*](https://eprint.iacr.org/2022/1131.pdf) which we revisited in [*Combined Private Circuits - Combined Security Refurbished*](https://eprint.iacr.org/2023/1341.pdf) due to some flaws in the gadgets and verification strategy. Moreover, the repository contains the source code for the paper [*Quantitative Fault Injection Analysis*](https://eprint.iacr.org/2023/1722.pdf).
 
 
 ## 1. Features
@@ -368,6 +368,7 @@ Please see `LICENSE` for further license instructions.
 1. J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering](https://eprint.iacr.org/2022/484.pdf). CHES 2022
 2. J. Feldtkeller, J. Richter-Brockmann, P. Sasdrich, T. Güneysu (2022): [CINI MINIS: Domain Isolation for Fault and Combined Security](https://eprint.iacr.org/2022/1131.pdf). CCS 2022
 3. J. Feldtkeller, T. Güneysu, T. Moos, J. Richter-Brockmann, S. Saha, P. Sasdrich, F.-X. Standaert (2023): [Combined Private Circuits - Combined Security Refurbished](https://eprint.iacr.org/2023/1341.pdf). CCS 2023
+4. J. Feldtkeller, T. Güneysu, P. Schaumont (2023): [Quantitative Fault Injection Analysis](https://eprint.iacr.org/2023/1722.pdf). AsiaCrypt 2023
 
 ### Reproduce results of the case studies
 
