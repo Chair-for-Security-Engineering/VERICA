@@ -75,7 +75,8 @@ ConfigurationFaultDetection::execute(const Settings *settings, State *state) {
         for(auto w : state->m_data_output_wires){
             BDD diff = w->golden_functions(core) ^ w->faulty_functions(core);
             compprime |= diff;
-            if(!((diff & comp).IsZero())) {
+            BDD check = (settings->getFaultLogicLevelErrorFlag()) ? (diff ^ comp) : !(diff ^ comp);
+            if(!check.IsZero()) {
                 // collect the fault domains of the errors
                 for(auto p : w->target_pins()){
                     if(std::find(mut->output_pins().begin(), mut->output_pins().end(), p) != mut->output_pins().end())
@@ -111,7 +112,8 @@ ConfigurationFaultDetection::execute(const Settings *settings, State *state) {
             }
             BDD diff = temp ^ w->faulty_functions(core);
             compprime |= diff;
-            if(!((diff & comp).IsZero())) {
+            BDD check = (settings->getFaultLogicLevelErrorFlag()) ? (diff ^ comp) : !(diff ^ comp);
+            if(!check.IsZero()) {
                 // collect the fault domains of the errors
                 for(auto p : w->target_pins()){
                     if(std::find(mut->output_pins().begin(), mut->output_pins().end(), p) != mut->output_pins().end())
