@@ -1,5 +1,6 @@
-# VERICA - Verification of Combined Attacks
+# VERICA+ - Verification of Combined Attacks (including  verification strategies for random models)
 
+**IMPORTANT:** This is just a placeholder for the code of [*VERICA+*](https://eprint.iacr.org/2024/757). We will upload the code in the following weeks! 
 
 This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*](https://eprint.iacr.org/2022/484.pdf). Additionally, we extended the functionalities of VERICA with respect to combined composability notions in [*CINI MINIS: Domain Isolation for Fault and Combined Security*](https://eprint.iacr.org/2022/1131.pdf) which we revisited in [*Combined Private Circuits - Combined Security Refurbished*](https://eprint.iacr.org/2023/1341.pdf) due to some flaws in the gadgets and verification strategy.
 
