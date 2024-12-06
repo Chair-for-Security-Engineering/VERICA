@@ -1,27 +1,26 @@
-# VERICA+ - Verification of Combined Attacks (including  verification strategies for random models)
+# VERICA+ - Verification Framework for Combined Random Fault and Random Probing Security
 
-**IMPORTANT:** This is just a placeholder for the code of [*VERICA+*](https://eprint.iacr.org/2024/757). We will upload the code in the following weeks! 
 
-This repository contains the source code for the paper [*VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering*](https://eprint.iacr.org/2022/484.pdf). Additionally, we extended the functionalities of VERICA with respect to combined composability notions in [*CINI MINIS: Domain Isolation for Fault and Combined Security*](https://eprint.iacr.org/2022/1131.pdf) which we revisited in [*Combined Private Circuits - Combined Security Refurbished*](https://eprint.iacr.org/2023/1341.pdf) due to some flaws in the gadgets and verification strategy.
+This branch contains the source code for the paper [*Formal Definition and Verification for Combined Random Fault and Random Probing Security*](https://eprint.iacr.org/2024/757.pdf) published at AsiaCrypt'24. 
 
 
 ## 1. Features
 
-VERICA is a framework written in `C++` to formally verify given digital logic circuits (as Verilog netlist or as instruction list) for their resistance against side-channel attacks, fault-injection attacks, and combined attacks.
+VERICA+ is a framework written in `C++` to formally verify given digital logic circuits (as Verilog netlist or as instruction list) for their resistance against side-channel attacks, fault-injection attacks, and combined attacks in random securty models.
 
 
 ## 2. Contact and Support
 
-Please contact Jan Richter-Brockmann (jan.richter-brockmann@rub.de) or Pascal Sasdrich (pascal.sasdrich@rub.de) if you have any questions, comments, if you found a bug that should be corrected, or if you want to reuse the framework or parts of it for your own research projects. 
+Please contact Jan Richter-Brockmann (jan.richter-brockmann@rub.de), Jakob Feldtkeller (jakob.feldtkeller@rub.de) or Pascal Sasdrich (pascal.sasdrich@rub.de) if you have any questions, comments, if you found a bug that should be corrected, or if you want to reuse the framework or parts of it for your own research projects. 
 
 
 ## 3. Build Instructions
 
-VERICA can be build and used in two different ways. The first option intends to build VERICA directly from the sources and execute the binaries. The second option uses Docker to build VERICA. The instructions to use Docker can be found at the end of this file (see [Docker](#containerize-verica-using-docker)).
+VERICA+ can be build and used in two different ways. The first option intends to build VERICA+ directly from the sources and execute the binaries. The second option uses Docker to build VERICA+. The instructions to use Docker can be found at the end of this file (see [Docker](#containerize-verica-using-docker)).
 
-To build VERICA directly from the sources and execute the binaries, please follow the instructions below:
+To build VERICA+ directly from the sources and execute the binaries, please follow the instructions below:
 
-1. Download the source code of VERICA. 
+1. Download the source code of VERICA+. 
 2. Download and unpack the [Boost Graph Library (BGL)](https://www.boost.org/users/history/version_1_84_0.html) library.
 3. `cd boost_X_XX_X`
 4. `./bootstrap.sh --with-libraries=program_options`
@@ -32,18 +31,18 @@ To build VERICA directly from the sources and execute the binaries, please follo
 9. `make check`
 10. `make install`
 11. Change directory to the VERICA folder. 
-12. If necessary, update the `INCLUDES` variable in the VERICA makefile with the path to your copy of BGL (i.e., `/path/to/VERICA/include/` as selected as prefix in step 4).
+12. If necessary, update the `INCLUDES` variable in the VERICA+ makefile with the path to your copy of BGL (i.e., `/path/to/VERICA/include/` as selected as prefix in step 4).
 13. `make release`
 
-If you do not install the BGL and CUDD library globally, an error occurs that prevents VERICA from being built, which can be solved with the help of the '#define BOOST_BIND_GLOBAL_PLACEHOLDERS', see also [here](https://stackoverflow.com/questions/53203970/why-boostbind-insists-pulling-boostplaceholders-into-global-namespace). 
+If you do not install the BGL and CUDD library globally, an error occurs that prevents VERICA+ from being built, which can be solved with the help of the '#define BOOST_BIND_GLOBAL_PLACEHOLDERS', see also [here](https://stackoverflow.com/questions/53203970/why-boostbind-insists-pulling-boostplaceholders-into-global-namespace). 
 
 ## 4. Quick Start
 
-After VERICA was successfully build, it can be executed by `bin/release/verica -c config/verica.json`. The configuration file (i.e., `config/verica.json`) can be adapted according to [Section 4.1](#41-configure-verica). Executing VERICA with the configuration file `config/verica-example.json`, should result in the output given in [Section 4.2](#42-expected-output).
+After VERICA+ was successfully build, it can be executed by `bin/release/verica -c config/verica.json`. The configuration file (i.e., `config/verica.json`) can be adapted according to [Section 4.1](#41-configure-verica). Executing VERICA+ with the configuration file `config/verica-example.json`, should result in the output given in [Section 4.2](#42-expected-output). Please note, you may have to adapt the number of available CPU cores.
 
-### 4.1 Configure VERICA
+### 4.1 Configure VERICA+
 
-VERICA can easily be configured via a configuration file written in json. In the following, we briefly describe possible settings and their functionalities. 
+VERICA+ can easily be configured via a configuration file written in json. In the following, we briefly describe possible settings and their functionalities. Please note, since the complexity of this project drastically increased by adding verifications in the random models, we cannot ensure that verifications in the threshold models still work on this branch. Please switch to the main branch in case you would like to perform such verifications.
 
 Parent              | Parameter                     | Allowed Parameter                             | Description
 --------------------|-------------------------------|-----------------------------------------------|----------------------
@@ -77,6 +76,12 @@ Parent              | Parameter                     | Allowed Parameter         
 --                  | `analysis/p-ni`               | `true`, `false`                               | Enables/disables the verification of the P-NI-property.
 --                  | `analysis/p-sni`              | `true`, `false`                               | Enables/disables the verification of the P-SNI-property.
 --                  | `analysis/pini`               | `true`, `false`                               | Enables/disables the verification of the PINI-property.
+--                  | `analysis/random-probing`     | `true`, `false`                               | Enables/disables the verification in the random probing model.
+--                  | `analysis/random-probing-composability` | `true`, `false`                     | Enables/disables the verification in the random probing model considering composability.
+--                  | `random-probing/probability`  | probability                                   | Global probability that is used for the leakage probability of each wire.
+--                  | `random-probing/max-probes`   | positive integer                              | Maximum cardinality of a probing set.
+--                  | `random-probing/probability-file` | Valid path                                | Path to a file containing individual probabilities for each wire. Used for the generalized random probing model.
+--                  | `random-probing/consider-copies` | 0,1,2                                      | Defines the way copies of wires are considered in the verification. 0: no copies, 1: hardware copies, 2: software copies.
 `fault-injection`   | `enable`                      | `true`, `false`                               | Enables/disables fault-injection verification. 
 --                  | `configuration/number`        | positive integer                              | Maximum number of simultaneous injected faults.
 --                  | `configuration/variate`       | 0-X                                           | Select between univariate (1) or multivariate (2-X), or consider all gates from all stages (0)
@@ -89,10 +94,15 @@ Parent              | Parameter                     | Allowed Parameter         
 --                  | `analysis/f-ni`               | `true`, `false`                               | Enables/disables the verification of the F-NI-property. If enabled, input faults are considered as well.
 --                  | `analysis/f-sni`              | `true`, `false`                               | Enables/disables the verification of the F-SNI-property. If enabled, input faults are considered as well.
 --                  | `analysis/fini`               | `true`, `false`                               | Enables/disables the verification of the FINI-property. If enabled, input faults are considered as well.
+--                  | `analysis/random-faulting`    | `true`, `false`                               | Enables/disables the verification in the random fault model
+--                  | `analysis/random-faulting-composability` | `true`, `false`                    | Enables/disables the verification in the random fault model considering composition. If enabled, input faults are considered as well.
 --                  | `vulnerability/enable`        | `true`, `false`                               | Enables/disables Quantitative Fault Injection Analysis. If enabled a fault white list with probabilities need to be given.
---                  | `vulnerability/unshare_outputs` | `true`, `false`                               | Enables/disables an unsharing of the output values for QIFA. 
---                  | `vulnerability/estimator` | `true`, `false`                               | Enables/disables probabilistic computation of QFIA using the Monte-Carlo Method. If enabled a number of runs need to be provided. 
---                  | `vulnerability/runs` | positive integer                               | Indicates the number of executions for the probabilitic compuation for QFIA. 
+--                  | `vulnerability/unshare_outputs` | `true`, `false`                             | Enables/disables an unsharing of the output values for QIFA. 
+--                  | `vulnerability/estimator`     | `true`, `false`                               | Enables/disables probabilistic computation of QFIA using the Monte-Carlo Method. If enabled a number of runs need to be provided. 
+--                  | `vulnerability/runs`          | positive integer                              | Indicates the number of executions for the probabilistic computation for QFIA. 
+--                  | `random-faulting/probability` | probability                                   | Global probability that is used for the faulting probability of each wire.
+--                  | `random-faulting/max-faults`  | positive integer                              | Maximum cardinality of a faulting set.
+--                  | `random-faulting/probability-file` | Valid path                               | Path to a file containing individual probabilities for each wire. Used for the generalized random faulting model.
 `combined`          | `enable`                      | `true`, `false`                               | Enables/disables combined analysis.
 --                  | `analysis/c-ni`               | `true`, `false`                               | Enables/disables the verification of the C-NI-property.
 --                  | `analysis/c-sni`              | `true`, `false`                               | Enables/disables the verification of the C-SNI-property.
@@ -103,17 +113,17 @@ Parent              | Parameter                     | Allowed Parameter         
 
 ### 4.2 Expected Output
 
-If VERICA is executed with the exemplary configuration file `config/verica_example.json`, the output should be the same as stated below. First, the cell library parser (contains the behavioral descriptions of allowed logic gates) and the design parser (Verilog, FIRRTL, and *.nl files are supported) are executed. The design under test is a (1,1)-SNINA gadget presented in [[DN19]](https://eprint.iacr.org/2019/615.pdf). Second, several preprocessing steps are performed ranging from parsing annotations, a model postprocessing, and FIA and SCA related preprocessing. The annotation parsing is used to inform VERICA which inputs are control signals, clock signals, refresh gates, and error flags. Additionally, the annotation file is used to provide information about share domains and share indices, and about primary input identifier. The last ones are used to identify inputs that carry the same signals, e.g., for duplication based countermeasures. Third, VERICA invokes the analyzer which is the CSNI analyzer in the given example. Based on the given side-channel order and the number of faults in the configuration file, VERICA analyzes the design under test and reports if the security is achieved by the design. Eventually, a visualizer is invoked which generates two files `dot/circuit.dot` and `dot/circuit_flaw.dot`. This files contain a dot graph descriptions of the design under test where the first file contains the entire circuit and the second only an extract with detected flaws (if there are any).
+If VERICA+ is executed with the exemplary configuration file `config/verica-example.json`, the output should be the same as stated below. First, the cell library parser (contains the behavioral descriptions of allowed logic gates) and the design parser (Verilog, FIRRTL, and *.nl files are supported) are executed. The design under test is a (1,1)-CPC gadget presented in [[FGM+23]](https://eprint.iacr.org/2023/1341.pdf). Second, several preprocessing steps are performed ranging from parsing annotations, a model postprocessing, and FIA and SCA related preprocessing. The annotation parsing is used to inform VERICA+ which inputs are control signals, clock signals, refresh gates, and error flags. Additionally, the annotation file is used to provide information about share domains and share indices, and about primary input identifier. The last ones are used to identify inputs that carry the same signals, e.g., for duplication based countermeasures. Third, VERICA+ invokes the analyzer which is the combined random analyzer in the given example. Based on the given side-channel order and the number of faults in the configuration file, VERICA+ analyzes the design under test and reports if the security is achieved by the design. 
 
 ```
 ----------------------------------------------------------------------------------------------------
-                             VERICA -- VERIFICATION OF COMBINED ATTACKS                             
+            VERICA+ -- VERIFICATION OF COMBINED RANDOM FAULT AND RANDOM PROBING SECURITY            
 
                       Ruhr-Universität Bochum, Chair for Security Engineering                      
                         Jan Richter-Brockmann (jan.richter-brockmann@rub.de),                       
                               Pascal Sasdrich (pascal.sasdrich@rub.de)                              
 
-                                         Copyright (c) 2022,                                        
+                                         Copyright (c) 2024,                                        
                                        Jan Richter-Brockmann,                                       
                                            Pascal Sasdrich                                          
 
@@ -123,185 +133,216 @@ If VERICA is executed with the exemplary configuration file `config/verica_examp
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: CELL LIBRARY
 ----------------------------------------------------------------------------------------------------
-     0.001    PARSER           CELLLIB               source: cell/nang45.txt
-     0.001    PARSER           CELLLIB               Parsed cell library with 14 gate type(s). 
+     0.002    PARSER           CELLLIB               source: cell/nang45.txt
+     0.002    PARSER           CELLLIB               Parsed cell library with 15 gate type(s). 
 ----------------------------------------------------------------------------------------------------
-     0.001    PARSER           CELLLIB               SUCCESS
+     0.002    PARSER           CELLLIB               SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: DESIGN UNDER TEST
 ----------------------------------------------------------------------------------------------------
-     0.077    PARSER           VERILOG               source: test/cini-insecure/hpc1/cini_d2_k1.v
-     0.077    PARSER           VERILOG                  module(s) : 1
-     0.077    PARSER           VERILOG                  gate(s)   : 243
-     0.077    PARSER           VERILOG                   - comb.  : 189
-     0.077    PARSER           VERILOG                   - seq.   : 54
-     0.077    PARSER           VERILOG                  wire(s)   : 270
-     0.077    PARSER           VERILOG                  pin(s)    : 822
-     0.077    PARSER           VERILOG               WARNING: detected 57 unconnected pins!
+     0.016    PARSER           VERILOG               source: test/combined-random-model/and-cini-d1-k1.v
+     0.016    PARSER           VERILOG                  module(s) : 1
+     0.016    PARSER           VERILOG                  gate(s)   : 96
+     0.016    PARSER           VERILOG                   - comb.  : 78
+     0.016    PARSER           VERILOG                   - seq.   : 18
+     0.016    PARSER           VERILOG                  wire(s)   : 113
+     0.016    PARSER           VERILOG                  pin(s)    : 332
+     0.016    PARSER           VERILOG               WARNING: detected 21 unconnected pins!
 ----------------------------------------------------------------------------------------------------
-     0.077    PARSER           VERILOG               SUCCESS
+     0.016    PARSER           VERILOG               SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: ANNOTATIONS
 ----------------------------------------------------------------------------------------------------
-     0.082    PREPROCESSOR     ANNOTATION            3 input wires were tagged as clock input.
-     0.082    PREPROCESSOR     ANNOTATION            WARNING: 2 wires could not be tagged as clock input in the MUT.
-     0.082    PREPROCESSOR     ANNOTATION            0 input wires were tagged as control inputs.
-     0.082    PREPROCESSOR     ANNOTATION            WARNING: 6 wires could not be tagged as control input in the MUT.
-     0.082    PREPROCESSOR     ANNOTATION            6 input wires were tagged as refresh inputs.
-     0.082    PREPROCESSOR     ANNOTATION            WARNING: 6 wires could not be tagged as refresh input in the MUT.
-     0.082    PREPROCESSOR     ANNOTATION            0 output wires were tagged as error flags.
-     0.082    PREPROCESSOR     ANNOTATION            18 input wires were tagged with PIIDs.
-     0.082    PREPROCESSOR     ANNOTATION            WARNING: 38 wires could not be identified in the MUT.
-     0.082    PREPROCESSOR     ANNOTATION            27 wires were tagged with a share domain.
-     0.082    PREPROCESSOR     ANNOTATION            WARNING: 85 wires could not be identified in the MUT.
-     0.082    PREPROCESSOR     ANNOTATION            27 wires were tagged with a share index.
-     0.082    PREPROCESSOR     ANNOTATION            WARNING: 57 wires could not be identified in the MUT.
-     0.082    PREPROCESSOR     ANNOTATION            27 wires were tagged with a fault domain.
-     0.082    PREPROCESSOR     ANNOTATION            WARNING: 85 wires could not be identified in the MUT.
+     0.025    PREPROCESSOR     ANNOTATION            3 input wires were tagged as clock input.
+     0.025    PREPROCESSOR     ANNOTATION            WARNING: 2 wires could not be tagged as clock input in the MUT.
+     0.025    PREPROCESSOR     ANNOTATION            0 input wires were tagged as control inputs.
+     0.025    PREPROCESSOR     ANNOTATION            WARNING: 6 wires could not be tagged as control input in the MUT.
+     0.025    PREPROCESSOR     ANNOTATION            2 input wires were tagged as refresh inputs.
+     0.025    PREPROCESSOR     ANNOTATION            WARNING: 46 wires could not be tagged as refresh input in the MUT.
+     0.026    PREPROCESSOR     ANNOTATION            0 output wires were tagged as error flags.
+     0.026    PREPROCESSOR     ANNOTATION            12 input wires were tagged with PIIDs.
+     0.026    PREPROCESSOR     ANNOTATION            WARNING: 44 wires could not be identified in the MUT.
+     0.027    PREPROCESSOR     ANNOTATION            18 wires were tagged with a share domain.
+     0.027    PREPROCESSOR     ANNOTATION            WARNING: 94 wires could not be identified in the MUT.
+     0.029    PREPROCESSOR     ANNOTATION            18 wires were tagged with a share index.
+     0.029    PREPROCESSOR     ANNOTATION            WARNING: 66 wires could not be identified in the MUT.
+     0.031    PREPROCESSOR     ANNOTATION            18 wires were tagged with a fault domain.
+     0.031    PREPROCESSOR     ANNOTATION            WARNING: 94 wires could not be identified in the MUT.
+     0.032    PREPROCESSOR     ANNOTATION            6 wires were tagged with a fault index.
+     0.032    PREPROCESSOR     ANNOTATION            WARNING: 22 wires could not be identified in the MUT.
+     0.033    PREPROCESSOR     ANNOTATION            0 wires were tagged with a secret index.
 ----------------------------------------------------------------------------------------------------
-     0.082    PREPROCESSOR     ANNOTATION            SUCCESS
+     0.033    PREPROCESSOR     ANNOTATION            SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: FILTERING
 ----------------------------------------------------------------------------------------------------
-     0.082    PREPROCESSOR     FILTERING             Filtering for side-channel verification is disabled!
-     0.082    PREPROCESSOR     FILTERING             Filtering for fault-injection verification is disabled!
+     0.033    PREPROCESSOR     FILTERING             Filtering for side-channel verification is disabled!
+     0.033    PREPROCESSOR     FILTERING             Filtering for fault-injection verification is disabled!
 ----------------------------------------------------------------------------------------------------
-     0.082    PREPROCESSOR     FILTERING             SUCCESS
+     0.033    PREPROCESSOR     FILTERING             SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO
 ----------------------------------------------------------------------------------------------------
-     0.138    PREPROCESSOR     MULTI-THREADING       cores: 2
-     0.138    PREPROCESSOR     MULTI-THREADING       memory: 16 GB
+     0.534    PREPROCESSOR     MULTI-THREADING       cores: 256
+     0.534    PREPROCESSOR     MULTI-THREADING       memory: 0 GB
 ----------------------------------------------------------------------------------------------------
-     0.138    PREPROCESSOR     MULTI-THREADING       SUCCESS
+     0.534    PREPROCESSOR     MULTI-THREADING       SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: MODEL POSTPROCESSING
 ----------------------------------------------------------------------------------------------------
-     0.139    PREPROCESSOR     MODEL POSTPROCESSING  Removed clock tree from netlist (3 wires were removed).
-     0.139    PREPROCESSOR     MODEL POSTPROCESSING  No control signals were found.
-     0.139    PREPROCESSOR     MODEL POSTPROCESSING  Removed 57 unconnected pins.
-     0.139    PREPROCESSOR     MODEL POSTPROCESSING  Removed 0 unconnected wires.
+     0.534    PREPROCESSOR     MODEL POSTPROCESSING  Removed clock tree from netlist (3 wires were removed).
+     0.534    PREPROCESSOR     MODEL POSTPROCESSING  No control signals were found.
+     0.534    PREPROCESSOR     MODEL POSTPROCESSING  Removed 21 unconnected pins.
+     0.534    PREPROCESSOR     MODEL POSTPROCESSING  Removed 0 unconnected wires.
 ----------------------------------------------------------------------------------------------------
-     0.139    PREPROCESSOR     MODEL POSTPROCESSING  SUCCESS
+     0.534    PREPROCESSOR     MODEL POSTPROCESSING  SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO
 ----------------------------------------------------------------------------------------------------
-     0.142    PREPROCESSOR     ELABORATE             stage(s): 
-     0.142    PREPROCESSOR     ELABORATE                logic    : 3
-     0.142    PREPROCESSOR     ELABORATE                register : 2
+     0.705    PREPROCESSOR     ELABORATE             stage(s): 
+     0.705    PREPROCESSOR     ELABORATE                logic    : 3
+     0.705    PREPROCESSOR     ELABORATE                register : 2
 ----------------------------------------------------------------------------------------------------
-     0.142    PREPROCESSOR     ELABORATE             SUCCESS
+     0.705    PREPROCESSOR     ELABORATE             SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: Configure FIA
 ----------------------------------------------------------------------------------------------------
-     0.142    PREPROCESSOR     FIA                   Identified 267 gates as target gates for fault injection.
-     0.142    PREPROCESSOR     FIA                   Applied parameters:
-     0.142    PREPROCESSOR     FIA                      number:          1
-     0.142    PREPROCESSOR     FIA                      variate:         1
-     0.142    PREPROCESSOR     FIA                      fault mapping:   model/setreset.txt
-     0.142    PREPROCESSOR     FIA                      location:        cs
-     0.142    PREPROCESSOR     FIA                      strategy:        correction
-     0.142    PREPROCESSOR     FIA                      logic-level:     low
-     0.142    PREPROCESSOR     FIA                      FNI:             false
-     0.142    PREPROCESSOR     FIA                      FSNI:            false
-     0.142    PREPROCESSOR     FIA                      FINI:            false
+     0.714    PREPROCESSOR     FIA                   Identified 98 gates as target gates for fault injection.
+     0.714    PREPROCESSOR     FIA                   Applied parameters:
+     0.714    PREPROCESSOR     FIA                      number:          1
+     0.714    PREPROCESSOR     FIA                      variate:         0
+     0.714    PREPROCESSOR     FIA                      fault mapping:   model/reset-random-faulting.txt
+     0.715    PREPROCESSOR     FIA                      location:        cs
+     0.715    PREPROCESSOR     FIA                      strategy:        correction
+     0.715    PREPROCESSOR     FIA                      logic-level:     low
+     0.715    PREPROCESSOR     FIA                      K-FAULTING:      false
+     0.715    PREPROCESSOR     FIA                      FNI:             false
+     0.715    PREPROCESSOR     FIA                      FSNI:            false
+     0.715    PREPROCESSOR     FIA                      FINI:            false
+     0.715    PREPROCESSOR     FIA                      RANDOM-FAULT:    true
+     0.715    PREPROCESSOR     FIA                      RAND-FAULT-COMP: false
 ----------------------------------------------------------------------------------------------------
-     0.142    PREPROCESSOR     FIA                   SUCCESS
+     0.715    PREPROCESSOR     FIA                   SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: Configure SCA
 ----------------------------------------------------------------------------------------------------
-     0.147    PREPROCESSOR     SCA                   Disabled auto-dynamic reordering for BDDs.
-     0.147    PREPROCESSOR     SCA                   Determined 2 shared inputs.
-     0.147    PREPROCESSOR     SCA                      Minimum number of shares: 3
-     0.147    PREPROCESSOR     SCA                   Determined 87 probe positions.
-     0.147    PREPROCESSOR     SCA                   Determined 3828 probe combinations.
-     0.147    PREPROCESSOR     SCA                   Determined 0 combinations of abort signals.
+     0.715    PREPROCESSOR     SCA                   Disabled auto-dynamic reordering for BDDs.
+     0.715    PREPROCESSOR     SCA                   Determined 2 shared inputs.
+     0.715    PREPROCESSOR     SCA                      Minimum number of shares: 2
+     0.715    PREPROCESSOR     SCA                   Determined 174 probe positions.
+     0.715    PREPROCESSOR     SCA                   Determined 0 probe combinations.
 ----------------------------------------------------------------------------------------------------
-     0.147    PREPROCESSOR     SCA                   SUCCESS
- 
-
-  TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT
-----------------------------------------------------------------------------------------------------
-     0.828    ANALYZER         CINI                  model parameters:
-     0.828    ANALYZER         CINI                     glitches    : yes
-     0.829    ANALYZER         CINI                     transitions : no
-     0.829    ANALYZER         CINI                     couplings   : no
-     0.829    ANALYZER         CINI                  verification:
-     0.829    ANALYZER         CINI                     targeted : (2, 0) security
-     0.829    ANALYZER         CINI                     verified : side-channel security
-     0.829    ANALYZER         CINI                     verified : fault-injection security
-----------------------------------------------------------------------------------------------------
-     0.829    ANALYZER         CINI                  SUCCESS
+     0.715    PREPROCESSOR     SCA                   SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: EVALUATION (n=1)
 ----------------------------------------------------------------------------------------------------
-     0.829    INJECTOR                               Found 3 valid stages to inject faults.
-     0.829    INJECTOR                               Got a new batch of permuted fault locations with 177 entries. I am going to analyze it...
-     2.811    INJECTOR                               Got a new batch of permuted fault locations with 72 entries. I am going to analyze it...
-     3.403    INJECTOR                               Got a new batch of permuted fault locations with 18 entries. I am going to analyze it...
+     0.715    INJECTOR                               Found 3 valid stages to inject faults.
+     0.716    INJECTOR                               Got a new batch of permuted fault locations with 98 entries. I am going to analyze it...
 ----------------------------------------------------------------------------------------------------
-     3.567    INJECTOR                               
+     1.457    INJECTOR                               
+
+
+  TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT RANDOM FAULTING
+----------------------------------------------------------------------------------------------------
+     1.457    ANALYZER         FAULT-CORRECTION      Fault-security order:           1
+     1.457    ANALYZER         FAULT-CORRECTION      wire faulting probability:      0.000977
+     1.457    ANALYZER         FAULT-CORRECTION      Maximum number of faults:       2
+     1.457    ANALYZER         FAULT-CORRECTION      Number of wires:                98
+     1.457    ANALYZER         FAULT-CORRECTION      Faulting probability:           μ = 0.000000e+00
+     1.457    ANALYZER         FAULT-CORRECTION      Faulting probability (bounded): μ_max = 4.259132e-03
+     1.457    ANALYZER         FAULT-CORRECTION      Number of faults:               0.000000
+----------------------------------------------------------------------------------------------------
+     1.457    ANALYZER         FAULT-CORRECTION      SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT
 ----------------------------------------------------------------------------------------------------
-     3.567    ANALYZER         CINI                  model parameters:
-     3.567    ANALYZER         CINI                     glitches    : yes
-     3.567    ANALYZER         CINI                     transitions : no
-     3.567    ANALYZER         CINI                     couplings   : no
-     3.567    ANALYZER         CINI                  verification:
-     3.567    ANALYZER         CINI                     targeted : (1, 1) security
-     3.567    ANALYZER         CINI                     failed   : side-channel security
-     3.567    ANALYZER         CINI                     verified : fault-injection security
+     1.458    ANALYZER         FIA+RANDOM-PROBING    parameter:
+     1.458    ANALYZER         FIA+RANDOM-PROBING       wire leaking probability:  0.000977
+     1.458    ANALYZER         FIA+RANDOM-PROBING       maximum number of probes:  2
+     1.458    ANALYZER         FIA+RANDOM-PROBING       wire faulting probability: 0.000977
+     1.458    ANALYZER         FIA+RANDOM-PROBING       maximum number of faults:  2
+     1.458    ANALYZER         FIA+RANDOM-PROBING    verification (lower bound):
+     1.458    ANALYZER         FIA+RANDOM-PROBING       probe leaking probability:      ε = 2.432260e-03
+     1.458    ANALYZER         FIA+RANDOM-PROBING       fault leaking probability:      μ = 0.000000e+00
+     1.458    ANALYZER         FIA+RANDOM-PROBING       combined leaking probability:   γ = 2.432260e-03
+     1.458    ANALYZER         FIA+RANDOM-PROBING    verification (upper bound):
+     1.458    ANALYZER         FIA+RANDOM-PROBING       probe leaking probability:      ε_max = 3.004715e-03
+     1.458    ANALYZER         FIA+RANDOM-PROBING       fault leaking probability:      μ_max = 4.259132e-03
+     1.458    ANALYZER         FIA+RANDOM-PROBING       combined leaking probability:   γ_max = 7.251050e-03
 ----------------------------------------------------------------------------------------------------
-     3.567    ANALYZER         CINI                  FAILURE
+     1.458    ANALYZER         FIA+RANDOM-PROBING    SUCCESS
 
 
-  TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT CINI
+  TIME [s]    SERVICE          CONFIGURATION         INFO: EVALUATION (n=2)
 ----------------------------------------------------------------------------------------------------
-     3.567    ANALYZER         CINI                  verification:
-     3.567    ANALYZER         CINI                     targeted : (2, 1)-CINI
+     1.458    INJECTOR                               Found 3 valid stages to inject faults.
+     1.460    INJECTOR                               Got a new batch of permuted fault locations with 4753 entries. I am going to analyze it...
 ----------------------------------------------------------------------------------------------------
-     3.567    ANALYZER         CINI                  FAILURE
+    13.797    INJECTOR                               
 
 
-  TIME [s]    SERVICE          CONFIGURATION         INFO: VISUALIZATION
+  TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT RANDOM FAULTING
 ----------------------------------------------------------------------------------------------------
-     3.568    VISUALIZER       GRAPHVIZ (DOT)        Exported full circuit to dot/circuit_cini.dot.
-     3.568    VISUALIZER       GRAPHVIZ (DOT)        Exported subgraph of security flaws to dot/circuit_flaw_cini.dot.
+    13.797    ANALYZER         FAULT-CORRECTION      Fault-security order:           1
+    13.797    ANALYZER         FAULT-CORRECTION      wire faulting probability:      0.000977
+    13.797    ANALYZER         FAULT-CORRECTION      Maximum number of faults:       2
+    13.797    ANALYZER         FAULT-CORRECTION      Number of wires:                98
+    13.797    ANALYZER         FAULT-CORRECTION      Faulting probability:           μ = 7.397836e-04
+    13.797    ANALYZER         FAULT-CORRECTION      Faulting probability (bounded): μ_max = 8.719309e-04
+    13.797    ANALYZER         FAULT-CORRECTION      Number of faults:               852.000000
 ----------------------------------------------------------------------------------------------------
-     3.568    VISUALIZER       GRAPHVIZ (DOT)        SUCCESS
+    13.797    ANALYZER         FAULT-CORRECTION      SUCCESS
+
+
+  TIME [s]    SERVICE          CONFIGURATION         INFO: ANALYSIS REPORT
+----------------------------------------------------------------------------------------------------
+    13.797    ANALYZER         FIA+RANDOM-PROBING    parameter:
+    13.797    ANALYZER         FIA+RANDOM-PROBING       wire leaking probability:  0.000977
+    13.797    ANALYZER         FIA+RANDOM-PROBING       maximum number of probes:  2
+    13.797    ANALYZER         FIA+RANDOM-PROBING       wire faulting probability: 0.000977
+    13.797    ANALYZER         FIA+RANDOM-PROBING       maximum number of faults:  2
+    13.797    ANALYZER         FIA+RANDOM-PROBING    verification (lower bound):
+    13.797    ANALYZER         FIA+RANDOM-PROBING       probe leaking probability:      ε = 2.442012e-03
+    13.797    ANALYZER         FIA+RANDOM-PROBING       fault leaking probability:      μ = 7.397836e-04
+    13.797    ANALYZER         FIA+RANDOM-PROBING       combined leaking probability:   γ = 3.179989e-03
+    13.798    ANALYZER         FIA+RANDOM-PROBING    verification (upper bound):
+    13.798    ANALYZER         FIA+RANDOM-PROBING       probe leaking probability:      ε_max = 3.004399e-03
+    13.798    ANALYZER         FIA+RANDOM-PROBING       fault leaking probability:      μ_max = 8.719309e-04
+    13.798    ANALYZER         FIA+RANDOM-PROBING       combined leaking probability:   γ_max = 3.873711e-03
+----------------------------------------------------------------------------------------------------
+    13.798    ANALYZER         FIA+RANDOM-PROBING    SUCCESS
 
 
   TIME [s]    SERVICE          CONFIGURATION         INFO
 ----------------------------------------------------------------------------------------------------
-     3.568    VERICA           COMBINED              DONE!
+    13.798    VERICA           COMBINED              DONE!
 ```
 
 ## Architecture
 
-The main file `verica.cpp` of VERICA only creates an object `Environment` which handles the entire verification. An environment object consists of a settings object, a state object, and a logger. The `settings` object parses at the time of construction the forwarded `config`-file and stores all settings while providing corresponding access functions. The `state` object is used to store global variables and data (e.g., the netlist model, information about the SCA and FIA verification, etc.). The logger is used to create consistent outputs throughout the entire preprocessing and verification.
+The main file `verica.cpp` of VERICA+ only creates an object `Environment` which handles the entire verification. An environment object consists of a settings object, a state object, and a logger. The `settings` object parses at the time of construction the forwarded `config`-file and stores all settings while providing corresponding access functions. The `state` object is used to store global variables and data (e.g., the netlist model, information about the SCA and FIA verification, etc.). The logger is used to create consistent outputs throughout the entire preprocessing and verification.
 
-Besides these basic objects, VERICA creates five additional "configuration" objects: `parser`, `preprocessor`, `injector`, `analyzer`, `visualizer`. The `parser` object reads the cell library and accepts parsing strategies that are able to parse `FIRRTL`, `VERILOG`, and `NETLIST` files. The `FIRRTL` and `VERILOG` parser utilize the BOOST library. Independent of the netlist format, VERICA generates a model of the circuit under test which is stored in a `netlist` object. Each netlist model consists of `modules`, `wires`, and `pins`. The final circuit model is stored in the `state` object.
+Besides these basic objects, VERICA+ creates five additional "configuration" objects: `parser`, `preprocessor`, `injector`, `analyzer`, `visualizer`. The `parser` object reads the cell library and accepts parsing strategies that are able to parse `FIRRTL`, `VERILOG`, and `NETLIST` files. The `FIRRTL` and `VERILOG` parser utilize the BOOST library. Independent of the netlist format, VERICA+ generates a model of the circuit under test which is stored in a `netlist` object. Each netlist model consists of `modules`, `wires`, and `pins`. The final circuit model is stored in the `state` object.
 
-The `preprocessor` object takes care of many different steps. First, the `annotation.json` file is loaded and parsed. The parsed information are added to the netlist model. Second, a `filtering` strategy is loaded to the preprocessor which applies the black- and whitelists to the model. Third, a `multi-threading` object is loaded which prepares the framework for parallel executions of the verification. Fourth, a `model-postprocessing` is applied which has several tasks. The first task ist to remove all clock and control networks from the netlist model. Afterwards, unconnected pins and wires are removed. Eventually, all wires from the netlist model are sorted in a topological order. Fifth, VERICA loads an `elaborate` strategy into the preprocessor. Based on the netlist model, all BDDs are created and additional information for the SCA verification is generated. Sixth, a `FIA` preprocessor is loaded which performs important configurations required for the FIA verification, i.e., determining fault mappings, fault locations, propagation paths, and preparing the framework for FIA related multi-threading tasks. Seventh, a `SCA` strategy is loaded into the preprocessor which determines all valid probe combinations for the SCA verification.
+The `preprocessor` object takes care of many different steps. First, the `annotation.json` file is loaded and parsed. The parsed information are added to the netlist model. Second, a `filtering` strategy is loaded to the preprocessor which applies the black- and whitelists to the model. Third, a `multi-threading` object is loaded which prepares the framework for parallel executions of the verification. Fourth, a `model-postprocessing` is applied which has several tasks. The first task ist to remove all clock and control networks from the netlist model. Afterwards, unconnected pins and wires are removed. Eventually, all wires from the netlist model are sorted in a topological order. Fifth, VERICA+ loads an `elaborate` strategy into the preprocessor. Based on the netlist model, all BDDs are created and additional information for the SCA verification is generated. Sixth, a `FIA` preprocessor is loaded which performs important configurations required for the FIA verification, i.e., determining fault mappings, fault locations, propagation paths, and preparing the framework for FIA related multi-threading tasks. Seventh, a `SCA` strategy is loaded into the preprocessor which determines all valid probe combinations for the SCA verification.
 
 Based on the configuration file, different SCA and FIA analysis strategies are loaded and executed. All available strategies are implemented in the `analyzer/` folder. `ConfigurationComposability` implements the verification of all SCA related composability notions. `ConfigurationCorrection` and `configurationDetection` handle the verification of countermeasures against fault attacks and are able to verify FIA composability notions for correction and detection based countermeasures, respectively. `ConfigurationSIFA` is applied in case a design should be checked for the resistance against SIFA-based attacks. `ConfigurationProbing` is used to verify probing security while `ConfigurationUniformity` verifies the uniformity of the design under test.
 
-Eventually, VERICA supports the visualization as a `.dot`-graph of the design under test. It is possible to create a graph for the entire netlist model or only for the part that is involved in security violations. Additionally, leaking probes and effective faults (if occur) are highlighted in the graph which should assist the designer to fix flawed parts. 
+Eventually, VERICA+ supports the visualization as a `.dot`-graph of the design under test. It is possible to create a graph for the entire netlist model or only for the part that is involved in security violations. Additionally, leaking probes and effective faults (if occur) are highlighted in the graph which should assist the designer to fix flawed parts. 
  
 ## Synopsis Design Compiler
 
-Most of the examples in the repository are generated with Synopsis Design Compiler using the standard cell library NANG45. The following commands should be used for the synthesis script in order to generate a Verilog gate-level netlist that can be processed by VERICA.
+Most of the examples in the repository are generated with Synopsis Design Compiler using the standard cell library NANG45. The following commands should be used for the synthesis script in order to generate a Verilog gate-level netlist that can be processed by VERICA+.
 
 ```
 set_dont_use [get_lib_cells NangateOpenCellLibrary/FA*]
@@ -359,7 +400,7 @@ before executing the binary.
 
 ## Licensing
 
-Copyright (c) 2022, Jan Richter-Brockmann and Pascal Sasdrich.
+Copyright (c) 2024, Jan Richter-Brockmann and Pascal Sasdrich.
 All rights reserved.
 
 Please see `LICENSE` for further license instructions.
@@ -369,6 +410,7 @@ Please see `LICENSE` for further license instructions.
 1. J. Richter-Brockmann, J. Feldtkeller, P. Sasdrich, T. Güneysu (2022): [VERICA - Verification of Combined Attacks Automated formal verification of security against simultaneous information leakage and tampering](https://eprint.iacr.org/2022/484.pdf). CHES 2022
 2. J. Feldtkeller, J. Richter-Brockmann, P. Sasdrich, T. Güneysu (2022): [CINI MINIS: Domain Isolation for Fault and Combined Security](https://eprint.iacr.org/2022/1131.pdf). CCS 2022
 3. J. Feldtkeller, T. Güneysu, T. Moos, J. Richter-Brockmann, S. Saha, P. Sasdrich, F.-X. Standaert (2023): [Combined Private Circuits - Combined Security Refurbished](https://eprint.iacr.org/2023/1341.pdf). CCS 2023
+3. S. Belaid, J. Feldtkeller, T. Güneysu, A. Guinet, J. Richter-Brockmann, M. Rivain, P. Sasdrich, A. Taleb (2024): [Formal Definition and Verification for Combined Random Fault and Random Probing Security](https://eprint.iacr.org/2024/757.pdf). AsiaCrypt 2024
 
 ### Reproduce results of the case studies
 

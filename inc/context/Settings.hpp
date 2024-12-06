@@ -74,6 +74,10 @@ class Settings
         bool getVisualizationFull() const;
         bool getVisualizationPartial() const;
 
+        bool getComposer() const;
+        std::string getComposerPath() const;
+        bool getComposerIronMask() const;
+
 
         /* Side-Channel */
         bool getSideChannel() const;
@@ -92,6 +96,13 @@ class Settings
         bool getSideChannelAnalysisNI() const;
         bool getSideChannelAnalysisSNI() const;
         bool getSideChannelAnalysisPINI() const;
+        bool getSideChannelAnalysisRandomProbing() const;
+        bool getSideChannelAnalysisRandomProbingComposability() const;
+
+        long double getSideChannelRandomProbingProbability() const;
+        int getSideChannelRandomProbingMaxProbes() const;
+        std::string getSideChannelRandomProbabilityFile() const;
+        int getSideChannelRandomProbingCopies() const;
 
 
         /* Fault-Injection */
@@ -107,14 +118,21 @@ class Settings
         bool getReduceComplexity() const;
         std::string getFaultAnalysisStrategy() const;
         bool getFaultLogicLevelErrorFlag() const;
+        bool getFaultThresholdFaulting() const;
         bool getFaultFNI() const;
         bool getFaultFSNI() const;
         bool getFaultFINI() const;
+        bool getFaultRandomFaulting() const;
+        bool getFaultRandomFaultingComposability() const;
 
         bool getFaultVulnerabilityEnable() const;
         bool getFaultVulnerabilityUnshareOutputs() const;
         bool getFaultVulnerabilityEstimator() const;
         int getFaultVulnerabilityEstimatorRuns() const;
+
+        long double getFaultRandomFaultingProbability() const;
+        int getFaultRandomFaultingMaxFaults() const;
+        std::string getFaultRandomFaultingProbabilityFile() const;
 
 
         /* Combined */
@@ -141,7 +159,8 @@ class Settings
         rT checkSettingRange(const std::string &setting, const std::vector<iT> &validSettings, boost::property_tree::ptree & config);
         std::string checkSettingFileExists(const std::string& setting, boost::property_tree::ptree & config);
         std::string checkSettingPathExists(const std::string& setting, boost::property_tree::ptree & config);
-        int checkSettingGreaterEqual(const std::string &setting, const int &threshold, boost::property_tree::ptree & config);
+        template<typename T> T checkSettingGreaterEqual(const std::string &setting, const T &threshold, boost::property_tree::ptree & config);
+        void checkInvalidSettingCombinations();
 
 
         /* Settings */
@@ -159,6 +178,9 @@ class Settings
         std::string libraryName = "";
         bool annotationsEnabled = false;
         std::string annotationFilePath = "";
+        bool composerEnabled = false;
+        std::string composerPath = "";
+        bool composerIronMaskEnabled = false;
 
 
 
@@ -170,6 +192,8 @@ class Settings
         bool scaNIEnabled = false;
         bool scaSNIEnabled = false;
         bool scaPINIEnabled = false;
+        bool scaRandomProbingEnabled = false;
+        bool scaRandomProbingComposabilityEnabled = false;
         std::string scaFilteringType = "";
         std::string scaWhiteList = "";
         std::string scaBlackList = "";
@@ -179,6 +203,10 @@ class Settings
         bool scaModelGlitchesEnabled = false;
         bool scaModelTransitionsEnabled = false;
         bool scaModelCouplingsEnabled = false;
+        long double scaRandomProbingProbability = 0.0;
+        int scaRandomProbingMaxProbes = 0;
+        std::string scaRandomProbingProbabilityFile = "";
+        int scaRandomProbingCopies = 0;
 
 
 
@@ -188,9 +216,12 @@ class Settings
         bool faultInterruptEnabled = false;
         bool faultReduceComplexityEnabled = false;
         bool faultLogicLevelErrorFlag = false;
+        bool faultThresholdFaultingEnabled = false;
         bool faultFNIEnabled = false;
         bool faultFSNIEnabled = false;
         bool faultFINIEnabled = false;
+        bool faultRandomFaultingEnabled = false;
+        bool faultRandomFaultingComposabilityEnabled = false;
         std::string faultFilteringType = "";
         std::string faultWhiteList = "";
         std::string faultBlackList = "";
@@ -201,6 +232,9 @@ class Settings
         bool faultVulnerabilityUnshareOutputs = false;
         bool faultVulnerabilityEstimator = false;
         int faultVulnerabilityEstimatorRuns = 0;
+        long double faultRandomFaultingProbability = 0.0;
+        int faultRandomFaultingMaxFaults = 0; 
+        std::string faultRandomFaultingProbabilityFile = "";
 
 
 

@@ -49,6 +49,8 @@ class ConfigurationFaultCorrection : public Configuration
     
     private:
 
+        void reset_bounds(const Settings *settings, State *state, int core);
+
         /* Member variables to store effective faults for each strategy independently */
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_fia;
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_fni;
@@ -59,6 +61,14 @@ class ConfigurationFaultCorrection : public Configuration
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_icsni;
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_cini;
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_icini;
+
+        std::vector<long double> m_faulting_probability;
+        std::vector<long double> m_faulting_probability_bounded;
+        std::vector<std::vector<long double>> m_faulting_probabilities;
+        std::vector<std::vector<long double>> m_faulting_probabilities_bounded;
+
+        std::vector<int> m_old_k;
+        long double m_counter = 0;
 };
 
 #endif // __VERICA_ANALYZER_CONFIGURATION_FAULT_CORRECTION_HPP_

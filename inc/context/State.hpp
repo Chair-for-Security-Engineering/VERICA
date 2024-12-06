@@ -34,7 +34,7 @@
 #include "context/FaultLibrary.hpp"
 
 // Used for SCA analysis
-enum class Composability { NONE, NI, SNI, PINI, CNI, CSNI, ICSNI, CINI, ICINI };
+enum class Composability { NONE, RANDOMPROBING, RCOMPOSABILITY, NI, SNI, PINI, CNI, CSNI, ICSNI, CINI, ICINI };
 
 class State
 {
@@ -61,9 +61,30 @@ class State
         std::vector<const verica::Pin*> m_min_shared_outputs;
         unsigned int m_num_output_shares = 0;
 
+        /* FIA: Duplication details */
+        unsigned int m_min_output_duplications = 0;
+
         /* SCA: Probe combinations */
         // first entry in the pair contains all real probes while the second entry contains all "virtual" probes (e.g., for simulating abort signals)
+        std::vector<const verica::Wire*> m_probe_positions;
         std::vector<std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>>> m_probe_combinations;
+
+        /* Random probing */
+        std::vector<long double> m_combined_leaking_probabilities;
+        std::vector<long double> m_combined_leaking_probabilities_upper_bound;
+        std::vector<std::vector<long double>> m_combined_composability_leaking_probabilities;
+        std::vector<std::vector<long double>> m_combined_composability_leaking_probabilities_upper_bound;
+        long double m_combined_final_leaking_probability;
+        long double m_combined_final_leaking_probability_upper_bound;
+        long double m_combined_final_composability_leaking_probability;
+        long double m_combined_final_composability_leaking_probability_upper_bounded;
+        bool m_use_individual_probabilities = false;
+        std::vector<std::vector<const verica::Wire*>> m_random_probing_composability_output_combinations;
+        std::vector<std::vector<const verica::Wire*>> m_random_faulting_composability_input_combinations;
+        std::vector<unsigned int> m_random_faulting_pos_combination;
+        std::vector<long double> m_random_faulting_current_single_faulting_probability; // for each core one entry
+        std::vector<long double> m_random_faulting_probabilities_per_input_combination;
+        std::vector<bool> m_random_faulting_correctable; // for each core one entry
 
         /* CUDD manager */
         std::vector<Cudd_Manager> m_managers;
@@ -74,7 +95,9 @@ class State
         /* Fault related members */
         std::map<int, std::vector<verica::fault::Fault>> m_faultMap;
         std::vector<const verica::Wire*> m_faultLocations;
+        std::vector<const verica::Wire*> m_faultLocations_copy;
         std::vector<const verica::Wire*> m_faultLocationsReduced;
+        std::vector<std::map<int, BDD>> m_faultInputsRandom;
 
         /* Detection-based */
         std::vector<const verica::Wire*> m_error_flags;
@@ -131,6 +154,10 @@ class State
         std::vector<std::vector<const verica::Wire*>> m_effective_faults_icsni;
         std::vector<std::vector<const verica::Wire*>> m_effective_faults_cini;
         std::vector<std::vector<const verica::Wire*>> m_effective_faults_icini;
+        long double m_faulting_probability;
+        long double m_faulting_probability_bounded;
+        long double m_faulting_probability_composability;
+        long double m_faulting_probability_composability_bounded;
 
         // store leaking combinations of probes and faults
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_sca_fia;
@@ -139,6 +166,12 @@ class State
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_icsni;
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_cini;
         std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>> m_leaking_combinations_icini;
+
+        // DEBUG
+        std::vector<int> m_thread_to_location;
+        std::map<int, long double> m_loc_to_epsilon;
+        std::ofstream *probe_file;
+        std::map<int, int> m_failing_probe_cnt;
 
     #ifdef UNITTEST
         // store maximal number of failing probes over all runs

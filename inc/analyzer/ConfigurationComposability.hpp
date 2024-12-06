@@ -50,6 +50,8 @@ class ConfigurationComposability : public ConfigurationCombinable
         /* Report analysis results for given context & configuration */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
 
+        void insert(const ConfigurationCombinable* configuration);
+
         Composability getType() const override;
 
     private:

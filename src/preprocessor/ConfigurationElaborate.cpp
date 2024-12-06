@@ -38,10 +38,10 @@ ConfigurationElaborate::execute(const Settings *settings, State *state)
 {
     int cores = settings->getCores();
 
-    /* Resize vectors that contain BDDs */
-    for(auto w : state->m_netlist_model->module_under_test()->wires()) {
-        state->m_netlist_model->resize_bdd_vectors(w->uid(), cores);
-    }
+    // /* Resize vectors that contain BDDs */
+    // for(auto w : state->m_netlist_model->module_under_test()->wires()) {
+    //     state->m_netlist_model->resize_bdd_vectors(w->uid(), cores);
+    // }
 
     /* Elaborate all BDDs in parallel */ 
     #pragma omp parallel for schedule(dynamic) num_threads(cores)
@@ -197,6 +197,7 @@ ConfigurationElaborate::gate_store_functions(verica::Netlist* model, const veric
     }if(std::find(mut->input_pins().begin(), mut->input_pins().end(), wire->source_pin()) != mut->input_pins().end()){
         // create new BDD variable
         model->set_bdd_golden_function(wire->uid(), manager.bddVar(wire->primary_input_identifier()), core);
+        // std::cout << "Wire " << wire->name() << " gets var " << wire->golden_functions(core) << std::endl;
     } else if(wire->source_pin()->fan_in() != nullptr){
         // connection between two modules (same BDD function as input wire)
         model->set_bdd_golden_function(wire->uid(), wire->source_pin()->fan_in()->golden_functions(core), core );

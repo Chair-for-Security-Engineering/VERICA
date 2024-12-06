@@ -104,6 +104,28 @@ class ConfigurationFIA : public Configuration
         */
        void fault_configure_sifa_sfa(State *state, int num_of_cores);
 
+        /**
+         * @brief Annotates all wires with their faulting probability.
+         * @param state Pointer to state.
+         * @param file Location of probability file.
+         * @param fault_locations Vector of all fault locations.
+         * @param general_prob Probability that is used if wire is not listed in the probability file.
+        */
+       void fault_determine_faulting_probabilities(State *state, std::string file, std::vector<const verica::Wire*> &fault_locations, long double general_prob);
+
+        /**
+         * @brief Determines all combinations of up to k duplications of each input
+         * @param state Pointer to state.
+         * @param settings Pointer to settings.
+        */
+        void determine_input_combinations(State *state, const Settings *settings);
+
+        /**
+         * @brief Determines all combinations of up to k duplications of each input
+         * @param state Pointer to state.
+        */
+        void determine_duplicated_outputs(State *state);
+
 };
 
 #endif // __VERICA_PREPROCESSOR_CONFIGURATION_FIA_HPP_

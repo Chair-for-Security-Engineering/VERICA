@@ -50,11 +50,14 @@ class ConfigurationCombinable : public Configuration
 
         virtual Composability getType() const = 0;
 
-        void insert(const ConfigurationCombinable* configuration);
+        // template<typename T> void insert(const T* configuration);
+        virtual void insert(const ConfigurationCombinable* configuration) = 0;
 
         const std::vector<std::vector<const verica::Wire*>>& failing_probes() const {
             return this->m_failing_probes;
         };
+
+        const std::vector<const verica::Wire*> &last_failing_probes() const { return this->m_failing_probes.back(); }
 
         const std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>>>&
         leaking_combinations() const {

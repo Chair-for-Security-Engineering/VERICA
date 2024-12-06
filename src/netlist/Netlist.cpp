@@ -534,6 +534,18 @@ void verica::Netlist::set_primary_input_identifier(int uid, int identifier){
     m_wires[uid]->m_primary_input_identifier = identifier;
 }
 
+void verica::Netlist::set_random_probing_probability(int uid, long double prob){
+    m_wires[uid]->m_leaking_probability = prob;
+}
+
+void verica::Netlist::set_random_faulting_probability(int uid, long double prob){
+    m_wires[uid]->m_faulting_probability = prob;
+}
+
+void verica::Netlist::set_random_faulting_probability_inverse(int uid, long double prob){
+    m_wires[uid]->m_faulting_probability_inverse = prob;
+}
+
 
 /* 
  * =========================================================================================
@@ -591,6 +603,10 @@ void verica::Netlist::set_pin_share_index(int uid, int share_index) {
 
 void verica::Netlist::set_pin_fault_domain(int uid, int fault_domain) {
     m_pins[uid]->m_fault_domain = fault_domain;
+}
+
+void verica::Netlist::set_pin_fault_index(int uid, int fault_index) {
+    m_pins[uid]->m_fault_index = fault_index;
 }
 
 void verica::Netlist::set_pin_secret_index(int uid, int secret_index) {
@@ -836,8 +852,6 @@ void verica::Netlist::info() {
                     std::cout << "\t\t\tto \"" << p->m_name << "\" of \"" << p->m_parent_module->m_name << "\"" << std::endl;
                 }
             }
-            // std::cout << "\t\t\tVariables: " << w->variables(0) << std::endl;
-            // std::cout << "\t\t\tRegisters: " << w->registers(0) << std::endl;
         }
     }
 

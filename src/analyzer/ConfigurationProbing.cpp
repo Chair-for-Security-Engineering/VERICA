@@ -40,14 +40,16 @@ ConfigurationProbing::initialize(const Settings *settings, State *state)
 }
 
 void
-ConfigurationProbing::execute(const Settings *settings, State *state)
-{
+ConfigurationProbing::execute(const Settings *settings, State *state) {
     /* Current thread number */
     int threadNum = omp_get_thread_num();
 
+    /* Extract probes from container */
+    std::vector<const verica::Wire*> current_probes = this->m_current_probes.first;
+
     /* Collect current set of shares */
     std::set<const verica::Wire*> variables;
-    for(auto probe : this->m_current_probes) {
+    for(auto probe : current_probes) {
         variables.insert(probe->variables(threadNum).begin(), probe->variables(threadNum).end());
     }
 
@@ -81,7 +83,7 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
         {
             // collect all syncronization points
             std::set<const verica::Wire*> registers;
-            for(auto probe : this->m_current_probes)
+            for(auto probe : current_probes)
                 registers.insert(probe->registers(threadNum).begin(), probe->registers(threadNum).end());
 
             // push registers to extended probes
@@ -101,7 +103,7 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
         }
         else
         {
-            extended_probes = this->m_current_probes;
+            extended_probes = current_probes;
         }
 
         /* Collect secrets */
@@ -124,13 +126,13 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
             this->m_independent &= state->m_managers[threadNum].bdd_statindependence(observation, secrets);
 
             if (!this->m_independent){
-                this->m_failing_probes.push_back(this->m_current_probes);
+                this->m_failing_probes.push_back(current_probes);
             }
         }
 
         /* Store leaking combinations of probes and faults */
         if(!this->m_independent && (settings->getFaultInjection() || settings->getCombined())) {
-            this->m_leaking_combinations.push_back(std::make_pair(this->m_current_probes, state->m_current_fault_injections[threadNum].first));
+            this->m_leaking_combinations.push_back(std::make_pair(current_probes, state->m_current_fault_injections[threadNum].first));
         }
     }
 }
@@ -219,12 +221,19 @@ Composability ConfigurationProbing::getType() const {
     return Composability::NONE;
 }
 
-// void
-// ConfigurationProbing::insert(const ConfigurationProbing* configuration) {
-//     for (auto combination : configuration->failing_probes())
-//         if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
-//             this->m_failing_probes.push_back(combination);
-//
-//     for(auto combination : configuration->leaking_combinations())
-//         this->m_leaking_combinations.push_back(combination);
-// }
+void
+ConfigurationProbing::insert(const ConfigurationCombinable* configuration) {
+    ConfigurationProbing *test = (ConfigurationProbing*) configuration;
+    for (auto combination : test->failing_probes())
+        if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
+            this->m_failing_probes.push_back(combination);
+
+    for(auto combination : test->leaking_combinations())
+        this->m_leaking_combinations.push_back(combination);
+    // for (auto combination : configuration->failing_probes())
+    //     if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
+    //         this->m_failing_probes.push_back(combination);
+
+    // for(auto combination : configuration->leaking_combinations())
+    //     this->m_leaking_combinations.push_back(combination);
+}

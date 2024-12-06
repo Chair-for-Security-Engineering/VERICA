@@ -59,6 +59,8 @@ class ConfigurationFaultDetection : public Configuration
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_icsni;
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_cini;
         std::vector<std::vector<std::vector<const verica::Wire*>>> m_effective_faults_icini;
+
+        std::vector<long double> m_faulting_probability;
         
 };
 

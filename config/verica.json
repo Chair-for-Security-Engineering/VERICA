@@ -1,12 +1,12 @@
 {
     "general":
     {
-        "verbose": 2,
-        "cores": 2,
-        "memory": 2,
+        "verbose": 3,
+        "cores": 256,
+        "memory": 0,
         "netlist":
         {
-            "file": "test/case-study-nina/and_snina_d1_k1.v",
+            "file": "test/combined-random-model/and-cini-d1-k1.v",
             "name": "",
             "module": ""
         },
@@ -20,7 +20,7 @@
             "sca":
             {
                 "type": "none",
-                "whitelist": "model/sca-whitelist",
+                "whitelist": "model/wires_d0.txt",
                 "blacklist": "model/sca-blacklist"
             },
             "fia":
@@ -30,10 +30,9 @@
                 "blacklist": "model/fia-blacklist"
             }
         },
-
         "annotation":
         {
-            "file": "test/case-study-nina/annotations.json",
+            "file": "test/combined-random-model/annotations-cini.json",
             "apply": true
         },
         "cudd":
@@ -42,16 +41,23 @@
         },
         "visualization":
         {
-            "enable": true,
+            "enable": false,
             "path": "dot/",
             "full": true,
             "partial": true
+        },
+        "composer":
+        {
+            "enable": false,
+            "path": "irs/",
+            "iron-mask": true
         }
     },
 
     "side-channel":
     {
         "enable": false,
+        "strategy": "independence",
         "configuration":
         {
             "order": 1,
@@ -61,7 +67,7 @@
         },
         "model":
         {
-            "glitches": true,
+            "glitches": false,
             "transitions": false,
             "couplings": false
         },
@@ -71,14 +77,16 @@
             "probing": false,
             "p-ni": false,
             "p-sni": false,
-            "pini": false
+            "pini": false,
+            "random-probing": true,
+            "random-probing-composability": false
         },
-        "vulnerability":
+        "random-probing": 
         {
-            "enable" : false,
-            "unshare_outputs" : true,
-            "estimator" : false,
-            "runs" : 10000
+            "probability": 0.0009765625,
+            "max-probes": 2,
+            "probability-file": "model/probing-probability",
+            "consider-copies": 1
         }
     },
 
@@ -88,22 +96,25 @@
         "configuration":
         {
             "number": 1,
-            "variate": 1,
+            "variate": 0,
             "interrupt": false
         },
         "model": 
         {
-            "mapping": "model/setreset.txt",
+            "mapping": "model/reset-random-faulting.txt",
             "location": "cs"
         },
         "analysis":
         {
             "reduced_complexity": false,
             "strategy": "correction",
-            "logic-level-error-flag": true,
+            "logic-level-error-flag": false,
+            "k-faulting": false,
             "f-ni": false,
             "f-sni": false,
-            "fini": false
+            "fini": false,
+            "random-faulting": true,
+            "random-faulting-composability": false
         },       
         "vulnerability":
         {
@@ -111,6 +122,12 @@
             "unshare_outputs" : true,
             "estimator" : false,
             "runs" : 10000
+        },
+        "random-faulting":
+        {
+            "probability": 0.0009765625,
+            "max-faults": 2,
+            "probability-file": "model/fault-probability"
         }
     },
 
@@ -120,7 +137,7 @@
         "analysis":
         {
             "c-ni": false,
-            "c-sni": true,
+            "c-sni": false,
             "ic-sni": false,
             "cini": false,
             "icini": false

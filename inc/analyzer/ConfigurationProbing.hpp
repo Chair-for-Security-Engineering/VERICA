@@ -47,11 +47,12 @@ class ConfigurationProbing : public ConfigurationCombinable
         /* Report analysis results for given context & configuration */
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
 
+        void insert(const ConfigurationCombinable* configuration);
+
         /* Accessor function(s) */
         const bool& independent() const { return this->m_independent; }
 
         /* Mutator function(s) */
-        void current_probes(const std::pair<std::vector<const verica::Wire*>, std::vector<const verica::Wire*>> current_probes) { this->m_current_probes = current_probes.first; };
 
         Composability getType() const override;
 
@@ -59,7 +60,6 @@ class ConfigurationProbing : public ConfigurationCombinable
 
         unsigned int m_max_order;                                           /**< Maximum security order for current design */
         bool m_independent;                                                 /**< Statistical independence for current probe combination */
-        std::vector<const verica::Wire*> m_current_probes;                  /**< Container for current probe combination */
 };
 
 #endif // __VERICA_ANALYZER_CONFIGURATION_PROBING_HPP_

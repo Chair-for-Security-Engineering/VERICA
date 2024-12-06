@@ -94,6 +94,13 @@ class ConfigurationAnnotation : public Configuration
         void parse_and_set_fault_domain(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input);
 
         /**
+         * @brief Parses and sets the fault domains.
+         * @param settings Pointer to the settings.
+         * @param state Pointer to the state.
+        */
+        void parse_and_set_fault_index(State *state, std::map<std::string, const verica::Wire*> &name_to_wire, bool for_input);
+
+        /**
          * @brief Parses and sets the share index.
          * @param settings Pointer to the settings.
          * @param state Pointer to the state.
@@ -143,6 +150,9 @@ class ConfigurationAnnotation : public Configuration
 
         int m_num_of_annotated_fault_domain_wires = 0;
         std::vector<std::string> m_fault_domain_wires_not_found;   
+
+        int m_num_of_annotated_fault_index_wires = 0;
+        std::vector<std::string> m_fault_index_wires_not_found;   
 
         int m_num_of_annotated_secret_index_wires = 0;
         std::vector<std::string> m_secret_index_wires_not_found;     

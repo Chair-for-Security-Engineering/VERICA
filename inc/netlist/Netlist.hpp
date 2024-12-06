@@ -140,6 +140,9 @@ namespace verica
             void set_faulty_gate_identifier(int uid, int new_identifier, int core);
             void set_primary_input_identifier(int uid, int identifier);
 
+            void set_random_probing_probability(int uid, long double prob);
+            void set_random_faulting_probability(int uid, long double prob);
+            void set_random_faulting_probability_inverse(int uid, long double prob);
 
             /* Pin functions */
             Pin* add_pin(std::string name);
@@ -153,6 +156,7 @@ namespace verica
             void set_pin_share_domain(int uid, int share_domain);
             void set_pin_share_index(int uid, int share_index);
             void set_pin_fault_domain(int uid, int fault_domain);
+            void set_pin_fault_index(int uid, int fault_index);
             void set_pin_secret_index(int uid, int secret_index);
             void set_pin_type(Pin *p, Flag port_type);
             void set_pin_type(int uid, Flag port_type);

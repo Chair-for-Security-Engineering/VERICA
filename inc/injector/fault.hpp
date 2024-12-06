@@ -55,6 +55,7 @@ namespace verica
                 NSUB,   // B13
                 CONV,   // B14
                 NCONV,  // B15
+                VAR,    // Random Faulting
             };
 
             static Fault string2fault(std::string fault){
@@ -74,6 +75,7 @@ namespace verica
                 else if (fault ==  "nsub") return NSUB;
                 else if (fault ==  "conv") return CONV;
                 else if (fault == "nconv") return NCONV;
+                else if (fault ==   "var") return VAR;
                 else throw std::logic_error("Unsupported gate type detected.");
             };
 
@@ -94,6 +96,7 @@ namespace verica
                 else if (fault ==  NSUB) return "nsub";
                 else if (fault ==  CONV) return "conv";
                 else if (fault == NCONV) return "nconv";
+                else if (fault ==   VAR) return "var";
                 else throw std::logic_error("Unsupported gate type detected.");
             };
     };

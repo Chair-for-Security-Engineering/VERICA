@@ -36,6 +36,7 @@ void
 ConfigurationFiltering::execute(const Settings *settings, State *state){
     /* Apply filtering for SCA */
     if (settings->getSideChannelFilteringType() == "white") {
+        std::cout << "Filter SCA white list... " << std::endl;
         this->apply_filter(settings, state, false, false);
     } else if (settings->getSideChannelFilteringType() == "black") {
         this->apply_filter(settings, state, true, false);
@@ -216,6 +217,16 @@ ConfigurationFiltering::apply_filter(const Settings *settings, State *state, con
     }
 
     for(auto& p : state->m_netlist_model->module_under_test()->input_pins()){
+        if(p->fan_out() != nullptr){
+            if(strategy){
+                state->m_netlist_model->ignore_fia_wire(p->fan_out()->uid(), !blacklist_filter);
+            }else {
+                state->m_netlist_model->ignore_sca_wire(p->fan_out()->uid(), !blacklist_filter);
+            }
+        }
+    }
+
+    for(auto& p : state->m_netlist_model->module_under_test()->input_pins()){
         i = 0;
         for(auto name : filter){
             if(p->fan_out() != nullptr){
@@ -231,16 +242,16 @@ ConfigurationFiltering::apply_filter(const Settings *settings, State *state, con
         }
     }
 
-    for(auto& p : state->m_netlist_model->module_under_test()->input_pins()){
-        for(auto name : filter){
-            if(p->fan_out() != nullptr){
-                if(p->fan_out()->name().find(name) != std::string::npos){
-                    if(strategy)
-                        state->m_netlist_model->ignore_fia_wire(p->fan_out()->uid(), blacklist_filter);
-                    else
-                        state->m_netlist_model->ignore_sca_wire(p->fan_out()->uid(), blacklist_filter);
-                }
-            }
-        }
-    }
+    // for(auto& p : state->m_netlist_model->module_under_test()->input_pins()){
+    //     for(auto name : filter){
+    //         if(p->fan_out() != nullptr){
+    //             if(p->fan_out()->name().find(name) != std::string::npos){
+    //                 if(strategy)
+    //                     state->m_netlist_model->ignore_fia_wire(p->fan_out()->uid(), blacklist_filter);
+    //                 else
+    //                     state->m_netlist_model->ignore_sca_wire(p->fan_out()->uid(), blacklist_filter);
+    //             }
+    //         }
+    //     }
+    // }
 }

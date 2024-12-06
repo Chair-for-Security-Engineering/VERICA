@@ -101,10 +101,12 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         }
 
         /* Construct glitch-extended probes */
+        std::vector<const verica::Wire*> temp_probes = this->m_current_probes.first;
+        temp_probes.insert(temp_probes.end(), this->m_current_probes.second.begin(), this->m_current_probes.second.end());
         if (settings->getSideChannelModelGlitches()) {
             // collect all syncronization points
             std::set<const verica::Wire*> registers;
-            for(auto probe : this->m_current_probes.first)
+            for(auto probe : temp_probes)
                 registers.insert(probe->registers(threadNum).begin(), probe->registers(threadNum).end());
 
 
@@ -125,11 +127,11 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         }
         else
         {
-            extended_probes = this->m_current_probes.first;
+            extended_probes = temp_probes;
         }
 
         // Add "virtual" probes, e.g., abort signals
-        extended_probes.insert(extended_probes.end(), this->m_current_probes.second.begin(), this->m_current_probes.second.end());
+        // extended_probes.insert(extended_probes.end(), this->m_current_probes.second.begin(), this->m_current_probes.second.end());
 
         /* Collect observation & support */
         // This loop together with the next for-loop is used to generate all possible combinations of extended probes
@@ -264,10 +266,15 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                 }
 
                 if (!this->m_independent){
-                    this->m_failing_probes.push_back(this->m_current_probes.first);
+                    std::vector<const verica::Wire*> temp = this->m_current_probes.first;
+                    // temp.insert(temp.end(), this->m_current_probes.second.begin(), this->m_current_probes.second.end());
+                    this->m_failing_probes.push_back(temp);
 
                     if(settings->getCombined()){
-                        this->m_leaking_combinations.push_back(std::make_pair(this->m_current_probes.first, state->m_current_fault_injections[threadNum].first));
+                        this->m_leaking_combinations.push_back(std::make_pair(temp, state->m_current_fault_injections[threadNum].first));
+                        // std::cout << "Failed: ";
+                        // for(auto p : temp) std::cout << p->name() << " ";
+                        // std::cout << std::endl;
                     }
                 }
             } else {
@@ -281,6 +288,12 @@ void
 ConfigurationComposability::finalize(const Settings *settings, State *state) {
     /* Sort failing probe combinations by size (small to large) */
     std::sort(this->m_failing_probes.begin(), this->m_failing_probes.end(), [](const std::vector<const verica::Wire*> & a, const std::vector<const verica::Wire*> & b){ return a.size() < b.size(); });
+
+    
+    // for(auto comb : m_failing_probes){
+    //     std::cout << "Failing probes: " << std::endl;
+    //     for(auto f : comb) std::cout << "   " << f->name() << std::endl;
+    // }
 
     switch (this->m_type) {
         case Composability::NI:
@@ -373,14 +386,14 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
 
             /* Report first failing probe combination */
             if (this->m_failing_probes.size() != 0) {
-                logger->log(service, this->m_name, ITEM + "first : " + state->m_netlist_model->wire_vector_to_json_string(this->m_failing_probes[0]));
-                // // NOTE: This snippet can be used to print all wires not only the first one
-                //
-                // for (const auto &probe : this->m_failing_probes) {
-                //     logger->log(
-                //         service, this->m_name,
-                //         ITEM + state->m_netlist_model->wire_vector_to_json_string(probe));
-                // }
+                // logger->log(service, this->m_name, ITEM + "first : " + state->m_netlist_model->wire_vector_to_json_string(this->m_failing_probes[0]));
+                // NOTE: This snippet can be used to print all wires not only the first one
+                
+                for (const auto &probe : this->m_failing_probes) {
+                    logger->log(
+                        service, this->m_name,
+                        ITEM + state->m_netlist_model->wire_vector_to_json_string(probe));
+                }
             } else {
                 logger->log(service, this->m_name, ITEM + "first : - ");
             }
@@ -558,17 +571,18 @@ ConfigurationComposability::report(std::string service, const Logger *logger, co
     }
 }
 
-// void
-// ConfigurationComposability::insert(const ConfigurationComposability* configuration) {
-//     for (auto combination : configuration->failing_probes()){
-//         if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
-//             this->m_failing_probes.push_back(combination);
-//     }
-//
-//     for(auto combination : configuration->leaking_combinations())
-//         this->m_leaking_combinations.push_back(combination);
-//
-// }
+void
+ConfigurationComposability::insert(const ConfigurationCombinable* configuration) {
+    ConfigurationComposability *test = (ConfigurationComposability*) configuration;
+    for (auto combination : test->failing_probes()){
+        if (std::find(this->m_failing_probes.begin(), this->m_failing_probes.end(), combination) == this->m_failing_probes.end())
+            this->m_failing_probes.push_back(combination);
+    }
+
+    for(auto combination : test->leaking_combinations())
+        this->m_leaking_combinations.push_back(combination);
+
+}
 
 void
 ConfigurationComposability::inter_vector_combinations_and(const std::vector<std::vector<std::set<const verica::Wire*>>> &intra, unsigned int offset, std::set<const verica::Wire*> combination, std::vector<std::set<const verica::Wire*>> &inter) {

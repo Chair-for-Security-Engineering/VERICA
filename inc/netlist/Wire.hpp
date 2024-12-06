@@ -114,6 +114,10 @@ namespace verica
             const size_t propagation_path_size(void) const { return m_propagation_path.size(); }
             const int& faulty_gate_identifier(int core) const { return m_faulty_gate_identifier[core]; }
 
+            const long double& get_leaking_probability() const { return m_leaking_probability; }
+            const long double& get_faulting_probability() const { return m_faulting_probability; }
+            const long double& get_faulting_probability_inverse() const { return m_faulting_probability_inverse; }
+
             /**
              * Golden function of the subcircuit spanning from the wire to the inputs of the current
              * module under test (generated during elaboration). Used during fault injection tracking
@@ -217,6 +221,11 @@ namespace verica
             std::vector<BDD> m_secrets;                         /**<  */
 
             void remove_target_pin(int uid);
+
+            /* Random Probing/Faulting */
+            long double m_leaking_probability = 0.0;
+            long double m_faulting_probability = 0.0;
+            long double m_faulting_probability_inverse = 0.0;
     };
 }
 

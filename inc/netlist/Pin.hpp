@@ -114,6 +114,16 @@ namespace verica
             const int& fault_domain() const { return m_fault_domain; }
 
             /** 
+             * Each input and output pin can be associated with a fault index (for duplication based countermeasures).
+             * All pins with the same fault index belong to the same input/output and therefore are used for detection or correction.
+             *
+             * @brief Accessor function for pin fault domain.
+             *
+             * @returns The fault domain of the pin.
+             */
+            const int& fault_index() const { return m_fault_index; }
+
+            /** 
              * Each input and output pin can be associated with a secret index.
              * Pins with the same secret index belong to the same secret input.
              * 
@@ -238,6 +248,7 @@ namespace verica
 
             /* Duplication */
             int m_fault_domain = -1;        /**< Fault domain of the pin (Duplication) */
+            int m_fault_index = -1;         /**< Fault index of the pin (Duplication) */
 
             /* Direction */
             bool m_is_input;                /**< Input/output pin (Direction) */

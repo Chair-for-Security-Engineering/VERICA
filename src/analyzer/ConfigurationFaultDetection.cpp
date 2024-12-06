@@ -75,8 +75,7 @@ ConfigurationFaultDetection::execute(const Settings *settings, State *state) {
         for(auto w : state->m_data_output_wires){
             BDD diff = w->golden_functions(core) ^ w->faulty_functions(core);
             compprime |= diff;
-            BDD check = (settings->getFaultLogicLevelErrorFlag()) ? (diff ^ comp) : !(diff ^ comp);
-            if(!check.IsZero()) {
+            if(!((diff & comp).IsZero())) {
                 // collect the fault domains of the errors
                 for(auto p : w->target_pins()){
                     if(std::find(mut->output_pins().begin(), mut->output_pins().end(), p) != mut->output_pins().end())
@@ -112,8 +111,7 @@ ConfigurationFaultDetection::execute(const Settings *settings, State *state) {
             }
             BDD diff = temp ^ w->faulty_functions(core);
             compprime |= diff;
-            BDD check = (settings->getFaultLogicLevelErrorFlag()) ? (diff ^ comp) : !(diff ^ comp);
-            if(!check.IsZero()) {
+            if(!((diff & comp).IsZero())) {
                 // collect the fault domains of the errors
                 for(auto p : w->target_pins()){
                     if(std::find(mut->output_pins().begin(), mut->output_pins().end(), p) != mut->output_pins().end())
@@ -139,8 +137,32 @@ ConfigurationFaultDetection::execute(const Settings *settings, State *state) {
     if (((compprime & (!comp))).CountMinterm(state->m_mut_input_size) == 0){
         state->m_effective[core] += 0; 
     } else {
-        state->m_effective[core] += 1;
-        m_effective_faults_fia[core].push_back(state->m_current_fault_injections[core].first);
+        // Threshold faulting model
+        if(settings->getFaultThresholdFaulting()){
+            if(max_k <= settings->getNumberOfFaults()){
+                state->m_effective[core] += 1;
+                m_effective_faults_fia[core].push_back(state->m_current_fault_injections[core].first);
+            }
+        }
+
+        // Random faulting model
+        if(settings->getFaultRandomFaulting()){
+            // Determine faulting probabilities for faulted and non-faulted wires
+            long double faulted_prob = 1.0;
+            long double non_faulted_prob = 1.0;
+            for(auto w : state->m_faultLocations){
+                if(std::find(state->m_current_fault_injections[core].first.begin(), state->m_current_fault_injections[core].first.end(), w) != state->m_current_fault_injections[core].first.end()){
+                    // Wire w has been faulted
+                    faulted_prob *= w->get_faulting_probability();
+                } else {
+                    // Wire w has not been faulted
+                    non_faulted_prob *= (1 - w->get_faulting_probability());
+                }
+            }
+
+            // Update total faulting probability
+            m_faulting_probability[core] += (faulted_prob * non_faulted_prob);
+        }
     }
 
     state->m_scenarios[core] += 1;
@@ -244,32 +266,38 @@ ConfigurationFaultDetection::finalize(const Settings *settings, State *state) {
     for(auto f : m_effective_faults_icsni) state->m_effective_faults_icsni.insert(state->m_effective_faults_icsni.end(), f.begin(), f.end());
     for(auto f : m_effective_faults_cini) state->m_effective_faults_cini.insert(state->m_effective_faults_cini.end(), f.begin(), f.end());
     for(auto f : m_effective_faults_icini) state->m_effective_faults_icini.insert(state->m_effective_faults_icini.end(), f.begin(), f.end());
+
+    // Random Faulting
+    state->m_faulting_probability = 0.0;
+    for(auto f : m_faulting_probability) state->m_faulting_probability += f;
 }
 
 void
 ConfigurationFaultDetection::report(std::string service, const Logger *logger, const Settings *settings, State *state) const {
-    /* Print header */
-    logger->header("ANALYSIS REPORT");
+    if(settings->getFaultThresholdFaulting() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
+        /* Print header */
+        logger->header("ANALYSIS REPORT THRESHOLD FAULTING");
 
-    // Fault Injection
-    double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
-    for(auto v : state->m_effective) effective += v;
-    for(auto v : state->m_scenarios) scenarios += v; 
+        // Fault Injection
+        double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
+        for(auto v : state->m_effective) effective += v;
+        for(auto v : state->m_scenarios) scenarios += v;
 
-    if(settings->getVerbose() > 0) {
-        logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
-        logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
-    } 
+        if(settings->getVerbose() > 0) {
+            logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
+            logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
+        }
 
-    /* Print footer */
-    if (!effective)
-        logger->footer(service, this->m_name, SUCCESS);
-    else
-        logger->footer(service, this->m_name, FAILURE);
+        /* Print footer */
+        if (!effective)
+            logger->footer(service, this->m_name, SUCCESS);
+        else
+            logger->footer(service, this->m_name, FAILURE);
+    }
 
     
     /* ReportFNI */
-    if(settings->getFaultFNI()){
+    if(settings->getFaultFNI() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
         /* Print header */
         logger->header("ANALYSIS REPORT FNI");
 
@@ -291,7 +319,7 @@ ConfigurationFaultDetection::report(std::string service, const Logger *logger, c
     }
 
     /* Report FSNI */
-    if(settings->getFaultFSNI()){
+    if(settings->getFaultFSNI() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
         /* Print header */
         logger->header("ANALYSIS REPORT FSNI");
 
@@ -313,7 +341,7 @@ ConfigurationFaultDetection::report(std::string service, const Logger *logger, c
     }
 
     /* Report FINI */
-    if(settings->getFaultFINI()){
+    if(settings->getFaultFINI() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
         /* Print header */
         logger->header("ANALYSIS REPORT FINI");
 
@@ -332,6 +360,24 @@ ConfigurationFaultDetection::report(std::string service, const Logger *logger, c
             logger->footer(service, this->m_name, SUCCESS);
         else
             logger->footer(service, this->m_name, FAILURE);
+    }
+
+    /* Report Random Faulting */
+    if(settings->getFaultRandomFaulting()){
+        /* Print header */
+        logger->header("ANALYSIS REPORT RANDOM FAULTING");
+
+        /* Print results */
+        if(settings->getVerbose() > 0){
+            std::stringstream prob;
+            prob << std::scientific;  
+            prob << state->m_faulting_probability;
+            
+            logger->log(service, this->m_name, "Faulting Probability: " + prob.str());
+        }
+
+        /* Print footer */
+        logger->footer(service, this->m_name, SUCCESS);
     }
 }
 

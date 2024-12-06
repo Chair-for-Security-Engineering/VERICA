@@ -29,6 +29,8 @@
 
 #include "Configuration.hpp"
 
+enum class OutputProbes {NONE, NI, SNI, PINI};
+
 class ConfigurationSCA : public Configuration
 {
     public:
@@ -47,7 +49,7 @@ class ConfigurationSCA : public Configuration
         void report(std::string service, const Logger *logger, const Settings *settings, State *state) const override;
 
         /* Update */
-        void update (State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int order, bool simulate_outputs, const int thread_num);
+        void update (State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int order, OutputProbes simulation_outputs, const int thread_num);
 
         /* Get probe positions */
         std::vector<const verica::Wire*> &get_probe_positions() {return m_positions; };
@@ -82,7 +84,29 @@ class ConfigurationSCA : public Configuration
         * @param reduce_order Reduces the order (i.e., number of probes per probe combination). This is required for combined analysis, e.g., C-NI.
         * @param simulate_outputs If true, all outputs with the same share domain are simulated if a probe is placed on one of the corresponding output shares. 
         */ 
-        void update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int max_order, bool simulate_outputs, const int thread_num);
+        void update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int max_order, OutputProbes simulation_outputs, const int thread_num);
+
+        /**
+         * @brief Annotates all wires with their faulting probability.
+         * @param state Pointer to state.
+         * @param file Location of probability file.
+         * @param general_prob Probability that is used if wire is not listed in the probability file.
+        */
+        void determine_probing_probabilities(State *state, std::string file, long double general_prob);
+
+        /**
+         * @brief Determines all combinations of up to d shares of each output
+         * @param state Pointer to state.
+         * @param settings Pointer to settings.
+        */
+        void separate_output_pins_per_output_and_fault_domain(State *state, const Settings *settings, int sca_order, std::map<int, std::vector<std::vector<std::vector<const verica::Pin*>>>> &combined_pins_per_output_and_fault_domain);
+
+        /**
+         * @brief Determines all combinations of up to d shares of each output
+         * @param state Pointer to state.
+         * @param settings Pointer to settings.
+        */
+        std::vector<std::vector<const verica::Wire*>> determine_output_combinations(State *state, const Settings *settings, int order);
 
 
         /* Holds all possible probe positions */

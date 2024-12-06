@@ -38,13 +38,34 @@ ConfigurationFaultCorrection::initialize(const Settings *settings, State *state)
     m_effective_faults_icsni.resize(settings->getCores());
     m_effective_faults_cini.resize(settings->getCores());
     m_effective_faults_icini.resize(settings->getCores());
+
+    m_old_k.resize(settings->getCores(), 0);
+
+    // initialize container for random faulting 
+    if(settings->getFaultRandomFaulting()){
+        for(unsigned int core=0; core<settings->getCores(); core++) m_faulting_probability.push_back(0.0);
+        for(unsigned int core=0; core<settings->getCores(); core++) m_faulting_probability_bounded.push_back(0.0);
+    }
+
+    // initialize container for random faulting composability
+    if(settings->getFaultRandomFaultingComposability()){
+        for(unsigned int core=0; core<settings->getCores(); core++){
+            std::vector<long double> temp(state->m_random_faulting_composability_input_combinations.size()+1, 0.0);
+            m_faulting_probabilities.push_back(temp);
+            m_faulting_probabilities_bounded.push_back(temp);
+        }
+    }
 }
 
 void
 ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
     int core = omp_get_thread_num();
     unsigned int max_k = state->m_current_number_of_injected_faults;
-    // bool secure = true;
+
+    if(max_k > m_old_k[core]) {
+        reset_bounds(settings, state, core);
+        m_old_k[core] = max_k;
+    }
 
     // Check if random input is faulted
     std::map<const verica::Wire*, verica::fault::Fault> faulted_rand_inputs;
@@ -58,6 +79,7 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
     BDD compprime = state->m_managers[core].bddZero();
     uint64_t cnt_faults = 0;
     std::vector<const verica::Pin*> output_fault_domain;
+    std::map<int, std::set<const verica::Pin*>> output_fault_index;
 
     if(faulted_rand_inputs.empty()){
         // no random input is faulted
@@ -67,8 +89,12 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
             if(!diff.IsZero()){
                 // collect the fault domains of the errors
                 for(auto p : w->target_pins()){
+                    // Fault domain
                     if(std::find(mut->output_pins().begin(), mut->output_pins().end(), p) != mut->output_pins().end())
                         output_fault_domain.push_back(p);
+
+                    // Fault index
+                    output_fault_index[p->fault_index()].insert(p);
                 }
                 // count the errors
                 cnt_faults++;
@@ -103,8 +129,12 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
             if(!diff.IsZero()){
                 // collect the fault domains of the errors
                 for(auto p : w->target_pins()){
+                    // Fault domain
                     if(std::find(mut->output_pins().begin(), mut->output_pins().end(), p) != mut->output_pins().end())
                         output_fault_domain.push_back(p);
+
+                    // Fault index
+                    output_fault_index[p->fault_index()].insert(p);
                 }
                 // count the errors
                 cnt_faults++;
@@ -112,16 +142,74 @@ ConfigurationFaultCorrection::execute(const Settings *settings, State *state) {
         }
     }
 
-    // Evaluate
-    if (compprime.CountMinterm(state->m_mut_input_size) == 0){
-        state->m_effective[core] += 0;   // no effective fault was detected
-    } else {
-        state->m_effective[core] += 1;
-        // TODO: print wire and compare with fiver output
-        // TODO: adapt fiver to use same configs as verica (blacklist, netlist, ... )
-        // TODO: Start with detection!
-        m_effective_faults_fia[core].push_back(state->m_current_fault_injections[core].first);
+    // Evaluate threshold faulting model
+    if(settings->getFaultThresholdFaulting()){
+        if (compprime.CountMinterm(state->m_mut_input_size) == 0){
+            state->m_effective[core] += 0;   // no effective fault was detected
+        } else {
+            state->m_effective[core] += 1;
+            m_effective_faults_fia[core].push_back(state->m_current_fault_injections[core].first);     
+        }
     }
+
+    // Evaluate random faulting model
+    if(settings->getFaultRandomFaulting() || settings->getFaultRandomFaultingComposability()){
+        // Check if faults at output cannot be corrected
+        int correction_capability = (int) ((state->m_min_output_duplications-1) / 2);
+        bool insecure = false;
+        for(auto idx : output_fault_index){
+            insecure |= (idx.second.size() > correction_capability) ? true : false;
+        }
+
+        // Determine faulting probabilities for faulted and non-faulted wires
+        long double faulted_prob = 1.0;
+        long double non_faulted_prob = 1.0;
+        for(auto w : state->m_faultLocations){
+            if(std::find(state->m_current_fault_injections[core].first.begin(), state->m_current_fault_injections[core].first.end(), w) != state->m_current_fault_injections[core].first.end()){
+                // Wire w has been faulted
+                faulted_prob *= w->get_faulting_probability();
+            } else {
+                // Wire w has not been faulted
+                non_faulted_prob *= w->get_faulting_probability_inverse();
+            }
+        }
+
+        // Final fault probability
+        long double prob = (faulted_prob * non_faulted_prob);
+
+        // This need to be done in a critical environment (for unkown reasons)
+        #pragma omp critical
+        {
+            state->m_random_faulting_current_single_faulting_probability[core] = prob;
+            state->m_random_faulting_correctable[core] = !insecure;
+        }
+
+        // Update faulting probability only if error cannot be corrected
+        if(insecure){
+            m_counter++;
+            // Update total faulting probability
+            if(settings->getFaultRandomFaulting()) m_faulting_probability[core] += prob;
+
+            // Update faulting probability for composability checks
+            if(settings->getFaultRandomFaultingComposability()) m_faulting_probabilities[core][state->m_random_faulting_pos_combination[core]] += prob;
+        
+            // #pragma omp critical
+            // {
+            //     std::cout << "Effective fault: ";
+            //     for(unsigned int i=0; i<state->m_current_fault_injections[core].first.size(); ++i){
+            //         std::cout << state->m_current_fault_injections[core].first[i]->name() << " ";
+            //         // if(state->m_current_fault_injections[core].first[i]->source_pin()->port_type() == verica::Refresh)
+            //             // faulted_rand_inputs[state->m_current_fault_injections[core].first[i]] = state->m_current_fault_injections[core].second[i];
+            //     }
+            //     std::cout << "; with effected outputs: ";
+            //     for(auto w : state->m_data_output_wires){
+            //         std::cout << w->name() << " ";
+            //     }
+            //     std::cout << std::endl;
+            // }
+        }
+    }
+    
 
     state->m_detected[core] = 0;
     state->m_scenarios[core] += 1;
@@ -227,32 +315,73 @@ ConfigurationFaultCorrection::finalize(const Settings *settings, State *state) {
     for(auto f : m_effective_faults_icsni) state->m_effective_faults_icsni.insert(state->m_effective_faults_icsni.end(), f.begin(), f.end());
     for(auto f : m_effective_faults_cini) state->m_effective_faults_cini.insert(state->m_effective_faults_cini.end(), f.begin(), f.end());
     for(auto f : m_effective_faults_icini) state->m_effective_faults_icini.insert(state->m_effective_faults_icini.end(), f.begin(), f.end());
+
+    // Random faulting
+    state->m_faulting_probability = 0.0;
+    for(auto f : m_faulting_probability) state->m_faulting_probability += f;
+
+    state->m_faulting_probability_bounded = 0.0;
+    unsigned int lower = state->m_current_number_of_injected_faults;
+    for(unsigned int j=lower+1; j<=state->m_faultLocations.size(); j++){
+        state->m_faulting_probability_bounded += binomial_coeff((long double)state->m_faultLocations.size(), (long double)j) *
+                                                std::pow(settings->getFaultRandomFaultingProbability(), j) *
+                                                std::pow((1-settings->getFaultRandomFaultingProbability()), (state->m_faultLocations.size() -j));
+    }
+
+
+    // Random Faulting composability
+    state->m_faulting_probability_composability = 0.0;
+    state->m_random_faulting_probabilities_per_input_combination.clear();
+    state->m_random_faulting_probabilities_per_input_combination.resize(state->m_random_faulting_composability_input_combinations.size()+1);
+    for(auto probs_per_core : m_faulting_probabilities) {
+        for(unsigned int idx=0; idx<probs_per_core.size(); idx++) state->m_random_faulting_probabilities_per_input_combination[idx] += probs_per_core[idx];
+    }
+
+    state->m_faulting_probability_composability_bounded = 0.0;
+    unsigned int lower_comp = state->m_current_number_of_injected_faults; // + state->m_faultLocations_copy.size() - state->m_faultLocations.size();
+    for(unsigned int j=lower_comp+1; j<=state->m_faultLocations.size(); j++){
+        state->m_faulting_probability_composability_bounded += binomial_coeff((long double)state->m_faultLocations.size(), (long double)j) *
+                                                std::pow(settings->getFaultRandomFaultingProbability(), j) *
+                                                std::pow((1-settings->getFaultRandomFaultingProbability()), (state->m_faultLocations.size() -j));
+    }
+
+    // state->m_faulting_probability_composability_bounded = 0.0;
+    // std::vector<long double> intermediate_probabilities_bounded(state->m_random_faulting_composability_input_combinations.size()+1);
+    // for(auto probs_per_core : m_faulting_probabilities_bounded) {
+    //     for(unsigned int idx=0; idx<probs_per_core.size(); idx++) intermediate_probabilities_bounded[idx] += probs_per_core[idx];
+    // }
+
+    // for(auto prob : intermediate_probabilities_bounded) {
+    //     state->m_faulting_probability_composability_bounded = (prob > state->m_faulting_probability_composability_bounded) ? prob : state->m_faulting_probability_composability_bounded;
+    //     std::cout << "Bound: " << state->m_faulting_probability_composability_bounded << " (" << prob << ")" << std::endl;
+    // }
 }
 
 void
-ConfigurationFaultCorrection::report(std::string service, const Logger *logger, const Settings *settings, State *state) const
-{
-    /* Print header */
-    logger->header("ANALYSIS REPORT");
+ConfigurationFaultCorrection::report(std::string service, const Logger *logger, const Settings *settings, State *state) const{
+    if(settings->getFaultThresholdFaulting() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
+        /* Print header */
+        logger->header("ANALYSIS REPORT THRESHOLD FAULTING");
 
-    // Fault Injection
-    double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
-    for(auto v : state->m_effective) effective += v;
-    for(auto v : state->m_scenarios) scenarios += v;
+        // Fault Injection
+        double effective = 0, ineffective = 0, detected = 0, scenarios = 0;
+        for(auto v : state->m_effective) effective += v;
+        for(auto v : state->m_scenarios) scenarios += v;
 
-    if(settings->getVerbose() > 0) {
-        logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
-        logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
+        if(settings->getVerbose() > 0) {
+            logger->log(service, this->m_name, "Effective faults:   " + std::to_string((u_int64_t)effective));
+            logger->log(service, this->m_name, "Fault scenarios:    " + std::to_string((u_int64_t)scenarios));
+        }
+
+        /* Print footer */
+        if (!effective)
+            logger->footer(service, this->m_name, SUCCESS);
+        else
+            logger->footer(service, this->m_name, FAILURE);
     }
 
-    /* Print footer */
-    if (!effective)
-        logger->footer(service, this->m_name, SUCCESS);
-    else
-        logger->footer(service, this->m_name, FAILURE);
-
     /* ReportFNI */
-    if(settings->getFaultFNI()){
+    if(settings->getFaultFNI() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
         /* Print header */
         logger->header("ANALYSIS REPORT FNI");
 
@@ -274,7 +403,7 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
     }
 
     /* Report FSNI */
-    if(settings->getFaultFSNI()){
+    if(settings->getFaultFSNI() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
         /* Print header */
         logger->header("ANALYSIS REPORT FSNI");
 
@@ -296,7 +425,7 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
     }
 
     /* Report FINI */
-    if(settings->getFaultFINI()){
+    if(settings->getFaultFINI() && (state->m_current_number_of_injected_faults <= settings->getNumberOfFaults())){
         /* Print header */
         logger->header("ANALYSIS REPORT FINI");
 
@@ -316,5 +445,79 @@ ConfigurationFaultCorrection::report(std::string service, const Logger *logger, 
         else
             logger->footer(service, this->m_name, FAILURE);
     }
+
+    /* Report Random Faulting */
+    if(settings->getFaultRandomFaulting()){
+        /* Print header */
+        logger->header("ANALYSIS REPORT RANDOM FAULTING");
+
+        /* Print results */
+        if(settings->getVerbose() > 0){
+            std::stringstream prob;
+            prob << std::scientific;  
+            prob << state->m_faulting_probability;
+
+            std::stringstream prob_bounded;
+            prob_bounded << std::scientific;  
+            prob_bounded << (state->m_faulting_probability + state->m_faulting_probability_bounded);
+            
+            logger->log(service, this->m_name, "Fault-security order:           " + std::to_string(settings->getNumberOfFaults()));
+            logger->log(service, this->m_name, "wire faulting probability:      " + std::to_string(settings->getFaultRandomFaultingProbability()));
+            logger->log(service, this->m_name, "Maximum number of faults:       " + std::to_string(settings->getFaultRandomFaultingMaxFaults()));
+            logger->log(service, this->m_name, "Number of wires:                " + std::to_string(state->m_faultLocations.size()));
+            logger->log(service, this->m_name, "Faulting probability:           \u03BC = " + prob.str());
+            logger->log(service, this->m_name, "Faulting probability (bounded): \u03BC_max = " + (prob_bounded).str());
+            logger->log(service, this->m_name, "Number of faults:               " + std::to_string(m_counter));
+        }
+
+        /* Print footer */
+        logger->footer(service, this->m_name, SUCCESS);
+    }
+
+    /* Report Random Faulting Composability */
+    if(settings->getFaultRandomFaultingComposability()){
+        /* Print header */
+        logger->header("ANALYSIS REPORT RANDOM FAULTING COMPOSABILITY");
+
+        /* Print results */
+        if(settings->getVerbose() > 0){
+            std::stringstream prob;
+            prob << std::scientific;  
+            prob << state->m_faulting_probability_composability;
+
+            std::stringstream prob_bounded;
+            prob_bounded << std::scientific;  
+            prob_bounded << (state->m_faulting_probability_composability + state->m_faulting_probability_composability_bounded);
+            
+            logger->log(service, this->m_name, "Fault-security order:           " + std::to_string(settings->getNumberOfFaults()));
+            logger->log(service, this->m_name, "wire faulting probability:      " + std::to_string(settings->getFaultRandomFaultingProbability()));
+            logger->log(service, this->m_name, "Maximum number of faults:       " + std::to_string(settings->getFaultRandomFaultingMaxFaults()));
+            logger->log(service, this->m_name, "Number of wires:                " + std::to_string(state->m_faultLocations.size()));
+            logger->log(service, this->m_name, "Faulting probability:           \u03BC = " + prob.str());
+            logger->log(service, this->m_name, "Faulting probability (bounded): \u03BC_max = " + prob_bounded.str());
+            logger->log(service, this->m_name, "Number of faults:               " + std::to_string(m_counter));
+        }
+
+        /* Print footer */
+        logger->footer(service, this->m_name, SUCCESS);
+    }
 }
 
+
+
+void
+ConfigurationFaultCorrection::reset_bounds(const Settings *settings, State *state, int core){
+    #pragma omp critical
+    {    
+        // reset container for random faulting 
+        if(settings->getFaultRandomFaulting()){
+            m_faulting_probability_bounded[core] = 0.0;
+        }
+
+        // initialize container for random faulting composability
+        if(settings->getFaultRandomFaultingComposability()){
+            std::vector<long double> temp(state->m_random_faulting_composability_input_combinations.size()+1, 0.0);
+            m_faulting_probabilities_bounded[core] = temp;
+        }
+    }
+}

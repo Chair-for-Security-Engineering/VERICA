@@ -45,6 +45,8 @@
 #include <vector>
 
 
+#include "composer/Composer.hpp"
+
 class Environment
 {
     public:
@@ -84,6 +86,7 @@ class Environment
          *
          * @brief Performs a multithreaded side-channel analysis of type T.
          *
+         * @param sca_preprocessor The preprocessor configuration containing SCA information.
          * @param strategy The side-channel strategy that should be applied to the DUT.
          * @param name Name of the strategy (e.g., PROBING, NI, SNI, ...).
          * @param type Type of the composability strategy that should be applied.
@@ -91,6 +94,24 @@ class Environment
          */
         template<typename T> void
         analyze_sca(ConfigurationSCA &sca_preprocessor,
+                    T &strategy, 
+                    std::string name, 
+                    Composability type=Composability::NONE);
+        
+        /**
+         * This function performs a multithreaded side-channel analysis of type T.
+         * It supports probing analysis (type=NONE) and all implemented composability notions.
+         *
+         * @brief Performs a multithreaded side-channel analysis of type T.
+         *
+         * @param sca_preprocessor The preprocessor configuration containing SCA information.
+         * @param strategy The side-channel strategy that should be applied to the DUT.
+         * @param name Name of the strategy (e.g., PROBING, NI, SNI, ...).
+         * @param type Type of the composability strategy that should be applied.
+         *
+         */
+        template<typename T> void
+        analyze_random_sca(ConfigurationSCA &sca_preprocessor,
                     T &strategy, 
                     std::string name, 
                     Composability type=Composability::NONE);
@@ -139,6 +160,19 @@ class Environment
         analyze_sca_combined(T &strategy, int thread_num);
 
         /**
+         * This function performs a multithreaded side-channel analysis in the combined settings (i.e., with injected faults) of type T.
+         * It supports probing analysis (type=NONE) and all implemented composability notions.
+         *
+         * @brief Performs a multithreaded side-channel analysis of type T in a combined setting.
+         *
+         * @param strategy The side-channel strategy that should be applied to the DUT.
+         * @param thread_num Number of the working thread.
+         *
+         */
+        template<typename T> void
+        analyze_random_sca_combined(T &strategy, int thread_num);
+
+        /**
          * Reports the side-channel analysis results in a combined setting, i.e., with injected faults.
          *
          * @brief Reports SCA analysis results in a combined setting.
@@ -164,6 +198,9 @@ class Environment
         void
         report_independent_combined(std::vector<std::unique_ptr<ConfigurationCombinable>> &strategies, std::string name);
 
+        template<typename T> void
+        random_probing(T &strategy, std::vector<const verica::Wire*> &wires, std::vector<const verica::Wire*> comb, long unsigned int num_of_probe_positions, int ptr, long double &leaking_probability, int &comb_cnt);
+
 
         /* Logger */
         Logger *m_logger;
@@ -188,6 +225,9 @@ class Environment
 
         /* Visualizer */
         Visualizer *m_visualizer;
+
+        /* Composer */
+        Composer *m_composer;
 };
 
 #endif // __VERICA_ENVIRONMENT_HPP_

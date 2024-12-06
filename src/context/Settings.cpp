@@ -74,8 +74,11 @@ Settings::Settings(int argc, char * argv[])
     // Validate parsed settings
     validateAndInitSettings(config);
 
+    // Identify invalid combinations of settings
+    checkInvalidSettingCombinations();
+
     // Composability
-    this->faultComposability= (this->faultFNIEnabled || this->faultFSNIEnabled || this->faultFINIEnabled ||
+    this->faultComposability= (this->faultFNIEnabled || this->faultFSNIEnabled || this->faultFINIEnabled || this->faultRandomFaultingComposabilityEnabled || 
         this->cniEnabled || this->csniEnabled || this->icsniEnabled || this->ciniEnabled || this->iciniEnabled);
 }
 
@@ -125,6 +128,18 @@ bool Settings::getVisualizationFull() const {
 
 bool Settings::getVisualizationPartial() const {
     return this->partialVisualization;
+}
+
+bool Settings::getComposer() const {
+    return this->composerEnabled;
+}
+
+std::string Settings::getComposerPath() const{
+    return this->composerPath;
+}
+
+bool Settings::getComposerIronMask() const {
+    return this->composerIronMaskEnabled;
 }
 
 int Settings::getMasking() const {
@@ -244,23 +259,47 @@ bool Settings::getSideChannelModelCouplings() const {
 }
 
 bool Settings::getSideChannelAnalysisUniformity() const {
-    return this->scaUniformityEnabled && this->scaEnabled;
+    return this->scaUniformityEnabled;
 }
 
 bool Settings::getSideChannelAnalysisProbing() const {
-    return this->scaProbingEnabled && this->scaEnabled;
+    return this->scaProbingEnabled;
 }
 
 bool Settings::getSideChannelAnalysisNI() const {
-    return this->scaNIEnabled && this->scaEnabled;
+    return this->scaNIEnabled;
 }
 
 bool Settings::getSideChannelAnalysisSNI() const {
-    return this->scaSNIEnabled && this->scaEnabled;
+    return this->scaSNIEnabled;
 }
 
 bool Settings::getSideChannelAnalysisPINI() const {
-    return this->scaPINIEnabled && this->scaEnabled;
+    return this->scaPINIEnabled;
+}
+
+bool Settings::getSideChannelAnalysisRandomProbing() const {
+    return this->scaRandomProbingEnabled;
+}
+
+bool Settings::getSideChannelAnalysisRandomProbingComposability() const {
+    return this->scaRandomProbingComposabilityEnabled;
+}
+
+long double Settings::getSideChannelRandomProbingProbability() const {
+    return this->scaRandomProbingProbability;
+}
+
+int Settings::getSideChannelRandomProbingMaxProbes() const {
+    return this->scaRandomProbingMaxProbes;
+}
+
+std::string Settings::getSideChannelRandomProbabilityFile() const {
+    return this->scaRandomProbingProbabilityFile;
+}
+
+int Settings::getSideChannelRandomProbingCopies() const {
+    return this->scaRandomProbingCopies;
 }
 /**********************************************************************/
 
@@ -285,16 +324,28 @@ bool Settings::getFaultLogicLevelErrorFlag() const {
     return this->faultLogicLevelErrorFlag;
 }
 
+bool Settings::getFaultThresholdFaulting() const {
+    return this->faultThresholdFaultingEnabled;
+}
+
 bool Settings::getFaultFNI() const {
-    return this->faultFNIEnabled && this->faultInjectionEnabled;
+    return this->faultFNIEnabled;
 }
 
 bool Settings::getFaultFSNI() const {
-    return this->faultFSNIEnabled && this->faultInjectionEnabled;
+    return this->faultFSNIEnabled;
 }
 
 bool Settings::getFaultFINI() const {
-    return this->faultFINIEnabled && this->faultInjectionEnabled;
+    return this->faultFINIEnabled;
+}
+
+bool Settings::getFaultRandomFaulting() const {
+    return this->faultRandomFaultingEnabled;
+}
+
+bool Settings::getFaultRandomFaultingComposability() const {
+    return this->faultRandomFaultingComposabilityEnabled;
 }
 
 bool Settings::getFaultVulnerabilityEnable() const {
@@ -312,6 +363,18 @@ bool Settings::getFaultVulnerabilityEstimator() const {
 int Settings::getFaultVulnerabilityEstimatorRuns() const {
     return this->faultVulnerabilityEstimatorRuns;
 }
+
+long double Settings::getFaultRandomFaultingProbability() const {
+    return this->faultRandomFaultingProbability;
+}
+
+int Settings::getFaultRandomFaultingMaxFaults() const {
+    return this->faultRandomFaultingMaxFaults;
+}
+
+std::string Settings::getFaultRandomFaultingProbabilityFile() const {
+    return this->faultRandomFaultingProbabilityFile;
+}
 /**********************************************************************/
 
 
@@ -323,23 +386,23 @@ bool Settings::getCombined() const {
 }
 
 bool Settings::getCombinedCNI() const {
-    return this->cniEnabled && this->combinedEnabled;
+    return this->cniEnabled;
 }
 
 bool Settings::getCombinedCSNI() const {
-    return this->csniEnabled && this->combinedEnabled;
+    return this->csniEnabled;
 }
 
 bool Settings::getCombinedICSNI() const {
-    return this->icsniEnabled && this->combinedEnabled;
+    return this->icsniEnabled;
 }
 
 bool Settings::getCombinedCINI() const {
-    return this->ciniEnabled && this->combinedEnabled;
+    return this->ciniEnabled;
 }
 
 bool Settings::getCombinedICINI() const {
-    return this->iciniEnabled && this->combinedEnabled;
+    return this->iciniEnabled;
 }
 /**********************************************************************/
 
@@ -365,6 +428,7 @@ void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
     std::vector<std::string> filter{"none", "black", "white"};
     std::vector<std::string> location{"c", "s", "cs"};
     std::vector<std::string> lib{"NANG45", "NL"};
+    std::vector<int> copies{0,1,2};
     std::vector<std::string> fault_strategy{"detection", "correction", "sfa", "sifa"};
 
     // validate cores
@@ -407,7 +471,7 @@ void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
 
     // validate annotation settings
     this->annotationFilePath = checkSettingFileExists("general.annotation.file", config);
-    this->annotationsEnabled        = checkSettingRange<bool,std::string>("general.annotation.apply", boolean, config);
+    this->annotationsEnabled = checkSettingRange<bool,std::string>("general.annotation.apply", boolean, config);
 
     // validate cudd settings
     this->reorderingEnabled = checkSettingRange<bool, std::string>("general.cudd.reordering", boolean, config);
@@ -417,6 +481,11 @@ void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
     this->visualizationPath = checkSettingPathExists("general.visualization.path", config);
     this->fullVisualizationEnabled = checkSettingRange<bool, std::string>("general.visualization.full", boolean, config);
     this->partialVisualization = checkSettingRange<bool, std::string>("general.visualization.partial", boolean, config);
+
+    // validate composer settings
+    this->composerEnabled = checkSettingRange<bool, std::string>("general.composer.enable", boolean, config);
+    this->composerPath = checkSettingPathExists("general.composer.path", config);
+    this->composerIronMaskEnabled = checkSettingRange<bool, std::string>("general.composer.iron-mask", boolean, config);
     // ---------------------------------------------------------
 
 
@@ -434,11 +503,18 @@ void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
     this->scaModelTransitionsEnabled = checkSettingRange<bool, std::string>("side-channel.model.transitions", boolean, config);
     this->scaModelCouplingsEnabled = checkSettingRange<bool, std::string>("side-channel.model.couplings", boolean, config);
 
-    this->scaUniformityEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.uniformity", boolean, config));
-    this->scaProbingEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.probing", boolean, config));
-    this->scaNIEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.p-ni", boolean, config));
-    this->scaSNIEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.p-sni", boolean, config));
-    this->scaPINIEnabled = (this->scaEnabled && checkSettingRange<bool, std::string>("side-channel.analysis.pini", boolean, config));
+    this->scaUniformityEnabled = checkSettingRange<bool, std::string>("side-channel.analysis.uniformity", boolean, config);
+    this->scaProbingEnabled = checkSettingRange<bool, std::string>("side-channel.analysis.probing", boolean, config);
+    this->scaNIEnabled = checkSettingRange<bool, std::string>("side-channel.analysis.p-ni", boolean, config);
+    this->scaSNIEnabled = checkSettingRange<bool, std::string>("side-channel.analysis.p-sni", boolean, config);
+    this->scaPINIEnabled = checkSettingRange<bool, std::string>("side-channel.analysis.pini", boolean, config);
+    this->scaRandomProbingEnabled = checkSettingRange<bool, std::string>("side-channel.analysis.random-probing", boolean, config);
+    this->scaRandomProbingComposabilityEnabled = checkSettingRange<bool, std::string>("side-channel.analysis.random-probing-composability", boolean, config);
+
+    this->scaRandomProbingProbability = checkSettingGreaterEqual("side-channel.random-probing.probability", 0.0, config);
+    this->scaRandomProbingMaxProbes = checkSettingGreaterEqual("side-channel.random-probing.max-probes", 0, config);
+    this->scaRandomProbingProbabilityFile = checkSettingPathExists("side-channel.random-probing.probability-file", config);
+    this->scaRandomProbingCopies = checkSettingRange<int, int>("side-channel.random-probing.consider-copies", copies, config);
 
     // -------------------------- FIA --------------------------
     // validate FIA settings
@@ -454,14 +530,21 @@ void Settings::validateAndInitSettings(boost::property_tree::ptree & config){
     this->faultReduceComplexityEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.reduced_complexity", boolean, config);
     this->faultAnalysisStrategy = checkSettingRange<std::string, std::string>("fault-injection.analysis.strategy", fault_strategy, config);
     this->faultLogicLevelErrorFlag = checkSettingRange<bool, std::string>("fault-injection.analysis.logic-level-error-flag", boolean, config);
-    this->faultFNIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.f-ni", boolean, config));
-    this->faultFSNIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.f-sni", boolean, config));
-    this->faultFINIEnabled = (this->faultInjectionEnabled && checkSettingRange<bool, std::string>("fault-injection.analysis.fini", boolean, config));
+    this->faultThresholdFaultingEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.k-faulting", boolean, config);
+    this->faultFNIEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.f-ni", boolean, config);
+    this->faultFSNIEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.f-sni", boolean, config);
+    this->faultFINIEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.fini", boolean, config);
+    this->faultRandomFaultingEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.random-faulting", boolean, config);
+    this->faultRandomFaultingComposabilityEnabled = checkSettingRange<bool, std::string>("fault-injection.analysis.random-faulting-composability", boolean, config);
 
     this->faultVulnerabilityEnabled         = checkSettingRange<bool, std::string>("fault-injection.vulnerability.enable", boolean, config);
     this->faultVulnerabilityUnshareOutputs  = checkSettingRange<bool, std::string>("fault-injection.vulnerability.unshare_outputs", boolean, config);
     this->faultVulnerabilityEstimator       = checkSettingRange<bool, std::string>("fault-injection.vulnerability.estimator", boolean, config);
     this->faultVulnerabilityEstimatorRuns   = checkSettingGreaterEqual("fault-injection.vulnerability.runs", 0, config);
+
+    this->faultRandomFaultingProbability = checkSettingGreaterEqual("fault-injection.random-faulting.probability", 0.0, config);
+    this->faultRandomFaultingMaxFaults = checkSettingGreaterEqual("fault-injection.random-faulting.max-faults", 0, config);
+    this->faultRandomFaultingProbabilityFile = checkSettingPathExists("fault-injection.random-faulting.probability-file", config);
     // ---------------------------------------------------------
 
     // ------------------ Combined Analysis---------------------
@@ -501,19 +584,44 @@ std::string Settings::checkSettingPathExists(const std::string &setting, boost::
     std::string path = config.get<std::string>(setting);
     const std::filesystem::path p{path};
     if(!std::filesystem::exists(p)){
-        throw std::logic_error("[CONFIG] Directory for " + setting + "does not exist!");
+        throw std::logic_error("[CONFIG] Directory for " + setting + " does not exist (" + path + ")!");
     }
     else{
         return path;
     }
 }
 
-int Settings::checkSettingGreaterEqual(const std::string &setting, const int &threshold, boost::property_tree::ptree &config){
-    int num = config.get<int>(setting);
+template<typename T> T  Settings::checkSettingGreaterEqual(const std::string &setting, const T &threshold, boost::property_tree::ptree &config){
+    T num = config.get<T>(setting);
     if(num < threshold){
         throw std::logic_error("[CONFIG] Invalid value for " + setting + "!");
     }
     else{
         return num;
+    }
+}
+
+void Settings::checkInvalidSettingCombinations(){
+    // The SCA indistinguishability is currently only supported for probing security 
+    // combined analyses are also not support yet
+    if(this->getSideChannelAnalysisRandomProbing()){
+        if(this->getSideChannelModelGlitches() || this->getSideChannelModelTransitions() || this->getSideChannelModelCouplings()){
+            throw std::logic_error("[SETTINGS] Enabling glitches, transitions, and couplings in the random probing model is not supported!");
+        }
+    }
+
+    // Check settings for masking (i.e., Boolean or arithmetic)
+    if(this->getMasking() != 0){
+        throw std::logic_error("[SETTINGS] By now, VERICA is only tested for Boolean masking! Please set side-channel.configuration.masking to 0!");
+    }
+
+    // Check transitions settings
+    if(this->getSideChannelModelTransitions()){
+        throw std::logic_error("[SETTINGS] By now, VERICA does not support verifications in the transition-extended probing model! Please disable side-channel.model.transitions!");
+    }
+
+    // Check couplings settings
+    if(this->getSideChannelModelCouplings()){
+        throw std::logic_error("[SETTINGS] By now, VERICA does not support verifications in the coupling-extended probing model! Please disable side-channel.model.couplings!");
     }
 }

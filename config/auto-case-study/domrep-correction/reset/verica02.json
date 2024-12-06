@@ -1,0 +1,146 @@
+{
+    "general":
+    {
+        "verbose": 3,
+        "cores": 256,
+        "memory": 0,
+        "netlist":
+        {
+            "file": "test/combined-random-model/conditional-accept/andDOMREP_correction_d1_k1.v",
+            "name": "",
+            "module": ""
+        },
+        "library":
+        {
+            "file": "cell/nang45.txt",
+            "name": "NANG45"
+        },
+        "filtering":
+        {
+            "sca":
+            {
+                "type": "none",
+                "whitelist": "model/sca-whitelist",
+                "blacklist": "model/sca-blacklist"
+            },
+            "fia":
+            {
+                "type": "none",
+                "whitelist": "model/fia-whitelist",
+                "blacklist": "model/fia-blacklist"
+            }
+        },
+        "annotation":
+        {
+            "file": "test/combined-random-model/conditional-accept/annotations.json",
+            "apply": true
+        },
+        "cudd":
+        {
+            "reordering": false
+        },
+        "visualization":
+        {
+            "enable": false,
+            "path": "dot/",
+            "full": true,
+            "partial": true
+        },
+        "composer":
+        {
+            "enable": false,
+            "path": "irs/",
+            "iron-mask": true
+        }
+    },
+
+    "side-channel":
+    {
+        "enable": false,
+        "strategy": "independence",
+        "configuration":
+        {
+            "order": 1,
+            "variate": 0,
+            "masking": 0,
+            "interrupt": false
+        },
+        "model":
+        {
+            "glitches": false,
+            "transitions": false,
+            "couplings": false
+        },
+        "analysis": 
+        {
+            "uniformity": false,
+            "probing": false,
+            "p-ni": false,
+            "p-sni": false,
+            "pini": false,
+            "random-probing": false,
+            "random-probing-composability": true
+        },
+        "random-probing": 
+        {
+            "probability": 0.0009765625,
+            "max-probes": 2,
+            "probability-file": "model/probing-probability",
+            "consider-copies": 1
+        }
+    },
+
+    "fault-injection":
+    {
+        "enable": false,
+        "configuration":
+        {
+            "number": 1,
+            "variate": 0,
+            "interrupt": false
+        },
+        "model": 
+        {
+            "mapping": "model/reset-random-faulting.txt",
+            "location": "cs"
+        },
+        "analysis":
+        {
+            "reduced_complexity": false,
+            "strategy": "correction",
+            "logic-level-error-flag": false,
+            "k-faulting": false,
+            "f-ni": false,
+            "f-sni": false,
+            "fini": false,
+            "random-faulting": false,
+            "random-faulting-composability": true
+        },       
+        "vulnerability":
+        {
+            "enable" : false,
+            "unshare_outputs" : true,
+            "estimator" : false,
+            "runs" : 10000
+        },
+        "random-faulting":
+        {
+            "probability": 0.000030517578125,
+            "max-faults": 2,
+            "probability-file": "model/fault-probability"
+        }
+    },
+
+    "combined": 
+    {
+        "enable": true,
+        "analysis":
+        {
+            "c-ni": false,
+            "c-sni": false,
+            "ic-sni": false,
+            "cini": false,
+            "icini": false
+        }
+    }
+}

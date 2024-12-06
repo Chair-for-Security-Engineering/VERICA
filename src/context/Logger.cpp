@@ -75,13 +75,13 @@ Logger::copyright() const
 
     /* VERICA copyright information */
     std::vector<std::string> infos = {
-        "VERICA -- VERIFICATION OF COMBINED ATTACKS",
+        "VERICA+ -- VERIFICATION OF COMBINED RANDOM FAULT AND RANDOM PROBING SECURITY",
         "",
         "Ruhr-Universität Bochum, Chair for Security Engineering",
         "Jan Richter-Brockmann (jan.richter-brockmann@rub.de),",
         "Pascal Sasdrich (pascal.sasdrich@rub.de)",
         "",
-        "Copyright (c) 2022,",
+        "Copyright (c) 2024,",
         "Jan Richter-Brockmann,",
         "Pascal Sasdrich",
         "",
@@ -243,7 +243,6 @@ void Logger::progress(unsigned int counter, unsigned int max) const
             float progress = float(counter) / float(max-1);
 
             std::cout << std::setw(10) << std::right << std::fixed << std::setprecision(3) << elapsed.count() << "    ";
-            // std::cout << std::setw(37) << std::left << "PROGRESS" << "  ";
             std::cout << "[";
             int barPos = barWidth * progress;
             for (int i = 0; i < barWidth; ++i) {

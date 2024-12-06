@@ -24,6 +24,7 @@
  *
  * Please see license.rtf and README for license and further instructions.
  */
+
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -51,8 +52,10 @@
 #include "preprocessor/ConfigurationSCA.hpp"
 
 #include "analyzer/ConfigurationProbing.hpp"
+#include "analyzer/ConfigurationRandomProbing.hpp"
 #include "analyzer/ConfigurationUniformity.hpp"
 #include "analyzer/ConfigurationComposability.hpp"
+#include "analyzer/ConfigurationRandomProbingComposability.hpp"
 #include "analyzer/ConfigurationFaultDetection.hpp"
 #include "analyzer/ConfigurationFaultSFA.hpp"
 #include "analyzer/ConfigurationFaultSIFA.hpp"
@@ -61,6 +64,7 @@
 
 #include "visualization/ConfigurationGraphvizDot.hpp"
 
+#include "composer/ConfigurationIronMask.hpp"
 #include "composer/NetlistComposer.hpp"
 /*
  * =========================================================================================
@@ -93,6 +97,7 @@ Environment::Environment(int argc, char * argv[]) :
 
 Environment::~Environment()
 {
+    delete this->m_composer;
     delete this->m_visualizer;
     delete this->m_analyzer;
     delete this->m_injector;
@@ -126,6 +131,9 @@ Environment::initialize()
 
     /* Registering new visualization instance */
     this->m_visualizer = new Visualizer("VISUALIZER", this->m_logger, this->m_settings, this->m_state);
+    
+    /* Registering new composer instance */
+    this->m_composer = new Composer("COMPOSER", this->m_logger, this->m_settings, this->m_state);
 }
 
 void
@@ -197,13 +205,21 @@ Environment::execute()
     this->m_preprocessor->execute();
     this->m_preprocessor->report();
 
+    if(m_settings->getComposer()){
+        ConfigurationIronMask ironmask{"IronMask"};
+        this->m_composer->configure(&ironmask);
+        this->m_composer->execute();
+        this->m_composer->report();
+    }
+
+
 
     /*
      * =====================================================================================
      * [UNIFORMITY] Statistical Independence Leakage VERification (SILVER)
      * =====================================================================================
      */
-    if (this->m_settings->getSideChannelAnalysisUniformity())
+    if (this->m_settings->getSideChannel() && this->m_settings->getSideChannelAnalysisUniformity())
     {
         /* Create new uniformity verification strategy */
         ConfigurationUniformity uniformity{"UNIFORMITY"};
@@ -225,7 +241,7 @@ Environment::execute()
      * [PROBING] Statistical Independence Leakage VERification (SILVER)
      * =====================================================================================
      */
-    if (this->m_settings->getSideChannelAnalysisProbing()){
+    if ((this->m_settings->getSideChannel() || this->m_settings->getCombined()) && this->m_settings->getSideChannelAnalysisProbing()){
         /* Create new probing verification strategy */
         ConfigurationProbing probing{"PROBING", Composability::NONE};
         analyze_sca(sca_preprocessor, probing, "PROBING");
@@ -234,13 +250,36 @@ Environment::execute()
 
     /*
      * =====================================================================================
+     * [RANDOM-PROBING]
+     * =====================================================================================
+     */
+    if (this->m_settings->getSideChannel() && this->m_settings->getSideChannelAnalysisRandomProbing()){
+        /* Create new probing verification strategy */
+        ConfigurationRandomProbing random_probing{"RANDOM-PROBING", Composability::NONE};
+        analyze_random_sca(sca_preprocessor, random_probing, "RANDOM-PROBING");
+    }
+
+
+    /*
+     * =====================================================================================
      * [NON-INTERFERENCE] Statistical Independence Leakage VERification (SILVER)
      * =====================================================================================
      */
-    if (this->m_settings->getSideChannelAnalysisNI()){
+    if (this->m_settings->getSideChannel() && this->m_settings->getSideChannelAnalysisNI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_ni{"PNI", Composability::NI};
         analyze_sca(sca_preprocessor, composability_ni, "PNI", Composability::NI);
+    }
+
+    /*
+     * =====================================================================================
+     * [RANDOM-PROBING-COMPOSABILITY]
+     * =====================================================================================
+     */
+    if (this->m_settings->getSideChannel() && this->m_settings->getSideChannelAnalysisRandomProbingComposability()){
+        /* Create new composability verification strategy */
+        ConfigurationRandomProbingComposability composability_random_probing_ni{"RPCOMP", Composability::RCOMPOSABILITY};
+        analyze_random_sca(sca_preprocessor, composability_random_probing_ni, "RPCOMP", Composability::RCOMPOSABILITY);
     }
 
 
@@ -249,7 +288,7 @@ Environment::execute()
      * [STRONG NON-INTERFERENCE] Statistical Independence Leakage VERification (SILVER)
      * =====================================================================================
      */
-    if (this->m_settings->getSideChannelAnalysisSNI()){
+    if (this->m_settings->getSideChannel() && this->m_settings->getSideChannelAnalysisSNI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_sni{"PSNI", Composability::SNI};
         analyze_sca(sca_preprocessor, composability_sni, "PSNI", Composability::SNI);
@@ -261,7 +300,7 @@ Environment::execute()
      * [PROBE-ISOLATING NON-INTERFERENCE] Statistical Independence Leakage VERification (SILVER)
      * =====================================================================================
      */
-    if (this->m_settings->getSideChannelAnalysisPINI()){
+    if (this->m_settings->getSideChannel() && this->m_settings->getSideChannelAnalysisPINI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_pini{"PINI", Composability::PINI};
         analyze_sca(sca_preprocessor, composability_pini, "PINI", Composability::PINI);
@@ -273,7 +312,7 @@ Environment::execute()
      * [Combined Non-Interference]
      * =====================================================================================
      */
-    if (this->m_settings->getCombinedCNI()){
+    if (this->m_settings->getCombined() && this->m_settings->getCombinedCNI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_cni{"CNI", Composability::CNI};
         analyze_sca(sca_preprocessor, composability_cni, "CNI", Composability::CNI);
@@ -285,7 +324,7 @@ Environment::execute()
      * [Combined Strong Non-Interference]
      * =====================================================================================
      */
-    if (this->m_settings->getCombinedCSNI()){
+    if (this->m_settings->getCombined() && this->m_settings->getCombinedCSNI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_csni{"CSNI", Composability::CSNI};
         analyze_sca(sca_preprocessor, composability_csni, "CSNI", Composability::CSNI);
@@ -297,7 +336,7 @@ Environment::execute()
      * [Independent Combined Strong Non-Interference]
      * =====================================================================================
      */
-    if (this->m_settings->getCombinedICSNI()){
+    if (this->m_settings->getCombined() && this->m_settings->getCombinedICSNI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_icsni{"ICSNI", Composability::ICSNI};
         analyze_sca(sca_preprocessor, composability_icsni, "ICSNI", Composability::ICSNI);
@@ -310,7 +349,7 @@ Environment::execute()
      * [COMBINED-ISOLATING NON-INTERFERENCE]
      * =====================================================================================
      */
-    if (this->m_settings->getCombinedCINI()){
+    if (this->m_settings->getCombined() && this->m_settings->getCombinedCINI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_cini{"CINI", Composability::CINI};
         analyze_sca(sca_preprocessor, composability_cini, "CINI", Composability::CINI);
@@ -322,7 +361,7 @@ Environment::execute()
      * [INDEPENDENT COMBINED-ISOLATING NON-INTERFERENCE]
      * =====================================================================================
      */
-    if (this->m_settings->getCombinedICINI()){
+    if (this->m_settings->getCombined() && this->m_settings->getCombinedICINI()){
         /* Create new composability verification strategy */
         ConfigurationComposability composability_icini{"ICINI", Composability::ICINI};
         analyze_sca(sca_preprocessor, composability_icini, "ICINI", Composability::ICINI);
@@ -331,7 +370,7 @@ Environment::execute()
 
     /*
      * =====================================================================================
-     * [COMBINED] Fault Injection VERification (FIVER) & Statistical Independence Leakage VERification (SILVER)
+     * [FAULT] Fault Injection VERification (FIVER)
      * =====================================================================================
      */
     if(this->m_settings->getFaultInjection()){
@@ -354,6 +393,11 @@ Environment::execute()
         }
     }
 
+    /*
+     * =====================================================================================
+     * [COMBINED] Fault Injection VERification (FIVER) & Statistical Independence Leakage VERification (SILVER)
+     * =====================================================================================
+     */
     if(this->m_settings->getCombined()){
         /* Create new fault verification strategy */
         std::unique_ptr<Configuration> fault_strategy;
@@ -381,6 +425,14 @@ void Environment::visualize(){
         if(this->m_settings->getSideChannelAnalysisProbing()){
             if(this->m_state->m_leaking_probes_sca.size() > 0) this->m_state->m_visualization_probes = this->m_state->m_leaking_probes_sca[0];
             visualizer.set_strategy_name("sca");
+            this->m_visualizer->execute();
+            this->m_visualizer->report();
+            this->m_state->m_visualization_probes.clear();
+        }
+
+        // Visualize Random Probing
+        if(this->m_settings->getSideChannelAnalysisRandomProbing()){
+            visualizer.set_strategy_name("random-probing");
             this->m_visualizer->execute();
             this->m_visualizer->report();
             this->m_state->m_visualization_probes.clear();
@@ -558,14 +610,46 @@ void Environment::finalize(){
         this->m_logger->log("VERICA", "DONE!");
     }
 }
+
 template<typename T> void
 Environment::analyze_fia(std::string name){
     /* Create new fault verification strategy */
     T fault_strategy{name};
     fault_strategy.initialize(this->m_settings, this->m_state);
 
+    /* New composer strategy */
+    ConfigurationIronMask composer_ironmask{"IRON-MASK"};
+    std::vector<ConfigurationIronMask> ironmask_threads{};
+  
+    for (int core = 0; core < this->m_settings->getCores(); core++){        
+        ConfigurationIronMask configComposerIronMask{"IRON-MASK-CORE" + std::to_string(core)}; 
+        ironmask_threads.push_back(configComposerIronMask);
+    } 
+
+    /* Resize container to store combinations for random faulting positions */
+    // if(this->m_settings->getFaultRandomFaulting() || this->m_settings->getFaultRandomFaultingComposability())
+    this->m_state->m_random_faulting_pos_combination.resize(this->m_settings->getCores()); 
+
+
+    /* Initialize fault location for random faulting composability */
+    this->m_state->m_faultLocations_copy = this->m_state->m_faultLocations;
+    if(this->m_settings->getFaultRandomFaultingComposability()) {
+        // remove inputs from fault locations (they will be added separately)
+        for(std::vector<const verica::Wire*>::iterator it=this->m_state->m_faultLocations.begin(); it!=this->m_state->m_faultLocations.end(); ) {
+            // check if input
+            if((*it)->source_pin()->parent_module() == this->m_state->m_netlist_model->topmodule() && (*it)->source_pin()->port_type() == verica::None) {
+                it = this->m_state->m_faultLocations.erase(it);
+            } else { 
+                ++it;
+            }
+        }
+    }
+
+
     /* Perform analysis */
-    for(int n = 1; n <= this->m_settings->getNumberOfFaults(); ++n){
+    bool consider_input_faults_only = true;
+    int num_of_faults = (this->m_settings->getFaultRandomFaulting() || this->m_settings->getFaultRandomFaultingComposability()) ? this->m_settings->getFaultRandomFaultingMaxFaults() : this->m_settings->getNumberOfFaults();
+    for(int n = 1; n <= num_of_faults; ++n){
         this->m_state->m_current_number_of_injected_faults = n;
 
         /* Early-abort variable */
@@ -584,39 +668,78 @@ Environment::analyze_fia(std::string name){
             unsigned int simulation_counter = 0;
 
             // Fault injection
+            m_state->m_thread_to_location.resize(m_settings->getCores());
+            std::vector<std::vector<const verica::Wire*>> fault_locations;
+            if(consider_input_faults_only && (this->m_settings->getFaultRandomFaulting() || this->m_settings->getFaultRandomFaultingComposability())){
+                std::vector<const verica::Wire*> temp;
+                fault_locations.push_back(temp);
+                consider_input_faults_only = false;
+            }
+            fault_locations.insert(fault_locations.end(), this->m_injector->permuted_fault_locations().begin(), this->m_injector->permuted_fault_locations().end());
+
             #pragma omp parallel num_threads(this->m_settings->getCores()) shared(cancel_fia)
             #pragma omp for schedule(dynamic)
-            for (auto location : this->m_injector->permuted_fault_locations())
-            {
+            for (int loc_idx=0; loc_idx<fault_locations.size(); loc_idx++) {
+                std::vector<const verica::Wire*> location = fault_locations[loc_idx];
                 #pragma omp cancellation point for
 
-                // get thread number
+                // Get thread number
                 int thread_num = omp_get_thread_num();
+                m_state->m_thread_to_location[thread_num] = loc_idx;
 
-                std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> target_fault_collection;
-                target_fault_collection = this->m_injector->prepeare_fault_mappings_for_injection(location);
-                for(unsigned int idx_fault_pair=0; idx_fault_pair<target_fault_collection.size(); ++idx_fault_pair){
-
-                    // Inject faults
-                    this->m_injector->inject(target_fault_collection[idx_fault_pair].first, target_fault_collection[idx_fault_pair].second, thread_num);
-
-                    // Analyze faults
-                    this->m_analyzer->configure(&fault_strategy);
-                    this->m_analyzer->execute();
-
-                    // Interrupt computation if effective fault was detected
-                    if(this->m_settings->getFaultInterrupt()) this->m_injector->interrupt_fault_injection(target_fault_collection, thread_num, cancel_fia);
-
-                    if (this->m_settings->getFaultInterrupt() && cancel_fia) {
-                        #pragma omp critical
-                        {
-                            cancel_fia = true;
-                        }
-                        #pragma omp cancel for
-                    }
+                // Create container for input faults - required for random faulting composability 
+                std::vector<std::vector<const verica::Wire*>> input_combinations;
+                std::vector<const verica::Wire*> empty_comb;
+                input_combinations.push_back(empty_comb);
+                if(this->m_settings->getFaultRandomFaultingComposability()){
+                    input_combinations.insert(input_combinations.end(), 
+                                            m_state->m_random_faulting_composability_input_combinations.begin(), 
+                                            m_state->m_random_faulting_composability_input_combinations.end());
                 }
 
-                // Restore BDDs
+                // Loop over all input combinations (will be zero for non-random faulting composability checks)
+                // for(auto input_combination : input_combinations){
+                for(unsigned int input_comb_idx=0; input_comb_idx<input_combinations.size(); input_comb_idx++){
+                    // Add input combination to target fault locations
+                    std::vector<const verica::Wire*> adapted_location = location;
+                    adapted_location.insert(adapted_location.end(), input_combinations[input_comb_idx].begin(), input_combinations[input_comb_idx].end());
+                    this->m_state->m_random_faulting_pos_combination[thread_num] = input_comb_idx;
+
+                    // Compute final fault mappings for current fault location
+                    std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> target_fault_collection;
+                    target_fault_collection = this->m_injector->prepeare_fault_mappings_for_injection(adapted_location);
+
+                    for(unsigned int idx_fault_pair=0; idx_fault_pair<target_fault_collection.size(); ++idx_fault_pair){
+
+                        // Inject faults
+                        this->m_injector->inject(target_fault_collection[idx_fault_pair].first, target_fault_collection[idx_fault_pair].second, thread_num);
+
+                        // Analyze faults
+                        this->m_analyzer->configure(&fault_strategy);
+                        this->m_analyzer->execute();
+
+                        // Composer
+                        if(m_settings->getComposer() && m_settings->getComposerIronMask()){
+                            ironmask_threads[thread_num].execute(m_settings, m_state);
+                        }
+
+                        // Interrupt computation if effective fault was detected
+                        if(this->m_settings->getFaultInterrupt()) this->m_injector->interrupt_fault_injection(target_fault_collection, thread_num, cancel_fia);
+
+                        if (this->m_settings->getFaultInterrupt() && cancel_fia) {
+                            #pragma omp critical
+                            {
+                                cancel_fia = true;
+                            }
+                            #pragma omp cancel for
+                        }
+                    }
+
+                    // Restore BDDs of faulted inputs only (internal faults are const in this loop)
+                    this->m_injector->restore_faulty_models(input_combinations[input_comb_idx], thread_num);
+                }
+
+                // Restore BDDs of internal faults
                 this->m_injector->restore_faulty_models(location, thread_num);
 
                 // Progress
@@ -627,6 +750,7 @@ Environment::analyze_fia(std::string name){
 
         } while(!cancel_fia && !this->m_injector->permutation_done());
 
+
         /* Footer for injector */
         if(this->m_settings->getVerbose() > 0)
             this->m_logger->footer(this->m_injector->name(), "", "");
@@ -634,12 +758,26 @@ Environment::analyze_fia(std::string name){
 
         /* Report fault verification results */
         this->m_analyzer->configure(&fault_strategy);
+        fault_strategy.finalize(this->m_settings, this->m_state);
         this->m_analyzer->report();
+
+
+        /* Report IronMask Export */
+        if(this->m_settings->getComposer()){
+            for (int core = 0; core < this->m_settings->getCores(); core++){
+                composer_ironmask.insert(&(ironmask_threads[core]));
+            }
+            composer_ironmask.finalize(this->m_settings, this->m_state);
+            this->m_analyzer->configure(&composer_ironmask);
+            this->m_analyzer->report();
+        }
+
 
         if(cancel_fia){
             return;
         }
     }
+
 
     /* 
      * =====================================================================================
@@ -655,53 +793,37 @@ Environment::analyze_fia(std::string name){
         fault_vulnerability.execute(m_settings, m_state);
         fault_vulnerability.report("FIA Vulnerability", m_logger, m_settings, m_state);
     }
-
-exit:
-
-    // Output dot graph
-    if(this->m_settings->getVisualization()){
-        ConfigurationGraphvizDot visualizer{"GRAPHVIZ (DOT)"};
-        this->m_visualizer->configure(&visualizer);
-
-        this->m_visualizer->execute();
-        this->m_visualizer->report();
-    }
-
-    // Finalize
-    this->m_logger->header();
-    if (this->m_settings->getFaultInjection() && this->m_settings->getSideChannel())
-        this->m_logger->log("VERICA", "FIA & SCA", "DONE!");
-    else if (this->m_settings->getFaultInjection())
-        this->m_logger->log("VERICA", "FIA", "DONE!");
-    else if (this->m_settings->getSideChannel())
-        this->m_logger->log("VERICA", "SCA", "DONE!");
-    else if (this->m_settings->getCombined())
-        this->m_logger->log("VERICA", "COMBINED", "DONE!");
-    else
-        this->m_logger->log("VERICA", "DONE!");
 }
+
 
 template<typename T> void
 Environment::analyze_sca(ConfigurationSCA &sca_preprocessor, T &strategy, std::string name, const Composability type){
+    /* Initialize probing strategy */
+    strategy.initialize(this->m_settings, this->m_state);
+
+    /* Initialize multi-threading strategies */
     std::vector<T> strategies{};
+    for (int core = 0; core < this->m_settings->getCores(); core++){
+        T new_strategy{name + "-CORE" + std::to_string(core), type};
+        strategies.push_back(new_strategy);
+        strategies[core].initialize(this->m_settings, this->m_state);
+    }
 
     /* Generate probe combinations */
-    bool sim = (type == Composability::PINI || type == Composability::CINI || type == Composability::ICINI) ? true : false;
+    auto sim = OutputProbes::NONE;
+    if(type == Composability::NI || type == Composability::CNI){
+        sim = OutputProbes::NI;
+    } else if(type == Composability::SNI || type == Composability::CSNI || type == Composability::ICSNI){
+        sim = OutputProbes::SNI;
+    } else if(type == Composability::PINI || type == Composability::CINI || type == Composability::ICINI){
+        sim = OutputProbes::PINI;
+    }
+
     int max_order = (m_settings->getSideChannelOrder() > 0) ? m_settings->getSideChannelOrder() : m_state->m_min_shared_inputs.size() - 1;
 
     #pragma omp parallel for schedule(dynamic) num_threads(m_settings->getCores()) 
     for (int core = 0; core < m_settings->getCores(); core++){
         sca_preprocessor.update(m_state, m_settings, sca_preprocessor.get_probe_positions(), max_order, sim, core);
-    }
-
-    /* Initialize probing strategy */
-    strategy.initialize(this->m_settings, this->m_state);
-
-    /* Initialize multi-threading strategies */
-    for (int core = 0; core < this->m_settings->getCores(); core++){
-        T new_strategy{name + "-CORE" + std::to_string(core), type};
-        strategies.push_back(new_strategy);
-        strategies[core].initialize(this->m_settings, this->m_state);
     }
 
     /* Early-abort variable */
@@ -751,6 +873,74 @@ Environment::analyze_sca(ConfigurationSCA &sca_preprocessor, T &strategy, std::s
     this->m_analyzer->report();
 }
 
+
+template<typename T> void
+Environment::analyze_random_sca(ConfigurationSCA &sca_preprocessor, T &strategy, std::string name, const Composability type){
+    /* Initialize random probing strategy */
+    strategy.initialize(this->m_settings, this->m_state);
+
+    /* Determine total amount of probe positions */
+    this->m_state->m_probe_positions = sca_preprocessor.get_probe_positions();
+
+    /* Initialize multi-threading strategies */
+    std::vector<T> strategies{};
+    for (int core = 0; core < this->m_settings->getCores(); core++){
+        T new_strategy{name + "-CORE" + std::to_string(core), type};
+        strategies.push_back(new_strategy);
+        strategies[core].initialize(this->m_settings, this->m_state);
+    }
+
+    /* Generate vector of additional probes that need to be considered for composability checks */
+    /* Contains only one empty vector for random probing (without composability checks) */
+    std::vector<std::vector<const verica::Wire*>> output_probes;
+    std::vector<const verica::Wire*> temp;
+    output_probes.push_back(temp);
+    if(type == Composability::RCOMPOSABILITY){
+        for(auto comb : this->m_state->m_random_probing_composability_output_combinations) output_probes.push_back(comb);
+    }
+
+    /* Analyze all probe combinations */
+    for(auto probes : output_probes){  
+        /* Initialize strategies */
+        for(unsigned int core=0; core < this->m_settings->getCores(); core++) strategies[core].initialize(this->m_settings, this->m_state);
+
+        #pragma omp parallel num_threads(this->m_settings->getCores())
+        #pragma omp for schedule(dynamic)
+        for (unsigned int idx = 0; idx < this->m_state->m_probe_positions.size(); idx++){
+            /* Thread number */
+            int thread_num = omp_get_thread_num();
+
+            std::vector<const verica::Wire*> wires = this->m_state->m_probe_positions;
+            wires.erase(wires.begin(), wires.begin() + idx);
+
+            strategies[thread_num].current_probes(std::make_pair(wires, probes));
+
+            strategies[thread_num].execute(m_settings, m_state);
+        }
+
+        /* Reset strategy */
+        strategy.initialize(this->m_settings, this->m_state);
+
+        /* Merge multi-threading results */
+        for (int core = 0; core < this->m_settings->getCores(); core++){
+            strategy.insert(&(strategies[core]));
+        }
+
+        /* Finalize probing strategy */
+        strategy.finalize(this->m_settings, this->m_state);
+    }
+
+    /* Report probing results */
+    this->m_analyzer->configure(&strategy);
+    this->m_analyzer->report();
+
+    #ifdef export_leaking_probes
+        m_state->probe_file->close();
+    #endif
+}
+
+
+
 // TODO: check if template parameter is here possible to avoid the if else branch
 void Environment::gen_configuration(
     const Composability comp,
@@ -759,8 +949,11 @@ void Environment::gen_configuration(
 
     if (comp == Composability::NONE) {
         sca_configurations.emplace_back(std::make_unique<ConfigurationProbing>(strategy, comp));
-    }
-    else{
+    } else if(comp == Composability::RANDOMPROBING){
+        sca_configurations.emplace_back(std::make_unique<ConfigurationRandomProbing>(strategy, comp));
+    } else if(comp == Composability::RCOMPOSABILITY){
+        sca_configurations.emplace_back(std::make_unique<ConfigurationRandomProbingComposability>(strategy, comp));
+    } else{
         sca_configurations.emplace_back(std::make_unique<ConfigurationComposability>(strategy, comp));
     }
 
@@ -774,9 +967,14 @@ void Environment::gen_multithreading_configurations(
     for (int core = 0; core < this->m_settings->getCores(); core++){
         if (comp == Composability::NONE) {
             sca_configurations_multithreading.back().emplace_back(
-                std::make_unique<ConfigurationProbing>(strategy + std::to_string(core), comp));
-        }
-        else {
+            std::make_unique<ConfigurationProbing>(strategy + std::to_string(core), comp));
+        } else if(comp == Composability::RANDOMPROBING){
+            sca_configurations_multithreading.back().emplace_back(
+            std::make_unique<ConfigurationRandomProbing>(strategy + std::to_string(core), comp));
+        } else if(comp == Composability::RCOMPOSABILITY){
+            sca_configurations_multithreading.back().emplace_back(
+            std::make_unique<ConfigurationRandomProbingComposability>(strategy + std::to_string(core), comp));
+        } else {
             sca_configurations_multithreading.back().emplace_back(
                 std::make_unique<ConfigurationComposability>(strategy +"-CORE " + std::to_string(core), comp));
         }
@@ -809,6 +1007,24 @@ void Environment::generate_choosen_sca_configurations(
         /* New probing strategy */
         if (this->m_settings->getSideChannelAnalysisProbing()) {
             std::pair<Composability, std::string> strat = std::make_pair(Composability::NONE, "FIA+PROBING");
+
+            gen_configuration(strat.first, strat.second, sca_configurations);
+            gen_multithreading_configurations(strat.first, strat.second, sca_configurations_multithreading);
+
+        }
+
+        /* New random probing strategy */
+        if (this->m_settings->getSideChannelAnalysisRandomProbing()) {
+            std::pair<Composability, std::string> strat = std::make_pair(Composability::RANDOMPROBING, "FIA+RANDOM-PROBING");
+
+            gen_configuration(strat.first, strat.second, sca_configurations);
+            gen_multithreading_configurations(strat.first, strat.second, sca_configurations_multithreading);
+
+        }
+
+        /* New random probing strategy */
+        if (this->m_settings->getSideChannelAnalysisRandomProbingComposability()) {
+            std::pair<Composability, std::string> strat = std::make_pair(Composability::RCOMPOSABILITY, "RCOMP FIA+PROBING");
 
             gen_configuration(strat.first, strat.second, sca_configurations);
             gen_multithreading_configurations(strat.first, strat.second, sca_configurations_multithreading);
@@ -889,7 +1105,9 @@ void Environment::report_combined(std::vector<std::unique_ptr<ConfigurationCombi
         report_sca_combined(sca_configurations[idxConfig], sca_configurations_multithreading[idxConfig]);
 
         /* Report details for combined analysis */
-        if (this->m_settings->getFaultInjection() && this->m_settings->getVerbose() > 2) {
+        // if (this->m_settings->getFaultInjection() && this->m_settings->getVerbose() > 2) {
+        if((m_settings->getSideChannelAnalysisProbing() || m_settings->getSideChannelAnalysisNI() || m_settings->getSideChannelAnalysisSNI() || m_settings->getSideChannelAnalysisPINI()) &&
+           (m_settings->getFaultThresholdFaulting() || m_settings->getFaultFNI() || m_settings->getFaultFSNI() || m_settings->getFaultFINI())) {
             if (sca_configurations[idxConfig]->getType() == Composability::NONE) {
                 report_independent_combined(sca_configurations_multithreading[idxConfig], "PROB");
             }
@@ -940,8 +1158,48 @@ void Environment::analyze_combined(ConfigurationSCA &sca_preprocessor,
         throw std::runtime_error("No sca_configuration and no sca_configurations_multithreading");
     }
 
+    /* Copy probe positions for random probing */
+    m_state->m_probe_positions = sca_preprocessor.get_probe_positions();
+
+    if(m_settings->getSideChannelAnalysisRandomProbing()) {
+        m_state->m_combined_leaking_probabilities.clear();
+        m_state->m_combined_leaking_probabilities.resize(m_settings->getCores(), 0.0);
+        m_state->m_combined_leaking_probabilities_upper_bound.clear();
+        m_state->m_combined_leaking_probabilities_upper_bound.resize(m_settings->getCores(), 0.0);
+    }
+
+    if(m_settings->getSideChannelAnalysisRandomProbingComposability()) {
+        m_state->m_combined_composability_leaking_probabilities.clear();
+        m_state->m_combined_composability_leaking_probabilities_upper_bound.clear();
+        for(unsigned int core=0; core<m_settings->getCores(); core++){
+            std::vector<long double> temp(m_state->m_random_faulting_composability_input_combinations.size()+1, 0.0);
+            m_state->m_combined_composability_leaking_probabilities.push_back(temp); 
+            m_state->m_combined_composability_leaking_probabilities_upper_bound.push_back(temp); 
+        }
+    }
+
+    /* Resize container to store combinations for random faulting positions */
+    this->m_state->m_random_faulting_pos_combination.resize(this->m_settings->getCores(), 0); 
+        
+
+    /* Initialize fault locations for random faulting composability */
+    if(this->m_settings->getFaultRandomFaultingComposability()) {
+        // remove inputs from fault locations (they will be added separately)
+        for(std::vector<const verica::Wire*>::iterator it=this->m_state->m_faultLocations.begin(); it!=this->m_state->m_faultLocations.end(); ) {
+            // check if input
+            if((*it)->source_pin()->parent_module() == this->m_state->m_netlist_model->topmodule() && (*it)->source_pin()->port_type() == verica::None) {
+                it = this->m_state->m_faultLocations.erase(it);
+            } else { 
+                ++it;
+            }
+        }
+    }
+
+
     /* Perform analysis */
-    for(int n = 1; n <= this->m_settings->getNumberOfFaults(); ++n){
+    bool consider_input_faults_only = true;
+    int num_of_faults = (this->m_settings->getFaultRandomFaulting() || this->m_settings->getFaultRandomFaultingComposability()) ? this->m_settings->getFaultRandomFaultingMaxFaults() : this->m_settings->getNumberOfFaults();
+    for(int n = 1; n <= num_of_faults; ++n){
         this->m_state->m_current_number_of_injected_faults = n;
         initialize_sca_configurations(sca_configurations, sca_configurations_multithreading);
 
@@ -964,151 +1222,238 @@ void Environment::analyze_combined(ConfigurationSCA &sca_preprocessor,
             unsigned int simulation_counter = 0;
 
             // Fault injection
+            m_state->m_thread_to_location.resize(m_settings->getCores());
+            std::vector<std::vector<const verica::Wire*>> fault_locations;
+            if(consider_input_faults_only && (this->m_settings->getFaultRandomFaulting() || this->m_settings->getFaultRandomFaultingComposability())){
+                std::vector<const verica::Wire*> temp;
+                fault_locations.push_back(temp);
+                consider_input_faults_only = false;
+            }
+            fault_locations.insert(fault_locations.end(), this->m_injector->permuted_fault_locations().begin(), this->m_injector->permuted_fault_locations().end());
+
             #pragma omp parallel num_threads(this->m_settings->getCores()) shared(cancel_fia)
-            #pragma omp for schedule(dynamic)
-            for (auto location : this->m_injector->permuted_fault_locations())
-            {
+            #pragma omp for schedule(guided)
+            for (int loc_idx=0; loc_idx<fault_locations.size(); loc_idx++) {
+                std::vector<const verica::Wire*> location = fault_locations[loc_idx];
                 #pragma omp cancellation point for
 
                 // get thread number
                 int thread_num = omp_get_thread_num();
 
-                std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> target_fault_collection;
-                target_fault_collection = this->m_injector->prepeare_fault_mappings_for_injection(location);
-                for(unsigned int idx_fault_pair=0; idx_fault_pair<target_fault_collection.size(); ++idx_fault_pair){
+                m_state->m_thread_to_location[thread_num] = loc_idx;
 
-                    // Inject faults
-                    this->m_injector->inject(target_fault_collection[idx_fault_pair].first, target_fault_collection[idx_fault_pair].second, thread_num);
+                // Create container for input faults - required for random faulting composability 
+                std::vector<std::vector<const verica::Wire*>> input_combinations;
+                std::vector<const verica::Wire*> empty_comb;
+                input_combinations.push_back(empty_comb);
+                if(this->m_settings->getFaultRandomFaultingComposability()){
+                    input_combinations.insert(input_combinations.end(), 
+                                            m_state->m_random_faulting_composability_input_combinations.begin(), 
+                                            m_state->m_random_faulting_composability_input_combinations.end());
+                }
 
-                    // Analyze faults
-                    this->m_analyzer->configure(fault_strategy.get());
-                    this->m_analyzer->execute();
+                // Loop over all input combinations (will be zero for non-random faulting composability checks)
+                // for(auto input_combination : input_combinations){
+                for(unsigned int input_comb_idx=0; input_comb_idx<input_combinations.size(); input_comb_idx++){
+                    // Add input combination to target fault locations
+                    std::vector<const verica::Wire*> adapted_location = location;
+                    adapted_location.insert(adapted_location.end(), input_combinations[input_comb_idx].begin(), input_combinations[input_comb_idx].end());
+                    this->m_state->m_random_faulting_pos_combination[thread_num] = input_comb_idx;
 
+                    // Compute final fault mappings for current fault location
+                    std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> target_fault_collection;
+                    target_fault_collection = this->m_injector->prepeare_fault_mappings_for_injection(adapted_location);
                     std::vector<const verica::Wire*> modified;
-                    if(idx_fault_pair == 0){
-                        for (auto w : location) {
-                            modified.push_back(w);
-                            for (auto p : w->propagation_path()) {
-                                modified.push_back(p);
+                    for(unsigned int idx_fault_pair=0; idx_fault_pair<target_fault_collection.size(); ++idx_fault_pair){
+                        // Inject faults
+                        this->m_injector->inject(target_fault_collection[idx_fault_pair].first, target_fault_collection[idx_fault_pair].second, thread_num);
+
+                        // Analyze faults
+                        this->m_analyzer->configure(fault_strategy.get());
+                        this->m_analyzer->execute();
+
+                        if(idx_fault_pair == 0){
+                            for (auto w : location) {
+                                modified.push_back(w);
+                                for (auto p : w->propagation_path()) {
+                                    modified.push_back(p);
+                                }
                             }
                         }
-                    }
 
-                    // Determine SCA order
-                    int max_order = (m_settings->getSideChannelOrder() > 0) ? m_settings->getSideChannelOrder() : m_state->m_min_shared_inputs.size() - 1;
-
-                    // Update probe combinations
-                    if(m_settings->getSideChannelAnalysisProbing() || m_settings->getSideChannelAnalysisNI() || m_settings->getSideChannelAnalysisSNI() || m_settings->getCombinedICSNI()){
-                        sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, false, thread_num);
-                    }
-
-                    for (auto &configuration : sca_configurations_multithreading) {
-                        switch (configuration.at(thread_num)->getType()) {
-                        case Composability::NONE:
-                        case Composability::NI:
-                        case Composability::SNI:
-                        case Composability::ICSNI:
-                            // For all the cases above the analyze_sca_combined step must be
-                            // performed at this position.
-                            analyze_sca_combined(configuration.at(thread_num), thread_num);
-                        break;
-                        default:
-                            // If the type of the configuration is non of the above,
-                            // then nothing should happen at this position
-                        break;
-                        }
-                    }
-
-                    // Update probe combinations
-                    if(m_settings->getSideChannelAnalysisPINI() || m_settings->getCombinedICINI()){
-                        sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, true, thread_num);
-                    }
-
-                    for (auto &configuration : sca_configurations_multithreading) {
-                        switch (configuration.at(thread_num)->getType()) {
-                        case Composability::PINI:
-                        case Composability::ICINI:
-                            analyze_sca_combined(configuration.at(thread_num), thread_num);
-                            // For all the cases above the analyze_sca_combined step must be
-                            // performed at this position.
-
-                        break;
-                        default:
-                            // If the type of the configuration is non of the above,
-                            // then nothing should happen at this position
-                        break;
-                        }
-                    }
-
-
-                    // Update number of input faults
-                    if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI() || this->m_settings->getCombinedCINI()){
-                        std::vector<const verica::Pin*> input_pins = m_state->m_netlist_model->module_under_test()->input_pins();
-                        for(auto w : target_fault_collection[idx_fault_pair].first) {
-                            if(std::find(input_pins.begin(), input_pins.end(), w->source_pin()) != input_pins.end() && w->source_pin()->port_type() != verica::Refresh){
-                                m_state->m_current_number_of_input_faults[thread_num]++;
+                        if(m_state->m_random_faulting_correctable[thread_num]){
+                            for(auto &configuration : sca_configurations_multithreading) {
+                                switch (configuration.at(thread_num)->getType()){
+                                    case Composability::RANDOMPROBING:
+                                    case Composability::RCOMPOSABILITY:
+                                        analyze_random_sca_combined(configuration.at(thread_num), thread_num);
+                                    break;
+                                    default:
+                                    break;
+                                }
                             }
                         }
-                    }
 
-                    // Adapt SCA order for all upcoming verifications 
-                    max_order -= m_state->m_current_number_of_injected_faults;
+                        // Determine SCA order
+                        int max_order = (m_settings->getSideChannelOrder() > 0) ? m_settings->getSideChannelOrder() : m_state->m_min_shared_inputs.size() - 1;
 
-                    // Update probe combinations
-                    if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI()){
-                        sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, false, thread_num);
-                    }
+                        // Update probe combinations
+                        if(m_settings->getSideChannelAnalysisProbing()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, OutputProbes::NONE, thread_num);
+                        }
 
-                    for (auto &configuration : sca_configurations_multithreading) {
-                        switch (configuration.at(thread_num)->getType()) {
-                        case Composability::CNI:
-                        case Composability::CSNI:
-                            // For all the cases above the analyze_sca_combined step must be
-                            // performed at this position.
-                            analyze_sca_combined(configuration.at(thread_num), thread_num);
-                        break;
-                        default:
-                            // If the type of the configuration is non of the above,
-                            // then nothing should happen at this position
-                        break;
+                        for (auto &configuration : sca_configurations_multithreading) {
+                            switch (configuration.at(thread_num)->getType()) {
+                            case Composability::NONE:
+                                analyze_sca_combined(configuration.at(thread_num), thread_num);
+                            break;
+                            default:
+                                // If the type of the configuration is non of the above,
+                                // then nothing should happen at this position
+                            break;
+                            }
+                        }
+
+                        // Update probe combinations
+                        if(m_settings->getSideChannelAnalysisNI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, OutputProbes::NI, thread_num);
+                        }
+
+                        for (auto &configuration : sca_configurations_multithreading) {
+                            switch (configuration.at(thread_num)->getType()) {
+                            case Composability::NI:
+                                analyze_sca_combined(configuration.at(thread_num), thread_num);
+                            break;
+                            default:
+                                // If the type of the configuration is non of the above,
+                                // then nothing should happen at this position
+                            break;
+                            }
+                        }
+
+                        // Update probe combinations
+                        if(m_settings->getSideChannelAnalysisSNI() || m_settings->getCombinedICSNI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, OutputProbes::SNI, thread_num);
+                        }
+
+                        for (auto &configuration : sca_configurations_multithreading) {
+                            switch (configuration.at(thread_num)->getType()) {
+                            case Composability::SNI:
+                            case Composability::ICSNI:
+                                analyze_sca_combined(configuration.at(thread_num), thread_num);
+                            break;
+                            default:
+                                // If the type of the configuration is non of the above,
+                                // then nothing should happen at this position
+                            break;
+                            }
+                        }
+
+                        // Update probe combinations
+                        if(m_settings->getSideChannelAnalysisPINI() || m_settings->getCombinedICINI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, OutputProbes::PINI, thread_num);
+                        }
+
+                        for (auto &configuration : sca_configurations_multithreading) {
+                            switch (configuration.at(thread_num)->getType()) {
+                            case Composability::PINI:
+                            case Composability::ICINI:
+                                analyze_sca_combined(configuration.at(thread_num), thread_num);
+                            break;
+                            default:
+                                // If the type of the configuration is non of the above,
+                                // then nothing should happen at this position
+                            break;
+                            }
+                        }
+
+
+                        // Update number of input faults
+                        if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI() || this->m_settings->getCombinedCINI()){
+                            std::vector<const verica::Pin*> input_pins = m_state->m_netlist_model->module_under_test()->input_pins();
+                            for(auto w : target_fault_collection[idx_fault_pair].first) {
+                                if(std::find(input_pins.begin(), input_pins.end(), w->source_pin()) != input_pins.end() && w->source_pin()->port_type() != verica::Refresh){
+                                    m_state->m_current_number_of_input_faults[thread_num]++;
+                                }
+                            }
+                        }
+
+                        // Adapt SCA order for all upcoming verifications 
+                        max_order -= m_state->m_current_number_of_injected_faults;
+
+                        // Update probe combinations
+                        if(this->m_settings->getCombinedCNI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, OutputProbes::NI, thread_num);
+                        }
+
+                        for (auto &configuration : sca_configurations_multithreading) {
+                            switch (configuration.at(thread_num)->getType()) {
+                            case Composability::CNI:
+                                analyze_sca_combined(configuration.at(thread_num), thread_num);
+                            break;
+                            default:
+                                // If the type of the configuration is non of the above,
+                                // then nothing should happen at this position
+                            break;
+                            }
+                        }
+
+                        // Update probe combinations
+                        if(this->m_settings->getCombinedCSNI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, OutputProbes::SNI, thread_num);
+                        }
+
+                        for (auto &configuration : sca_configurations_multithreading) {
+                            switch (configuration.at(thread_num)->getType()) {
+                            case Composability::CSNI:
+                                analyze_sca_combined(configuration.at(thread_num), thread_num);
+                            break;
+                            default:
+                                // If the type of the configuration is non of the above,
+                                // then nothing should happen at this position
+                            break;
+                            }
+                        }
+
+
+                        // Update probe combinations
+                        if(this->m_settings->getCombinedCINI()){
+                            sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, OutputProbes::PINI, thread_num);
+                        }
+
+                        for (auto &configuration : sca_configurations_multithreading) {
+                            switch (configuration.at(thread_num)->getType()) {
+                            case Composability::CINI:
+                                // For all the cases above the analyze_sca_combined step must be
+                                // performed at this position.
+                                analyze_sca_combined(configuration.at(thread_num), thread_num);
+                            break;
+                            default:
+                                // If the type of the configuration is non of the above,
+                                // then nothing should happen at this position
+                            break;
+                            }
+                        }
+
+                        if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI() || this->m_settings->getCombinedCINI()){
+                            /* Reset input fault counter */
+                            m_state->m_current_number_of_input_faults[thread_num] = 0;
+                        }
+
+                        // Interrupt computation if effective fault was detected
+                        if(this->m_settings->getFaultInterrupt()) this->m_injector->interrupt_fault_injection(target_fault_collection, thread_num, cancel_fia);
+
+                        if (this->m_settings->getFaultInterrupt() && cancel_fia) {
+                            #pragma omp critical
+                            {
+                                cancel_fia = true;
+                            }
+                            #pragma omp cancel for
                         }
                     }
 
-
-                    // Update probe combinations
-                    if(this->m_settings->getCombinedCINI()){
-                        sca_preprocessor.update(this->m_state, this->m_settings, modified, max_order, true, thread_num);
-                    }
-
-                    for (auto &configuration : sca_configurations_multithreading) {
-                        switch (configuration.at(thread_num)->getType()) {
-                        case Composability::CINI:
-                            // For all the cases above the analyze_sca_combined step must be
-                            // performed at this position.
-                            analyze_sca_combined(configuration.at(thread_num), thread_num);
-                        break;
-                        default:
-                            // If the type of the configuration is non of the above,
-                            // then nothing should happen at this position
-                        break;
-                        }
-                    }
-
-                    if(this->m_settings->getCombinedCNI() || this->m_settings->getCombinedCSNI() || this->m_settings->getCombinedCINI()){
-                        /* Reset input fault counter */
-                        m_state->m_current_number_of_input_faults[thread_num] = 0;
-                    }
-
-                    // Interrupt computation if effective fault was detected
-                    if(this->m_settings->getFaultInterrupt()) this->m_injector->interrupt_fault_injection(target_fault_collection, thread_num, cancel_fia);
-
-                    if (this->m_settings->getFaultInterrupt() && cancel_fia) {
-                        #pragma omp critical
-                        {
-                            cancel_fia = true;
-                        }
-                        #pragma omp cancel for
-                    }
+                    // Restore BDDs of faulted inputs only (internal faults are const in this loop)
+                    this->m_injector->restore_faulty_models(input_combinations[input_comb_idx], thread_num);
                 }
 
                 // Restore BDDs
@@ -1128,19 +1473,16 @@ void Environment::analyze_combined(ConfigurationSCA &sca_preprocessor,
 
 
         /* Report fault verification results */
-        if (this->m_settings->getFaultInjection()){
-            this->m_analyzer->configure(fault_strategy.get());
-            this->m_analyzer->report();
-        }
+        this->m_analyzer->configure(fault_strategy.get());
+        fault_strategy->finalize(m_settings, m_state);
+        this->m_analyzer->report();
+        
 
         report_combined(sca_configurations, sca_configurations_multithreading);
 
         if(cancel_fia){
             return;
-        }
-
-        // Finalize injector
-        fault_strategy->finalize(m_settings, m_state);
+        }        
     }
 }
 
@@ -1162,14 +1504,88 @@ Environment::analyze_sca_combined(T &strategy, int thread_num){
     }
 }
 
+template<typename T> void
+Environment::analyze_random_sca_combined(T &strategy, int thread_num){
+    /* Early-abort variable */
+    bool cancel= false;
+
+    /* Generate vector of additional probes that need to be considered for composability checks */
+    /* Contains only one empty vector for random probing (without composability checks) */
+    std::vector<std::vector<const verica::Wire*>> output_probes;
+    std::vector<const verica::Wire*> empty_probes;
+    output_probes.push_back(empty_probes);
+    if(strategy->getType() == Composability::RCOMPOSABILITY){
+        for(auto comb : this->m_state->m_random_probing_composability_output_combinations) output_probes.push_back(comb);
+    }
+
+    /* Performing SCA analysis */
+    for(auto probes : output_probes){
+        /* Initialize strategy */
+        strategy->initialize(m_settings, m_state);
+
+        for (unsigned int idx = 0; idx < m_state->m_probe_positions.size(); idx++){
+            std::vector<const verica::Wire*> wires = this->m_state->m_probe_positions;
+            wires.erase(wires.begin(), wires.begin() + idx);
+
+            strategy->current_probes(std::make_pair(wires, probes));
+
+            strategy->execute(m_settings, m_state);
+        }
+
+        /* Finalize strategy */
+        strategy->finalize(m_settings, m_state);
+    }
+}
+
 // template<typename T> void
 void
 Environment::report_sca_combined(std::unique_ptr<ConfigurationCombinable> &strategy,
                                  std::vector<std::unique_ptr<ConfigurationCombinable>> &strategies){
+
+    if(m_settings->getSideChannelAnalysisRandomProbing()){
+        long double prob = 0.0;
+        long double prob_bound = 0.0;
+        for(auto l : m_state->m_combined_leaking_probabilities) prob += l;
+        for(auto l : m_state->m_combined_leaking_probabilities_upper_bound) prob_bound += l;
+        m_state->m_combined_final_leaking_probability = prob;
+        m_state->m_combined_final_leaking_probability_upper_bound = prob_bound;
+    }
+
+    if(m_settings->getSideChannelAnalysisRandomProbingComposability()){
+        // accumulate all probabilities
+        std::vector<long double> prob_vec((m_state->m_random_faulting_composability_input_combinations.size()+1), 0.0);
+        for(auto leaking_prob_per_core : m_state->m_combined_composability_leaking_probabilities) {
+            for(unsigned int idx=0; idx<leaking_prob_per_core.size(); idx++){
+                prob_vec[idx] += leaking_prob_per_core[idx];
+            }
+        }
+
+        std::vector<long double> prob_vec_bounded((m_state->m_random_faulting_composability_input_combinations.size()+1), 0.0);
+        for(auto leaking_prob_per_core : m_state->m_combined_composability_leaking_probabilities_upper_bound) {
+            for(unsigned int idx=0; idx<leaking_prob_per_core.size(); idx++){
+                prob_vec_bounded[idx] += leaking_prob_per_core[idx];
+            }
+        }
+
+        // find maximum
+        long double prob = 0.0;
+        unsigned int idx;
+        for(unsigned int i=0; i<prob_vec.size(); i++){
+            if(prob_vec[i] > prob){
+                prob = prob_vec[i];
+                idx = i;
+            }
+        }
+        m_state->m_combined_final_composability_leaking_probability = prob;
+
+        m_state->m_combined_final_composability_leaking_probability_upper_bounded = prob_vec_bounded[idx];
+    }
+
     for (int core = 0; core < this->m_settings->getCores(); core++){
         strategy->insert(strategies.at(core).get());
     }
-    strategy->finalize(this->m_settings, this->m_state);
+
+    if(!m_settings->getSideChannelAnalysisRandomProbing() && !m_settings->getSideChannelAnalysisRandomProbingComposability()) strategy->finalize(this->m_settings, this->m_state);
     this->m_analyzer->configure(strategy.get());
     this->m_analyzer->report();
 }
@@ -1182,25 +1598,6 @@ Environment::report_independent_combined(
 
     std::vector<std::pair<std::vector<const verica::Wire*>, std::vector<verica::fault::Fault>>> combined_leaking_fault_injections;
     std::vector<std::vector<const verica::Wire*>> failing_probes;
-    // for (int core = 0; core < this->m_settings->getCores(); core++){
-    //     combined_leaking_fault_injections.insert(combined_leaking_fault_injections.end(), strategies[core].combined_leaking_faults().begin(), strategies[core].combined_leaking_faults().end());
-    //     failing_probes.insert(failing_probes.end(), strategies[core].combined_failing_probes().begin(), strategies[core].combined_failing_probes().end());
-    // }
-
-    // this->m_logger->header("COMBINED-ANALYZER (FAULT+PROBING)");
-    // // for(auto leaking_fault : combined_leaking_fault_injections){
-    // for(unsigned int idx=0; idx<combined_leaking_fault_injections.size(); ++idx){
-    //     /* report faulted nodes */
-    //     this->m_logger->log("ANALYZER", "FIA+" + name, "Faulted node(s): " + this->m_state->m_netlist_model->wire_vector_to_json_string(combined_leaking_fault_injections[idx].first));
-
-    //     /* report fault mapping */
-    //     // this->m_logger->log("ANALYZER", "FIA+" + name, "Fault mapping: " + this->m_state->m_netlist_model->fault_state_to_json_string(combined_leaking_fault_injections[idx], this->m_state->m_cell_library));
-
-    //     /* report failing probes */
-    //     this->m_logger->log("ANALYZER", "FIA+" + name, "Failing probe(s): " + this->m_state->m_netlist_model->wire_vector_to_json_string(failing_probes[idx]));
-    //     this->m_logger->log("ANALYZER", "FIA+" + name, "");
-    // }
-    // this->m_logger->footer();
 
     this->m_logger->header("COMBINED-ANALYZER (FAULT+PROBING)");
     this->m_logger->log("ANALYZER", "FIA+" + name, "Currently not supported!");

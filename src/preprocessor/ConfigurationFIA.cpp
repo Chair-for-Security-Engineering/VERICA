@@ -34,17 +34,29 @@ ConfigurationFIA::initialize(const Settings *settings, State *state){
 
 void
 ConfigurationFIA::execute(const Settings *settings, State *state) {
+     /* Ensure all pins are equipped with an gate identifier */
+    for (auto p : state->m_netlist_model->module_under_test()->input_pins()){
+        if(p->port_type() != verica::Refresh){
+            state->m_netlist_model->set_pin_gate_identifier(p->uid(), 10);
+        } else {
+            for(unsigned int core=0; core<settings->getCores(); core++) state->m_netlist_model->set_faulty_gate_identifier(p->fan_out()->uid(), 13, core);
+            state->m_netlist_model->set_pin_gate_identifier(p->uid(), 13);
+        }
+    }
+
+    /* Set faulty gate identifier */
+    for(int t=0; t<settings->getCores(); ++t){
+        for(auto w : state->m_netlist_model->module_under_test()->wires()){
+            state->m_netlist_model->set_faulty_gate_identifier(w->uid(), w->source_pin()->gate_identifier(), t);
+        }
+    }
+    
     if(settings->getFaultInjection() || settings->getCombined()){
         // Determine selected variate
         fault_determine_variate(settings, state);
 
         // Read fault mapping
         fault_get_mapping(settings->getFaultMappingPath(), state->m_cell_library, state->m_faultMap);
-
-        /* Ensure all pins are equipped with an gate identifier */
-        for (auto p : state->m_netlist_model->module_under_test()->input_pins()){
-            state->m_netlist_model->set_pin_gate_identifier(p->uid(), 10);
-        }
 
         // Determine fault locations
         fault_get_locations(settings->getFaultLocation(), state->m_netlist_model, state->m_faultLocations);
@@ -54,8 +66,22 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
 
         // If fault composability checks are enabled (e.g., FNI, FSNI or some combined checks), input wires need to be added to the valid fault locations
         if(settings->getFaultComposability() || settings->getFaultVulnerabilityEnable()){
+            state->m_faultInputsRandom.resize(settings->getCores());
             for(auto p : state->m_netlist_model->module_under_test()->input_pins()){
-                if(!p->fan_out()->fia_ignore()) state->m_faultLocations.push_back(p->fan_out());
+                if(!p->fan_out()->fia_ignore()) {
+                    state->m_faultLocations.push_back(p->fan_out());
+                    if(p->port_type() != verica::Refresh)
+                        for(unsigned int core=0; core<settings->getCores(); core++) {
+                            state->m_faultInputsRandom[core][p->fan_out()->uid()] = state->m_managers[core].bddVar();
+                        }
+                }
+            }
+        }
+
+        // Push randomness always to fault locations
+        if(!settings->getFaultComposability() && !settings->getFaultVulnerabilityEnable()){
+            for(auto p : state->m_netlist_model->module_under_test()->input_pins()){
+                if(!p->fan_out()->fia_ignore() && p->port_type() == verica::Refresh && settings->getFaultLocation() != "s") state->m_faultLocations.push_back(p->fan_out());
             }
         }
 
@@ -67,7 +93,6 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
         for(int t=0; t<settings->getCores(); ++t){
             for(auto w : state->m_netlist_model->module_under_test()->wires()){
                 state->m_netlist_model->set_bdd_faulty_function(w->uid(), w->golden_functions(t), t);
-                state->m_netlist_model->set_faulty_gate_identifier(w->uid(), w->source_pin()->gate_identifier(), t);
             }
             state->m_effective.push_back(0);
             state->m_ineffective.push_back(0);
@@ -85,6 +110,8 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
         state->m_leaking_fault_injections.resize(settings->getCores());
         state->m_current_fault_injections.resize(settings->getCores());
         state->m_unshared_output_combinations.resize(settings->getCores());
+        state->m_random_faulting_current_single_faulting_probability.resize(settings->getCores());
+        state->m_random_faulting_correctable.resize(settings->getCores(), false);
 
         /* Apply strategy specific configurations */
         // Determine error flags for SIFA, SFA, and Detection
@@ -105,6 +132,19 @@ ConfigurationFIA::execute(const Settings *settings, State *state) {
                             state->m_data_output_wires.push_back(p->fan_in());
             }
         }
+
+        /* Parse information for random faulting */
+        if(settings->getFaultRandomFaulting() || settings->getFaultRandomFaultingComposability()){
+            fault_determine_faulting_probabilities(state, settings->getFaultRandomFaultingProbabilityFile(), state->m_faultLocations, settings->getFaultRandomFaultingProbability());
+        }
+
+        /* Generate combinations for inputs */
+        if(settings->getFaultRandomFaultingComposability()){
+            determine_input_combinations(state, settings);
+        }
+
+        /* Determine duplicated outputs */
+        determine_duplicated_outputs(state);
     }
 }
 
@@ -132,6 +172,10 @@ ConfigurationFIA::report(std::string service, const Logger *logger, const Settin
         } else {
             logger->log(service, this->m_name, "   logic-level:     low");
         }
+        if(settings->getFaultThresholdFaulting())
+            logger->log(service, this->m_name, "   K-FAULTING:      true");
+        else
+            logger->log(service, this->m_name, "   K-FAULTING:      false");
         if(settings->getFaultFNI())
             logger->log(service, this->m_name, "   FNI:             true");
         else
@@ -144,6 +188,14 @@ ConfigurationFIA::report(std::string service, const Logger *logger, const Settin
             logger->log(service, this->m_name, "   FINI:            true");
         else
             logger->log(service, this->m_name, "   FINI:            false");
+        if(settings->getFaultRandomFaulting())
+            logger->log(service, this->m_name, "   RANDOM-FAULT:    true");
+        else
+            logger->log(service, this->m_name, "   RANDOM-FAULT:    false");
+        if(settings->getFaultRandomFaultingComposability())
+            logger->log(service, this->m_name, "   RAND-FAULT-COMP: true");
+        else
+            logger->log(service, this->m_name, "   RAND-FAULT-COMP: false");
         if(settings->getFaultAnalysisStrategy() == "sifa" || settings->getFaultAnalysisStrategy() == "sfa"){
             if(state->m_error_flags.empty()) {
                 logger->log(service, this->m_name, "WARNING: Countermeasures for the selected strategy (" + settings->getFaultAnalysisStrategy() + ") usually implements error flags which were were not selected!");
@@ -239,6 +291,9 @@ int ConfigurationFIA::fault_get_mapping(const std::string &file, CellLibrary* ce
                     }
                     else if(tokens[it] == "not"){
                         faultMap[identifier].push_back(verica::fault::Fault::NOTA);
+                    }                   
+                    else if(tokens[it] == "var"){
+                        faultMap[identifier].push_back(verica::fault::Fault::VAR);
                     } else {                    
                         throw std::logic_error("[PREPROCESS-FAULT] Fault type for fault mapping is not supported! " + tokens[0] + " " + tokens[it]);
                     }
@@ -253,7 +308,6 @@ int ConfigurationFIA::fault_get_mapping(const std::string &file, CellLibrary* ce
     return 0;
 }
 
-
 int ConfigurationFIA::fault_get_locations(const std::string location, verica::Netlist* model, std::vector<const verica::Wire*> &faultLocations) {    
     /* Collect all sequential gates that should not be ignored */
     if(location == "s" || location == "cs"){
@@ -267,7 +321,7 @@ int ConfigurationFIA::fault_get_locations(const std::string location, verica::Ne
     /* Collect all combinational gates that should not be ignored */
     if(location == "c" || location == "cs"){
         for(auto w : model->module_under_test()->wires()){
-            if(!w->source_pin()->parent_module()->is_sequential()){
+            if(!w->source_pin()->parent_module()->is_sequential() && w->source_pin()->parent_module()->gate()){
                 if(std::find(model->module_under_test()->input_pins().begin(), model->module_under_test()->input_pins().end(), w->source_pin()) == model->module_under_test()->input_pins().end()){
                     if(!w->fia_ignore()) faultLocations.push_back(w);
                 }
@@ -277,7 +331,6 @@ int ConfigurationFIA::fault_get_locations(const std::string location, verica::Ne
 
     return 0;
 }
-
 
 void ConfigurationFIA::fault_determine_propagation_paths(verica::Netlist* model){
     std::vector<const verica::Wire*> wires = model->module_under_test()->wires();
@@ -389,4 +442,132 @@ void ConfigurationFIA::fault_get_reduced_locations_conservative(verica::Netlist*
             }
         }
     }
+}
+
+void ConfigurationFIA::fault_determine_faulting_probabilities(State *state, std::string file, std::vector<const verica::Wire*> &fault_locations, long double general_prob){
+    std::vector<std::string> tokens;
+    std::vector<std::pair<std::string, long double>> probabilities;
+    
+    /* Open probability file */
+    std::ifstream filterStream(file);
+
+    /* Loop over all lines and all names per line */
+    std::string line;
+    while (std::getline(filterStream, line)) {
+        /* Split line into space-separated tokens */
+        tokens = Parser::split(line, ' ');
+
+        /* Create blacklist-filter for gates based on gate names */
+        if (tokens[0].at(0) != '#') {
+            if(tokens.size() > 2){
+                throw std::logic_error("[PREPROCESS-FAULT] Fault probability file is erroneous!");
+            } else {
+                probabilities.push_back(std::make_pair(tokens[0], std::stold(tokens[1])));
+            }
+            
+        }
+    }
+
+    /* Annotated fault probabilities */
+    for(auto w : fault_locations){
+        bool annotated = false;
+        long double prob;
+        long double prob_inverse;
+        for(auto p : probabilities){
+            if(w->name().find(p.first) != std::string::npos) {
+                annotated = true;
+                if(w->source_pin()->gate_identifier() != -1){
+                    prob = (p.second/state->m_faultMap[w->source_pin()->gate_identifier()].size());
+                    prob_inverse = (1- p.second);
+                } else { 
+                    throw std::logic_error("[PREPROCESS-FAULT] Gate identifier of wire " + p.first + " not set! Is the selected wire an output wires of a basis gate?");
+                }
+            }
+        }
+        if(!annotated) {
+            prob = (general_prob/state->m_faultMap[w->source_pin()->gate_identifier()].size());
+            prob_inverse = (1 - general_prob);
+        }
+
+        state->m_netlist_model->set_random_faulting_probability(w->uid(), prob);
+        state->m_netlist_model->set_random_faulting_probability_inverse(w->uid(), prob_inverse);
+    }
+}
+
+void 
+ConfigurationFIA::determine_input_combinations(State *state, const Settings *settings){
+    /* Extract input with same primary input identifier */
+    std::map<int, std::vector<const verica::Wire*>> duplicated_inputs;
+    for(auto p : state->m_netlist_model->module_under_test()->input_pins()){
+        if(p->port_type() == verica::None)
+            duplicated_inputs[p->fan_out()->primary_input_identifier()].push_back(p->fan_out());
+    }
+
+
+    /* Generate combinations of up to k duplications of each input independently */
+    std::vector<std::vector<std::vector<const verica::Wire*>>> combined_wires_per_input;
+
+    for(auto current_input : duplicated_inputs){
+        std::vector<std::vector<const verica::Wire*>> combinations_current_input;
+        std::vector<const verica::Wire*> empty;
+        combinations_current_input.push_back(empty);
+        for(unsigned int order=0; order<settings->getNumberOfFaults(); order++){
+            // Initialize bitmask (first combination)
+            std::vector<bool> bitmask(current_input.second.size());
+            std::fill(bitmask.begin(), bitmask.begin() + (order + 1), true);
+
+            do {
+                std::vector<const verica::Wire*> combination;
+
+                for(unsigned int idx=0; idx<bitmask.size(); idx++){
+                    if(bitmask[idx]) combination.push_back(current_input.second[idx]);
+                }
+
+                combinations_current_input.push_back(combination);
+            } while(std::prev_permutation(bitmask.begin(), bitmask.end()));
+
+        }
+
+        // Push combinations of current output to container
+        combined_wires_per_input.push_back(combinations_current_input);
+    }
+
+
+    /* Generate combinations between outputs */
+    std::vector<std::vector<std::vector<const verica::Wire*>>> combined_wires_non_flattened;
+    cartesian_product(combined_wires_per_input, combined_wires_non_flattened);
+
+    for(auto comb : combined_wires_non_flattened){
+        std::vector<const verica::Wire*> combination;
+        for(auto output : comb){
+            for(auto w : output) combination.push_back(w);
+        }
+        state->m_random_faulting_composability_input_combinations.push_back(combination);
+    }
+
+
+    /* Remove first element since it is empty */
+    state->m_random_faulting_composability_input_combinations.erase(state->m_random_faulting_composability_input_combinations.begin());
+}
+
+
+void 
+ConfigurationFIA::determine_duplicated_outputs(State *state){
+    // Create mapping between output fault indices and corresponding pins
+    std::map<int, std::set<const verica::Pin*>> fault_indices;
+    for(auto p : state->m_netlist_model->module_under_test()->output_pins()){
+        fault_indices[p->fault_index()].insert(p);
+    }
+
+    // Determine minimum number of duplications
+    unsigned int min_number_duplications = 0;
+    for(auto idx : fault_indices){
+        if(min_number_duplications == 0)
+            min_number_duplications = idx.second.size();
+        else    
+            min_number_duplications = (idx.second.size() < min_number_duplications) ? idx.second.size() : min_number_duplications;
+    }
+
+    // Store minimum number of duplications in state
+    state->m_min_output_duplications = min_number_duplications;
 }

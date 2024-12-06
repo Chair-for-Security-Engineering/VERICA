@@ -315,6 +315,7 @@ void Injector::interrupt_fault_injection(std::vector<std::pair<std::vector<const
 
 void Injector::restore_faulty_models(std::vector<const verica::Wire*> &locations, int &thread_num){
     for(auto r : locations){
+        // std::cout << "Restore " << r->name() << " with identifier " << r->source_pin()->gate_identifier() << std::endl;
         this->m_state->m_netlist_model->set_faulty_gate_identifier(r->uid(), r->source_pin()->gate_identifier(), thread_num);
         elaborate_node(r, thread_num);
         for(int n=r->propagation_path_size()-1; n >=0; --n){
@@ -329,11 +330,13 @@ void Injector::restore_faulty_models(std::vector<const verica::Wire*> &locations
 
 void Injector::fault_injection_incremental(std::vector<const verica::Wire*> &nodes, std::vector<verica::fault::Fault> &faultList, int core){
     for(unsigned int it=0; it < nodes.size(); it++){
+        // std::cout << "Fault node: " << nodes[it]->name() << " with " << verica::fault::fault2string(faultList[it]) << " (" << nodes[it]->faulty_gate_identifier(core) << ")" << std::endl;
         fault_node(nodes[it], faultList[it], core);
         for(int pos=nodes[it]->propagation_path_size()-1; pos >=0; --pos){
             elaborate_node(nodes[it]->propagation_path_wire(pos), core);
         }
     }
+    // std::cout << "----------------------------------------" << std::endl;
 }
 
 void Injector::fault_node(const verica::Wire* wire, verica::fault::Fault fault, int core){
@@ -397,14 +400,21 @@ void Injector::fault_node(const verica::Wire* wire, verica::fault::Fault fault, 
             this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), operands[0]->faulty_functions(core), core);
             this->m_state->m_netlist_model->set_faulty_gate_identifier(wire->uid(), 0, core);
             break;
+        case verica::fault::VAR:
+            this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), this->m_state->m_faultInputsRandom[core][wire->uid()], core);
+            this->m_state->m_netlist_model->set_faulty_gate_identifier(wire->uid(), 14, core);
+            break;
         default:
             throw std::logic_error("[INJECTOR] Invalid fault type detected during fault injection!");
             break;
     }
+
+    // std::cout << "Faulted wire " << wire->name() << " with id " << wire->faulty_gate_identifier(core) << std::endl;
 }
 
 void Injector::elaborate_node(const verica::Wire* wire, int core){
-    if(wire->faulty_gate_identifier(core) == 10){
+    if(wire->faulty_gate_identifier(core) == 10 || wire->faulty_gate_identifier(core) == 13){
+        // std::cout << "   restoring input: " << wire->primary_input_identifier() << std::endl;
         this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), this->m_state->m_managers[core].bddVar(wire->primary_input_identifier()), core);
     } else if(wire->source_pin()->fan_in() != nullptr){
         this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), wire->source_pin()->fan_in()->faulty_functions(core), core );
@@ -445,6 +455,9 @@ void Injector::elaborate_node(const verica::Wire* wire, int core){
                 break;
             case 12:
                 this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), ! wire->source_pin()->parent_module()->input_pins()[0]->fan_in()->faulty_functions(core), core);
+                break;
+            case 14:
+                this->m_state->m_netlist_model->set_bdd_faulty_function(wire->uid(), this->m_state->m_faultInputsRandom[core][wire->uid()], core);
                 break;
             default:
                 throw std::logic_error("[INJECTOR] Gate identifier " + std::to_string(wire->source_pin()->gate_identifier()) + " is not supported!");
@@ -507,12 +520,9 @@ void Injector::add_fault_select(std::map<const verica::Wire*, std::vector<BDD>> 
     Cudd_Manager mgr = this->m_state->m_managers[core];
     int idx = mgr.ReadSize();
     auto f = this->m_state->m_faultLocations[0];
-    // std::cout << f->name() << "\n";
     for(auto fault_location: this->m_state->m_faultLocations){
-        // std::cout << fault_location->name() << "\n";
         fault_select[fault_location] = std::vector<BDD>();
         for(auto fault_type: this->m_state->m_faultMap[fault_location->source_pin()->gate_identifier()]){
-            // std::cout << " " << verica::fault::fault2string(fault_type) << "\n";
             fault_select[fault_location].push_back(mgr.bddVar(idx++));
             BDD faulty_function = this->fault_function(fault_location, fault_type, core);
             BDD previous_function = fault_location->faulty_functions(core);
@@ -523,7 +533,6 @@ void Injector::add_fault_select(std::map<const verica::Wire*, std::vector<BDD>> 
                         (previous_function & !fault_select[fault_location].back()) | (faulty_function & fault_select[fault_location].back()), 
                         core);
         }
-        // std::cout << "\n";
         for(int n=fault_location->propagation_path().size()-1; n >=0; --n){  
             elaborate_node(fault_location->propagation_path()[n], core);
         }

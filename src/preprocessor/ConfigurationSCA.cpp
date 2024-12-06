@@ -24,6 +24,7 @@
  * Please see license.rtf and README for license and further instructions.
  */
 
+#include "parser/Parser.hpp"
 #include "preprocessor/ConfigurationSCA.hpp"
 
 void
@@ -49,12 +50,22 @@ ConfigurationSCA::execute(const Settings *settings, State *state) {
 
         // Determine all possible probe positions
         determine_probe_positions(state, settings);
+
+        if(settings->getSideChannelAnalysisRandomProbing() || settings->getSideChannelAnalysisRandomProbingComposability()) 
+            determine_probing_probabilities(state, settings->getSideChannelRandomProbabilityFile(), settings->getSideChannelRandomProbingProbability());
+
+        if(settings->getSideChannelAnalysisRandomProbingComposability())
+            state->m_random_probing_composability_output_combinations = determine_output_combinations(state, settings, settings->getSideChannelOrder());
+        
+
+
+
     }
 }
 
 void
-ConfigurationSCA::update(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int order, bool simulate_outputs, const int thread_num){
-    update_probe_combinations(state, settings, modified, order, simulate_outputs, thread_num);
+ConfigurationSCA::update(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int order, OutputProbes simulation_outputs, const int thread_num){
+    update_probe_combinations(state, settings, modified, order, simulation_outputs, thread_num);
 }
 
 void
@@ -134,6 +145,33 @@ ConfigurationSCA::determine_shared_inputs(State *state)
         minimal = (m.second.size() < state->m_shared_inputs[minimal].size()) ? m.first : minimal;
 
     state->m_min_shared_inputs = state->m_shared_inputs[minimal];
+
+    /* Collect shared outputs and shared variables */
+    for (auto p : state->m_netlist_model->topmodule()->output_pins()) {        
+        if (p->port_type() == verica::Flag::None && p->share_index() != -1 && p->share_domain() != -1) {
+            state->m_shared_outputs[p->share_index()].push_back(p);
+        }
+    }
+
+    /* Erase duplicated shared outputs */
+    for (auto output : state->m_shared_outputs) {        
+        std::sort(state->m_shared_outputs[output.first].begin(), 
+                  state->m_shared_outputs[output.first].end(),
+                  [](const verica::Pin* a, const verica::Pin* b) { return a->share_domain() < b->share_domain(); }   
+        );
+        state->m_shared_outputs[output.first].erase(
+            std::unique(state->m_shared_outputs[output.first].begin(), state->m_shared_outputs[output.first].end(), 
+                [](const verica::Pin* p0, const verica::Pin* p1){return p0->share_domain() == p1->share_domain();}), 
+            state->m_shared_outputs[output.first].end()
+        );
+    }
+
+    /* Find smallest inputs sharing */
+    int minimal_out = (*state->m_shared_outputs.begin()).first;
+    for(auto m : state->m_shared_outputs)
+        minimal_out = (m.second.size() < state->m_shared_outputs[minimal_out].size()) ? m.first : minimal_out;
+
+    state->m_min_shared_outputs = state->m_shared_outputs[minimal_out];
 }
 
 void 
@@ -250,14 +288,50 @@ ConfigurationSCA::determine_probe_positions(State *state, const Settings *settin
     }
 
 
+    if(settings->getSideChannelAnalysisRandomProbing() || settings->getSideChannelAnalysisRandomProbingComposability()){
+        // Remove output pins
+        for(std::vector<const verica::Wire*>::iterator it=this->m_positions.begin(); it!=this->m_positions.end(); ) {
+            bool remove = false;
+            for(auto p : (*it)->target_pins()){
+                if(p->parent_module() == state->m_netlist_model->topmodule()) {
+                    remove = true;
+                    break;
+                } 
+            }
+
+            if(remove){
+                it = this->m_positions.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        // Create copies
+        if(settings->getSideChannelRandomProbingCopies() != 0){
+            std::vector<const verica::Wire*> temp;
+            for(auto w : m_positions){
+                unsigned int lim = (settings->getSideChannelRandomProbingCopies() == 1) ? (w->target_pins().size()-1) : (2*w->target_pins().size()-2);
+                for(unsigned int idx=0;idx<lim; idx++) temp.push_back(w);
+                // for(unsigned int idx=0;idx<(2*w->target_pins().size()-2); idx++) temp.push_back(w);
+            }
+            m_positions.insert(m_positions.end(), temp.begin(), temp.end());
+        }
+    }
+
+
     /* Check for empty set */
     if (m_positions.size() == 0) throw std::logic_error(this->m_name + ": Detected empty set of probe positions!");
 
-
+    // std::cout << "Probe positions: " << std::endl;
+    // int i=0;
+    // for(auto w : m_positions){
+    //     std::cout << "   " << i << ": " << w->name() << std::endl;
+    //     i++;
+    // }
 }
 
 void
-ConfigurationSCA::update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int max_order, bool simulate_outputs, const int thread_num) {
+ConfigurationSCA::update_probe_combinations(State *state, const Settings *settings, std::vector<const verica::Wire*> modified, int max_order, OutputProbes simulation_outputs, const int thread_num) {
     /* Clear current set of probe combinations */
     state->m_probe_combinations[thread_num].clear();
 
@@ -315,8 +389,102 @@ ConfigurationSCA::update_probe_combinations(State *state, const Settings *settin
                 std::vector<const verica::Wire*> virtual_probes;
                 state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, virtual_probes));
 
-                /* Simulate all outputs of the same domain for PINI, CINI, ICINI */
-                if(simulate_outputs){
+                if(simulation_outputs == OutputProbes::NI){
+                    /* Placing a single probe on one output share gives the attacker probes on all it duplications */
+                    // Loop over probes and check for output probe
+                    // std::cout << "NI" << std::endl;
+                    // std::cout << "   Probes: ";
+                    // for(auto p : probes) std::cout << p->name() << " ";
+                    // std::cout << std::endl;
+
+                    std::vector<const verica::Wire*> output_probes;
+                    // for(auto probe : probes){
+                    for(std::vector<const verica::Wire*>::iterator it=probes.begin(); it!=probes.end();){
+                        bool found = false;
+                        for(auto probe_pin : (*it)->target_pins()){
+                            if(std::find(state->m_netlist_model->module_under_test()->output_pins().begin(), state->m_netlist_model->module_under_test()->output_pins().end(), probe_pin) != state->m_netlist_model->module_under_test()->output_pins().end()){
+                                // output_probes.push_back((*it));
+                                for(auto output_pin : state->m_netlist_model->module_under_test()->output_pins()){
+                                    if(output_pin->fault_domain() != probe_pin->fault_domain()){        // different fault domain?
+                                        if((probe_pin->share_domain() == output_pin->share_domain()) && (probe_pin->share_index() == output_pin->share_index())){   // same share index and share domain?
+                                            output_probes.push_back(output_pin->fan_in());
+                                        }
+                                    }
+                                }
+                                found |= true;
+                            }
+                        }
+
+                        // If current probe belongs to output, we can remove it from the probes since it is considered in the virtual probe set
+                        it++;
+                        // if(found){
+                        //     probes.erase(it);
+                        // } else{
+                        //     it++;
+                        // }
+                    }
+
+                    // Push probe combination with output probes to global container
+                    // std::vector<const verica::Wire*> temp(output_probes.begin(), output_probes.end());
+                    state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, output_probes));
+
+                    // // DEBUG
+                    // std::cout << "   Adapted probes: ";
+                    // for(auto p : probes) std::cout << p->name() << " ";
+                    // std::cout << std::endl;
+                    // std::cout << "   Virtual probes: ";
+                    // for(auto p : output_probes) std::cout << p->name() << " ";
+                    // std::cout << std::endl;
+
+                } else if (simulation_outputs == OutputProbes::SNI){
+                    /* Placing a single probe on one output share gives the attacker probes on all it duplications */
+                    /* Additionally to NI, the attacker is allowed to probe one share of each secret output */
+                    std::cout << "SNI" << std::endl;
+                    std::cout << "   Probes: ";
+                    for(auto p : probes) std::cout << p->name() << " ";
+                    std::cout << std::endl;
+
+                    unsigned int num_output_probes = 0;
+                    for(std::vector<const verica::Wire*>::iterator it=probes.begin(); it!=probes.end();){
+                        bool found = false;
+                        for(auto p : (*it)->target_pins()){
+                            if(std::find(state->m_netlist_model->module_under_test()->output_pins().begin(), state->m_netlist_model->module_under_test()->output_pins().end(), p) != state->m_netlist_model->module_under_test()->output_pins().end()){
+                                if(p->port_type() != verica::ErrorFlag) found |= true;
+                            }
+                        }
+
+                        // if(found) num_output_probes++;
+                        // it++;
+
+                        if(found){
+                            num_output_probes++;
+                            probes.erase(it);
+                        } else {
+                            it++;
+                        }
+                    }
+
+                    std::vector<std::vector<const verica::Wire*>> output_combinations;
+                    if(num_output_probes > 0)
+                        output_combinations = determine_output_combinations(state, settings, num_output_probes);
+
+                    for(auto output_comb : output_combinations){
+                        state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, output_comb));
+                    }
+
+                    // DEBUG
+                    std::cout << "   Adapted probes: ";
+                    for(auto p : probes) std::cout << p->name() << " ";
+                    std::cout << std::endl;
+                    std::cout << "   Virtual probes: " << std::endl;
+                    for(auto output_comb : output_combinations){
+                        std::cout << "      New set: ";
+                        for(auto p : output_comb) std::cout << p->name() << " ";
+                        std::cout << std::endl;
+                    }
+
+                } else if (simulation_outputs == OutputProbes::PINI){
+                    /* Simulate all outputs of the same domain for PINI, CINI, ICINI */
                     // collect output domains
                     std::set<int> domains;
                     for(auto probe : probes){
@@ -369,4 +537,174 @@ ConfigurationSCA::update_probe_combinations(State *state, const Settings *settin
         }
         
     }
+}
+
+void ConfigurationSCA::determine_probing_probabilities(State *state, std::string file, long double general_prob){
+    std::vector<std::string> tokens;
+    std::vector<std::pair<std::string, long double>> probabilities;
+    
+    /* Open probability file */
+    std::ifstream filterStream(file);
+
+    /* Loop over all lines and all names per line */
+    std::string line;
+    while (std::getline(filterStream, line)) {
+        /* Split line into space-separated tokens */
+        tokens = Parser::split(line, ' ');
+
+        /* Create blacklist-filter for gates based on gate names */
+        if (tokens[0].at(0) != '#') {
+            if(tokens.size() > 2){
+                throw std::logic_error("[PREPROCESS-SCA] Probing probability file is erroneous!");
+            } else {
+                probabilities.push_back(std::make_pair(tokens[0], std::stold(tokens[1])));
+            }
+            
+        }
+    }
+
+    /* Annotated fault probabilities */
+    for(auto w : m_positions){
+        bool annotated = false;
+        long double prob;
+        // long double prob_inverse;
+        for(auto p : probabilities){
+            if(w->name().find(p.first) != std::string::npos) {
+                annotated = true;
+                prob = p.second;
+            }
+        }
+
+        if(!annotated) {
+            prob = general_prob;
+        }
+
+        // track if individual probabilities are used or not
+        state->m_use_individual_probabilities |= annotated;
+
+        // set probability
+        state->m_netlist_model->set_random_probing_probability(w->uid(), prob);
+    }
+}
+
+void
+ConfigurationSCA::separate_output_pins_per_output_and_fault_domain(State *state, const Settings *settings, int sca_order, std::map<int, std::vector<std::vector<std::vector<const verica::Pin*>>>> &combined_pins_per_output_and_fault_domain){
+    /* Determine shared outputs per fault domain */
+    std::map<int, std::vector<const verica::Pin*>> pins_per_fault_domain;
+    for(auto p : state->m_netlist_model->module_under_test()->output_pins()){
+        if (p->port_type() == verica::Flag::None && p->share_index() != -1 && p->share_domain() != -1){
+            pins_per_fault_domain[p->fault_domain()].push_back(p);
+        }
+    }
+
+    /* Separate pins of each fault domain into share indices */
+    std::map<int, std::vector<std::vector<const verica::Pin*>>> shared_outputs_per_fault_domain;
+    for(auto domain : pins_per_fault_domain){
+        std::map<int, std::vector<const verica::Pin*>> pins_per_share_index;
+        for(auto p : domain.second){
+            pins_per_share_index[p->share_index()].push_back(p);
+        }
+
+        // collect vectors in shared_outputs
+        for(auto idx : pins_per_share_index) shared_outputs_per_fault_domain[domain.first].push_back(idx.second);
+    }
+
+    // // DEBUG
+    // for(auto out : shared_outputs_per_fault_domain){
+    //     std::cout << "New shared outputs for fault domain " << out.first << ": " << std::endl;
+    //     for(auto s : out.second){
+    //         std::cout << "   Shared output: ";
+    //         for(auto p : s) std::cout << p->fan_in()->name() << " ";
+    //         std::cout << std::endl;
+    //     }
+    // }
+
+    for(auto current_output_per_fault_domain : shared_outputs_per_fault_domain){
+        for(auto current_output : current_output_per_fault_domain.second){
+            std::vector<std::vector<const verica::Pin*>> combinations_current_output;
+            std::vector<const verica::Pin*> empty;
+            combinations_current_output.push_back(empty);
+            for(unsigned int order=0; order<sca_order; order++){
+                // Initialize bitmask (first combination)
+                std::vector<bool> bitmask(current_output.size());
+                std::fill(bitmask.begin(), bitmask.begin() + (order + 1), true);
+
+                do {
+                    std::vector<const verica::Pin*> combination;
+
+                    for(unsigned int idx=0; idx<bitmask.size(); idx++){
+                        if(bitmask[idx]) combination.push_back(current_output[idx]);
+                    }
+
+                    combinations_current_output.push_back(combination);
+                } while(std::prev_permutation(bitmask.begin(), bitmask.end()));
+
+            }
+
+            // Push combinations of current output to container
+            combined_pins_per_output_and_fault_domain[current_output_per_fault_domain.first].push_back(combinations_current_output);
+        }
+    }
+
+    // // DEBUG
+    // for(auto out : combined_pins_per_output_and_fault_domain){
+    //     std::cout << "Consider fault domain " << out.first << ": " << std::endl;
+    //     for(auto s : out.second){
+    //         std::cout << "   Shared output: " << std::endl;
+    //         for(auto comb : s) {
+    //             std::cout << "      New combination: ";
+    //             for(auto w : comb) std::cout << w->fan_in()->name() << " ";
+    //             std::cout << std::endl;
+    //         }
+            
+    //     }
+    // }
+}
+
+std::vector<std::vector<const verica::Wire*>> 
+ConfigurationSCA::determine_output_combinations(State *state, const Settings *settings, int order){
+    std::vector<std::vector<const verica::Wire*>> output_combinations;
+
+    /* Generate combinations of up to d shares of each output independently */
+    std::map<int, std::vector<std::vector<std::vector<const verica::Pin*>>>> combined_pins_per_output_and_fault_domain;
+    separate_output_pins_per_output_and_fault_domain(state, settings, order, combined_pins_per_output_and_fault_domain);
+
+    /* Generate combinations between outputs for the first fault domain only */
+    std::vector<std::vector<std::vector<const verica::Pin*>>> combined_pins_per_output = combined_pins_per_output_and_fault_domain.begin()->second;
+    std::vector<std::vector<std::vector<const verica::Pin*>>> combined_pins_non_flattened;
+    cartesian_product(combined_pins_per_output, combined_pins_non_flattened);
+
+    for(auto comb : combined_pins_non_flattened){
+        std::vector<const verica::Wire*> combination;
+        for(auto output : comb){
+            for(auto p : output) {
+                combination.push_back(p->fan_in());
+                // Identify all outputs with the same share index and share domain but different fault domain
+                for(auto output_pin : state->m_netlist_model->module_under_test()->output_pins()){
+                    if(output_pin->fault_domain() != p->fault_domain()){        // different fault domain?
+                        if((p->share_domain() == output_pin->share_domain()) && (p->share_index() == output_pin->share_index())){   // same share index and share domain?
+                            combination.push_back(output_pin->fan_in());
+                        }
+                    }
+                }
+            }
+        }
+
+        output_combinations.push_back(combination);
+        // state->m_random_probing_composability_output_combinations.push_back(combination);
+    }
+
+    /* Remove first element since it is empty */
+    output_combinations.erase(output_combinations.begin());
+    return output_combinations;
+    // state->m_random_probing_composability_output_combinations.erase(state->m_random_probing_composability_output_combinations.begin());
+
+    // // DEBUG
+    // std::cout << "Output combinations" << std::endl;
+    // for(auto comb : state->m_random_probing_composability_output_combinations){
+    //     std::cout << "   ";
+    //     for(auto f : comb) std::cout << f->name() << " ";
+    //     std::cout << std::endl;
+    // }
+
 }

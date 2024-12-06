@@ -1,0 +1,87 @@
+{
+    "type":
+    {
+        "clock": ["clk"],
+        "refresh": ["port_r", "port_r_add", "port_r_out"],
+        "control": ["reset"],
+        "error_flag": ["port_errorFlag_0", "port_errorFlag_1", "port_errorFlag_2"]
+    },
+    "primary_input_identifier":
+    {
+        "0": ["port_a_0[5:0]"],
+        "1": ["port_a_1[5:0]"],
+        "2": ["port_a_2[5:0]"],
+        "3": ["port_b_0[5:0]"],
+        "4": ["port_b_1[5:0]"],
+        "5": ["port_b_2[5:0]"]
+    },
+    "share_domain":
+    {
+        "input":
+        {
+            "0": ["port_a_0", "port_b_0"],
+            "1": ["port_a_1", "port_b_1"],
+            "2": ["port_a_2", "port_b_2"]
+        },
+        "output":
+        {
+            "0": ["port_c_0"],
+            "1": ["port_c_1"],
+            "2": ["port_c_2"]
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+            "0": ["port_a_0", "port_a_1", "port_a_2"],
+            "1": ["port_b_0", "port_b_1", "port_b_2"]
+        },
+        "output":
+        {
+            "0": ["port_c_0", "port_c_1", "port_c_2"]
+        }
+        
+    },
+    "fault_domain":
+    {
+        "input":
+        {
+            "0": ["port_a_0[0]", "port_a_1[0]", "port_a_2[0]", "port_b_0[0]", "port_b_1[0]", "port_b_2[0]"],
+            "1": ["port_a_0[1]", "port_a_1[1]", "port_a_2[1]", "port_b_0[1]", "port_b_1[1]", "port_b_2[1]"],
+            "2": ["port_a_0[2]", "port_a_1[2]", "port_a_2[2]", "port_b_0[2]", "port_b_1[2]", "port_b_2[2]"],
+            "3": ["port_a_0[3]", "port_a_1[3]", "port_a_2[3]", "port_b_0[3]", "port_b_1[3]", "port_b_2[3]"],
+            "4": ["port_a_0[4]", "port_a_1[4]", "port_a_2[4]", "port_b_0[4]", "port_b_1[4]", "port_b_2[4]"]
+            
+        },
+        "output":
+        {
+            "0": ["port_c_0[0]", "port_c_1[0]", "port_c_2[0]"],
+            "1": ["port_c_0[1]", "port_c_1[1]", "port_c_2[1]"],
+            "2": ["port_c_0[2]", "port_c_1[2]", "port_c_2[2]"],
+            "3": ["port_c_0[3]", "port_c_1[3]", "port_c_2[3]"],
+            "4": ["port_c_0[4]", "port_c_1[4]", "port_c_2[4]"]
+        }
+    },
+    "fault_index":
+    {
+        "input": 
+        {
+
+        },
+        "output":
+        {
+            "0": ["port_c_0"],
+            "1": ["port_c_1"],
+            "2": ["port_c_2"]
+        }
+    },
+    "secret_index":
+    {
+        "input": 
+        {
+
+        }
+    }
+
+}

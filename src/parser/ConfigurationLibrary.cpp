@@ -210,6 +210,9 @@ ConfigurationLibrary::execute(const Settings *settings, State *state)
     // Always insert an input gate to the CellLibrary.
     gate_types.insert(std::pair<std::string, CellTemplate*>("in", new CellTemplate({10}, "in", {"A"}, {"Z"}, {"A"}, false)));
 
+    // Create distinct template for refresh inputs
+    gate_types.insert(std::pair<std::string, CellTemplate*>("ref", new CellTemplate({13}, "ref", {"A"}, {"Z"}, {"A"}, false)));
+
     // Insert standard FIRRTL gates to the CellLibrary, when parsing FIRRTL files.
     if (boost::algorithm::ends_with(settings->getDesignFilePath(), ".fir"))
         gate_types.insert(std::pair<std::string, CellTemplate*>("mux", new CellTemplate({11}, "mux", {"A1", "A2", "A3"}, {"Z"}, {"((!A1 & A2) | (A1 & A3))"}, false))); // 1-Bit multiplexer                          // SInt interpreter

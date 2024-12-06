@@ -1,0 +1,74 @@
+{
+    "type":
+    {
+        "clock": ["clk"],
+        "refresh": ["port_r_dom", "port_r_rep"],
+        "control": ["reset"],
+        "error_flag": []
+    },
+    "primary_input_identifier":
+    {
+        "0": ["port_a_0"],
+        "1": ["port_a_1"],
+        "2": ["port_b_0"],
+        "3": ["port_b_1"]
+    },
+    "share_domain":
+    {
+        "input":
+        {
+            "0": ["port_a_0", "port_b_0"],
+            "1": ["port_a_1", "port_b_1"]
+        },
+        "output":
+        {
+            "0": ["port_c_0"],
+            "1": ["port_c_1"]
+        }
+    },
+    "share_index":
+    {
+        "input": 
+        {
+            "0": ["port_a_0", "port_a_1"],
+            "1": ["port_b_0", "port_b_1"]
+        },
+        "output":
+        {
+            "0": ["port_c_0", "port_c_1"]
+        }
+    },
+    "fault_domain":
+    {
+        "input": {
+            "0": ["port_a_0[0]", "port_a_1[0]", "port_b_0[0]", "port_b_1[0]"],
+            "1": ["port_a_0[1]", "port_a_1[1]", "port_b_0[1]", "port_b_1[1]"],
+            "2": ["port_a_0[2]", "port_a_1[2]", "port_b_0[2]", "port_b_1[2]"]
+        },
+        "output":{
+            "0": ["port_c_0[0]", "port_c_1[0]"],
+            "1": ["port_c_0[1]", "port_c_1[1]"],
+            "2": ["port_c_0[2]", "port_c_1[2]"]
+        }
+    },
+    "fault_index":
+    {
+        "input": 
+        {
+
+        },
+        "output":
+        {
+            "0": ["port_c_0"],
+            "1": ["port_c_1"]
+        }
+    },
+    "secret_index":
+    {
+        "input": 
+        {
+
+        }
+    }
+
+}
