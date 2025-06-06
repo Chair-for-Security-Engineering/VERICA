@@ -328,6 +328,9 @@ set_dont_use [get_lib_cells NangateOpenCellLibrary/NAND3*]
 set_dont_use [get_lib_cells NangateOpenCellLibrary/NAND4*]
 set_dont_use [get_lib_cells NangateOpenCellLibrary/NAND5*]
 set_dont_use [get_lib_cells NangateOpenCellLibrary/BUF*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/DFFR*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/DFFS*]
+set_dont_use [get_lib_cells NangateOpenCellLibrary/SDFF*]
 ```
 
 Additionally, you can use the flowing commands to force the synthesizer to compile, keep the hierarchy and make a flattened netlist of the design.
