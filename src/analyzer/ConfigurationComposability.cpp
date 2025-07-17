@@ -133,12 +133,12 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
 
         /* Collect observation & support */
         // This loop together with the next for-loop is used to generate all possible combinations of extended probes
-        for (uint64_t comb = 1; comb < (1 << extended_probes.size()); comb++) {
+        for (uint64_t comb = 1; comb < (1ull << extended_probes.size()); comb++) {
             BDD observe = state->m_managers[threadNum].bddOne();
             std::set<const verica::Wire*> support;
 
             /* TODO: These loops check some combinations several times. Especially for higher order verifications some of the considered combinations are already checked in a previous test. */
-            for (unsigned int elem = 0; elem < extended_probes.size(); elem++) {
+            for (uint64_t elem = 0; elem < extended_probes.size(); elem++) {
                 if (comb & (1 << elem)) {
                     observe &= extended_probes[elem]->functions(threadNum);                                                                     // create cube of all selected extended probes
                     support.insert(extended_probes[elem]->variables(threadNum).begin(), extended_probes[elem]->variables(threadNum).end());     // track all influencing variables

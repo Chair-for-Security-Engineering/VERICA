@@ -112,11 +112,11 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
         this->m_independent = true;
 
         /* Check combinations & secrets for statistical independence */
-        for (uint64_t comb = 1; comb < (uint64_t)(1 << extended_probes.size()) && this->m_independent; comb++)
+        for (uint64_t comb = 1; comb < (uint64_t)(1ull << extended_probes.size()) && this->m_independent; comb++)
         {
             /* Generate probe observation */
             BDD observation = state->m_managers[threadNum].bddOne();
-            for (unsigned int elem = 0; elem < extended_probes.size(); elem++){
+            for (uint64_t elem = 0; elem < extended_probes.size(); elem++){
                 if (comb & (1 << elem)) observation &= extended_probes[elem]->functions(threadNum);
             }
 
