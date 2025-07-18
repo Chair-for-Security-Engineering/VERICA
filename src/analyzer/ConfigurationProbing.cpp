@@ -97,7 +97,6 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
                 if(!var_included) extended_probes.push_back(reg);
             }
 
-            if (extended_probes.size() > 63) throw std::logic_error("PROBING: More than 63 extended probes detected (overflow)!");
         }
         else
         {
@@ -111,13 +110,15 @@ ConfigurationProbing::execute(const Settings *settings, State *state)
 
         this->m_independent = true;
 
+        if (extended_probes.size() > 63) throw std::logic_error("[PROBING]: More than 63 extended probes detected (overflow)!");
+
         /* Check combinations & secrets for statistical independence */
-        for (uint64_t comb = 1; comb < (uint64_t)(1ull << extended_probes.size()) && this->m_independent; comb++)
+        for (uint64_t comb = 1; comb < (1ull << extended_probes.size()) && this->m_independent; comb++)
         {
             /* Generate probe observation */
             BDD observation = state->m_managers[threadNum].bddOne();
             for (uint64_t elem = 0; elem < extended_probes.size(); elem++){
-                if (comb & (1 << elem)) observation &= extended_probes[elem]->functions(threadNum);
+                if (comb & (1ull << elem)) observation &= extended_probes[elem]->functions(threadNum);
             }
 
             /* Statistical independence check */

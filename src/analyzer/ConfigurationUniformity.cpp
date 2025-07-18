@@ -71,7 +71,7 @@ ConfigurationUniformity::execute(const Settings *settings, State *state)
             for (uint64_t comb = 1; comb < ((1ull << output_shares_map.second.size()) - 1) && this->m_uniform; comb++) {
                 intra[share_cnt].push_back(state->m_managers[0].bddZero());
                 for (unsigned int elem = 0; elem < output_shares_map.second.size(); elem++) {
-                    if (comb & (1 << elem)) intra[share_cnt].back() ^= output_shares_map.second[elem]->functions(0);
+                    if (comb & (1ull << elem)) intra[share_cnt].back() ^= output_shares_map.second[elem]->functions(0);
                 }
 
                 if (abs(state->m_managers[0].bdd_satcountln(intra[share_cnt].back(), this->m_variable_count) - this->m_variable_count + 1) > DOUBLE_COMPARE_THRESHOLD) this->m_uniform = false;

@@ -120,8 +120,6 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                 }
                 if(!var_included) extended_probes.push_back(reg);
             }
-
-            if (extended_probes.size() > 63) throw std::logic_error("[COMPOSABILITY]: More than 63 extended probes detected (overflow)!");
         }
         else
         {
@@ -131,6 +129,8 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
         // Add "virtual" probes, e.g., abort signals
         extended_probes.insert(extended_probes.end(), this->m_current_probes.second.begin(), this->m_current_probes.second.end());
 
+        if (extended_probes.size() > 63) throw std::logic_error("[COMPOSABILITY]: More than 63 extended probes detected (overflow)!");
+
         /* Collect observation & support */
         // This loop together with the next for-loop is used to generate all possible combinations of extended probes
         for (uint64_t comb = 1; comb < (1ull << extended_probes.size()); comb++) {
@@ -139,7 +139,7 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
 
             /* TODO: These loops check some combinations several times. Especially for higher order verifications some of the considered combinations are already checked in a previous test. */
             for (uint64_t elem = 0; elem < extended_probes.size(); elem++) {
-                if (comb & (1 << elem)) {
+                if (comb & (1ull << elem)) {
                     observe &= extended_probes[elem]->functions(threadNum);                                                                     // create cube of all selected extended probes
                     support.insert(extended_probes[elem]->variables(threadNum).begin(), extended_probes[elem]->variables(threadNum).end());     // track all influencing variables
                 }
@@ -182,12 +182,12 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
                 std::vector<std::vector<std::set<const verica::Wire*>>> intra(shares.size());
                 // Loop over all secret values
                 for (unsigned int idx = 0; idx < shares.size(); idx++) {
-                    for (uint64_t comb = 0; comb < (uint64_t)(1 << shares[idx].size()); comb++) {
+                    for (uint64_t comb = 0; comb < (1ull << shares[idx].size()); comb++) {
                         if (__builtin_popcount(comb) <= threshold) {        // TODO: would == threshold also be valid since we always start with testing security for d=1?
                             std::set<const verica::Wire*> tmp;
                             intra[idx].push_back(tmp);
                             for (unsigned int elem = 0; elem < shares[idx].size(); elem++)
-                                if (comb & (1 << elem)) intra[idx][intra[idx].size() - 1].insert(shares[idx][elem]);
+                                if (comb & (1ull << elem)) intra[idx][intra[idx].size() - 1].insert(shares[idx][elem]);
                         }
                     }
                 }
@@ -249,13 +249,13 @@ ConfigurationComposability::execute(const Settings *settings, State *state) {
 
 
                         // This strategy seems to be faster
-                        for(unsigned int s=0; s < (1 << combination_filtered.size()) && this->m_independent; ++s){
+                        for(uint64_t s=0; s < (1ull << combination_filtered.size()) && this->m_independent; ++s){
                             BDD simulate = observe;
-                            for(int elem=0; elem<combination_filtered.size(); ++elem) if(s & (1 << elem)) simulate &= combination_filtered[elem]->functions(threadNum);
+                            for(int elem=0; elem<combination_filtered.size(); ++elem) if(s & (1ull << elem)) simulate &= combination_filtered[elem]->functions(threadNum);
 
-                            for(unsigned int r=1; r<(1 << complement.size()) && this->m_independent; ++r){
+                            for(uint64_t r=1; r<(1ull << complement.size()) && this->m_independent; ++r){
                                 BDD free = state->m_managers[threadNum].bddOne();
-                                for(int elem=0; elem<complement.size(); ++elem) if(r & (1 << elem)) free &= complement[elem]->functions(threadNum);
+                                for(int elem=0; elem<complement.size(); ++elem) if(r & (1ull << elem)) free &= complement[elem]->functions(threadNum);
 
                                 this->m_independent &= state->m_managers[threadNum].bdd_statindependence(simulate, free);
                             }

@@ -331,9 +331,9 @@ ConfigurationSCA::update_probe_combinations(State *state, const Settings *settin
                         for(auto d : domains) wires.insert(wires.end(), m_outputs_same_domain[d].begin(), m_outputs_same_domain[d].end());
 
                         // create combinations
-                        for(unsigned int comb=1; comb <= ((1 << wires.size())-1); comb++){
+                        for(uint64_t comb=1; comb <= ((1ull << wires.size())-1); comb++){
                             std::vector<const verica::Wire*> new_comb;
-                            for(unsigned int bit=0; bit < wires.size(); bit++){
+                            for(uint64_t bit=0; bit < wires.size(); bit++){
                                 if((comb >> bit) & 1) new_comb.push_back(wires[bit]);
                             }
                             state->m_probe_combinations[thread_num].push_back(std::make_pair(probes, new_comb));
